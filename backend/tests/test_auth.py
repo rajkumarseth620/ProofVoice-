@@ -349,3 +349,109 @@ class AuthenticationAndProfileTests(TestCase):
         }, format='json')
         self.assertEqual(res_allowed.status_code, status.HTTP_200_OK)
         self.assertIn('token', res_allowed.data)
+
+    def test_superadmin_approval_endpoint_verifies_institution_and_students(self):
+        """Platform superadmin approves unlisted institution request via API, unlocking student logins and verified dropdown."""
+        # Create platform superadmin
+        superadmin = User.objects.create_user(
+            email='superadmin@proofvoice.org',
+            password='SuperSecretPassword123',
+            full_name='Platform Superadmin',
+            role=User.Role.PLATFORM_SUPERADMIN,
+            is_verified=True,
+            is_superuser=True
+        )
+
+        # Student registers unlisted institution
+        student_payload = {
+            'email': 'student_approv@globaluniv.edu',
+            'password': 'SecurePassword123',
+            'full_name': 'Pending Student',
+            'institution_id': 'OTHER',
+            'custom_institution_name': 'Global Technical University',
+            'institution_type': 'University',
+            'city': 'Bengaluru',
+            'state': 'Karnataka'
+        }
+        reg_resp = self.client.post('/api/v1/auth/register/student/', student_payload, format='json')
+        self.assertEqual(reg_resp.status_code, status.HTTP_201_CREATED)
+
+        inst = Institution.objects.get(name='Global Technical University')
+        self.assertEqual(inst.verification_status, Institution.VerificationStatus.PENDING)
+
+        req = inst.originating_request.first()
+        self.assertIsNotNone(req)
+        self.assertEqual(req.status, 'PENDING')
+
+        # Superadmin approves the request via API
+        self.client.force_authenticate(user=superadmin)
+        approve_resp = self.client.post(f'/api/v1/institutions/registration-requests/{req.id}/approve/', {
+            'action': 'approve'
+        }, format='json')
+        self.assertEqual(approve_resp.status_code, status.HTTP_200_OK)
+
+        # Institution is now VERIFIED
+        inst.refresh_from_db()
+        self.assertEqual(inst.verification_status, Institution.VerificationStatus.VERIFIED)
+
+        # Student is now verified and can log in
+        student_user = User.objects.get(email='student_approv@globaluniv.edu')
+        self.assertTrue(student_user.is_verified)
+        self.assertEqual(student_user.role, User.Role.STUDENT)
+
+        self.client.force_authenticate(user=None)
+        login_resp = self.client.post('/api/v1/auth/login/', {
+            'email': 'student_approv@globaluniv.edu',
+            'password': 'SecurePassword123'
+        }, format='json')
+        self.assertEqual(login_resp.status_code, status.HTTP_200_OK)
+        self.assertIn('token', login_resp.data)
+
+        # Institution appears in verified dropdown list
+        inst_list_resp = self.client.get('/api/v1/institutions/')
+        self.assertEqual(inst_list_resp.status_code, status.HTTP_200_OK)
+        names = [i['name'] for i in inst_list_resp.data]
+        self.assertIn('Global Technical University', names)
+
+    def test_superadmin_rejection_endpoint_marks_institution_rejected(self):
+        """Platform superadmin rejects unlisted institution request via API."""
+        superadmin = User.objects.create_user(
+            email='superadmin2@proofvoice.org',
+            password='SuperSecretPassword123',
+            full_name='Platform Superadmin 2',
+            role=User.Role.PLATFORM_SUPERADMIN,
+            is_verified=True,
+            is_superuser=True
+        )
+
+        student_payload = {
+            'email': 'student_reject@fakecollege.edu',
+            'password': 'SecurePassword123',
+            'full_name': 'Reject Candidate',
+            'institution_id': 'OTHER',
+            'custom_institution_name': 'Unverified Fake College',
+            'city': 'Nowhere',
+            'state': 'Unknown'
+        }
+        self.client.post('/api/v1/auth/register/student/', student_payload, format='json')
+
+        inst = Institution.objects.get(name='Unverified Fake College')
+        req = inst.originating_request.first()
+
+        self.client.force_authenticate(user=superadmin)
+        reject_resp = self.client.post(f'/api/v1/institutions/registration-requests/{req.id}/approve/', {
+            'action': 'reject',
+            'reason': 'Accreditation records could not be verified.'
+        }, format='json')
+        self.assertEqual(reject_resp.status_code, status.HTTP_200_OK)
+
+        inst.refresh_from_db()
+        self.assertEqual(inst.verification_status, Institution.VerificationStatus.REJECTED)
+
+        # Student login still blocked
+        self.client.force_authenticate(user=None)
+        login_resp = self.client.post('/api/v1/auth/login/', {
+            'email': 'student_reject@fakecollege.edu',
+            'password': 'SecurePassword123'
+        }, format='json')
+        self.assertEqual(login_resp.status_code, status.HTTP_400_BAD_REQUEST)

@@ -291,66 +291,74 @@ class InstitutionRegistrationApproveView(APIView):
         action = request.data.get('action', 'approve').lower()
 
         if action == 'approve':
-            # Create the verified Institution
-            slug = slugify(req.institution_name)[:90]
-            # Ensure unique slug
-            counter = 1
-            unique_slug = slug
-            while Institution.objects.filter(code=unique_slug).exists():
-                unique_slug = f"{slug}-{counter}"
-                counter += 1
+            institution = req.created_institution
+            if not institution:
+                # Create the verified Institution
+                slug = slugify(req.institution_name)[:90] or 'inst'
+                # Ensure unique slug
+                counter = 1
+                unique_slug = slug
+                while Institution.objects.filter(code=unique_slug).exists():
+                    unique_slug = f"{slug}-{counter}"
+                    counter += 1
 
-            institution = Institution.objects.create(
-                code=unique_slug,
-                name=req.institution_name,
-                institution_type=req.institution_type,
-                official_email=req.official_email,
-                official_address=req.official_address,
-                state=req.state,
-                city=req.city,
-                website=req.website,
-                verification_status=Institution.VerificationStatus.VERIFIED,
-                is_active=True
-            )
-
-            # Seed default departments and categories
-            default_depts = [
-                ('Estate & Maintenance', 'EST'),
-                ('Hostel Administration', 'HST'),
-                ('Academic Affairs', 'ACD'),
-                ('IT & Network Services', 'ITS'),
-                ('Dean of Student Welfare', 'DSW')
-            ]
-            created_depts = {}
-            for d_name, d_code in default_depts:
-                created_depts[d_name] = InstitutionDepartment.objects.create(
-                    institution=institution,
-                    name=d_name,
-                    code=d_code
+                institution = Institution.objects.create(
+                    code=unique_slug,
+                    name=req.institution_name,
+                    institution_type=req.institution_type,
+                    official_email=req.official_email,
+                    official_address=req.official_address,
+                    state=req.state,
+                    city=req.city,
+                    website=req.website,
+                    verification_status=Institution.VerificationStatus.VERIFIED,
+                    is_active=True
                 )
+            else:
+                institution.verification_status = Institution.VerificationStatus.VERIFIED
+                institution.is_active = True
+                institution.save(update_fields=['verification_status', 'is_active', 'updated_at'])
 
-            default_categories = [
-                ('Infrastructure & Maintenance', created_depts['Estate & Maintenance']),
-                ('Hostel & Accommodation', created_depts['Hostel Administration']),
-                ('Academic & Faculty', created_depts['Academic Affairs']),
-                ('Sanitation & Hygiene', created_depts['Estate & Maintenance']),
-                ('IT & Network Issues', created_depts['IT & Network Services']),
-                ('General Administration', created_depts['Dean of Student Welfare'])
-            ]
-            for cat_name, dept_obj in default_categories:
-                ComplaintCategory.objects.create(
+            # Seed default departments and categories if they don't exist yet
+            if not institution.departments.exists():
+                default_depts = [
+                    ('Estate & Maintenance', 'EST'),
+                    ('Hostel Administration', 'HST'),
+                    ('Academic Affairs', 'ACD'),
+                    ('IT & Network Services', 'ITS'),
+                    ('Dean of Student Welfare', 'DSW')
+                ]
+                created_depts = {}
+                for d_name, d_code in default_depts:
+                    created_depts[d_name] = InstitutionDepartment.objects.create(
+                        institution=institution,
+                        name=d_name,
+                        code=d_code
+                    )
+
+                default_categories = [
+                    ('Infrastructure & Maintenance', created_depts['Estate & Maintenance']),
+                    ('Hostel & Accommodation', created_depts['Hostel Administration']),
+                    ('Academic & Faculty', created_depts['Academic Affairs']),
+                    ('Sanitation & Hygiene', created_depts['Estate & Maintenance']),
+                    ('IT & Network Issues', created_depts['IT & Network Services']),
+                    ('General Administration', created_depts['Dean of Student Welfare'])
+                ]
+                for cat_name, dept_obj in default_categories:
+                    ComplaintCategory.objects.create(
+                        institution=institution,
+                        name=cat_name,
+                        default_department=dept_obj
+                    )
+
+            if not institution.recipient_configurations.exists():
+                # Configure default recipient as 'The Dean'
+                ComplaintRecipientConfiguration.objects.create(
                     institution=institution,
-                    name=cat_name,
-                    default_department=dept_obj
+                    recipient_designation='The Dean',
+                    recipient_name='',
+                    recipient_address=f"Office of the Dean, {institution.name}\n{institution.official_address}"
                 )
-
-            # Configure default recipient as 'The Dean'
-            ComplaintRecipientConfiguration.objects.create(
-                institution=institution,
-                recipient_designation='The Dean',
-                recipient_name='',
-                recipient_address=f"Office of the Dean, {institution.name}\n{institution.official_address}"
-            )
 
             # Update request
             req.status = InstitutionRegistrationRequest.Status.APPROVED
@@ -359,19 +367,26 @@ class InstitutionRegistrationApproveView(APIView):
             req.reviewed_at = timezone.now()
             req.save()
 
-            # Assign and approve applicant admin profile
-            admin_user = req.applicant_user
-            admin_user.role = User.Role.INSTITUTION_ADMIN
-            admin_user.is_verified = True
-            admin_user.save()
+            # Handle applicant user according to role
+            applicant = req.applicant_user
+            if applicant:
+                applicant.is_verified = True
+                applicant.save(update_fields=['is_verified', 'updated_at'])
 
-            admin_profile, _ = AdministratorProfile.objects.get_or_create(user=admin_user)
-            admin_profile.institution = institution
-            admin_profile.designation = req.applicant_designation
-            admin_profile.approval_status = AdministratorProfile.ApprovalStatus.APPROVED
-            admin_profile.approved_by = request.user
-            admin_profile.approved_at = timezone.now()
-            admin_profile.save()
+                if applicant.role == User.Role.INSTITUTION_ADMIN:
+                    admin_profile, _ = AdministratorProfile.objects.get_or_create(user=applicant)
+                    admin_profile.institution = institution
+                    admin_profile.designation = req.applicant_designation or 'Institution Administrator'
+                    admin_profile.approval_status = AdministratorProfile.ApprovalStatus.APPROVED
+                    admin_profile.approved_by = request.user
+                    admin_profile.approved_at = timezone.now()
+                    admin_profile.save()
+
+            # Verify all pending students belonging to this institution
+            User.objects.filter(
+                student_profile__institution=institution,
+                role=User.Role.STUDENT
+            ).update(is_verified=True)
 
             return Response({
                 'message': f'Institution "{institution.name}" has been approved and verified.',
@@ -385,6 +400,9 @@ class InstitutionRegistrationApproveView(APIView):
             req.reviewed_by = request.user
             req.reviewed_at = timezone.now()
             req.save()
+            if req.created_institution:
+                req.created_institution.verification_status = Institution.VerificationStatus.REJECTED
+                req.created_institution.save(update_fields=['verification_status', 'updated_at'])
             return Response({
                 'message': 'Registration request rejected.',
                 'request': InstitutionRegistrationRequestSerializer(req).data
