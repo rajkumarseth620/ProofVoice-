@@ -321,7 +321,7 @@ The REST API will be available at: `http://127.0.0.1:8000/api/v1/`
 
 ## 19. Running the Frontend Application
 
-In a separate terminal, serve the frontend static files:
+In a separate terminal, serve the frontend static files locally:
 
 ```powershell
 # Using npx serve (recommended)
@@ -332,6 +332,53 @@ python -m http.server 3000
 ```
 
 Open your browser at **`http://localhost:3000/`**.
+
+---
+
+## 19.1. Production Cloud Deployment Architecture
+
+ProofVoice is architected for decoupled cloud deployment:
+
+```
+┌───────────────────────────────────────┐
+│     Vercel (Production Frontend)      │
+│     https://proofvoice.vercel.app     │
+│   (HTML5, Modern CSS, Client-side JS) │
+└───────────────────┬───────────────────┘
+                    │ HTTPS REST APIs
+                    ▼
+┌───────────────────────────────────────┐
+│     Render (Production Backend)       │
+│      Django REST Framework + WSGI     │
+│  (Gnani AI STT/TTS & LLM Integrations)│
+└───────────────────┬───────────────────┘
+                    │ TCP / SSL
+                    ▼
+┌───────────────────────────────────────┐
+│       Cloud MySQL 8.0+ Database       │
+│  (Persistent Multi-Tenant Isolation)  │
+└───────────────────────────────────────┘
+```
+
+1. **Frontend Hosting (Vercel):**
+   - Pure static deployment governed by `vercel.json` (static build override, clean URLs) and `.vercelignore` (excludes backend dependencies and requirements from Vercel's build pipeline).
+   - Configurable API base endpoint in `js/api-client.js` supporting both local development (`http://127.0.0.1:8000/api/v1`) and HTTPS production backends.
+
+2. **Backend Services (Render / Cloud Container):**
+   - Django REST Framework 3.15+ on Python 3.13 with Gunicorn.
+   - Enforces institutional multi-tenancy, token authentication, and Gnani AI audio proxies.
+
+3. **Database Tier (Cloud MySQL):**
+   - MySQL 8.0+ engine supporting UTF-8 (mb4) for multilingual grievance filings.
+
+4. **Institutional Onboarding & Verification:**
+   - Supports verified institutions as well as an unlisted institution request workflow (`+ My Institution Is Not Listed`).
+   - Automatically registers pending institutions and applicant requests for Platform Superadmin review without premature workspace activation.
+
+5. **Profile Photo Management:**
+   - Multi-format support (JPG, JPEG, PNG, WebP, max 5 MB).
+   - Server-side verification via Pillow prevents malicious binary uploads.
+
 
 ---
 
