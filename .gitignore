@@ -1,0 +1,61 @@
+# ==============================================================================
+# ProofVoice - Git Ignore Configuration
+# Protects private credentials, virtual environments, database files, and caches.
+# ==============================================================================
+
+# Environment files & Secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python runtime & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+*.sqlite3
+db.sqlite3
+*.sqlite3-journal
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Node & package dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating System & IDE artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing & Coverage caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local media, backups & static build
+staticfiles/
+media/
+_audit_backup/
+
+# Security Keys & Certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert

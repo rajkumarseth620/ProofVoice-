@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | ProofVoice</title>
+  <meta name="description" content="View your submitted campus grievances, track status updates, and coordinate resolutions.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="student-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Student Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Verified Institution Chip -->
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Verified Institution</span>
+        <span class="sidebar-institution-name" id="studentInstitutionName">
+          Apex Institute of Technology
+        </span>
+      </div>
+
+      <!-- Sidebar Navigation Items -->
+      <nav class="sidebar-nav" aria-label="Student Sidebar">
+        <span class="sidebar-section-title">Navigation</span>
+        
+        <a href="student-dashboard.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+
+        <a href="new-complaint.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Create Complaint
+        </a>
+
+        <a href="my-complaints.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          My Complaints
+        </a>
+
+        <a href="student-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+          <span class="nav-count" id="sidebarNotifCount" style="display: none;">0</span>
+        </a>
+
+        <span class="sidebar-section-title" style="margin-top:var(--space-4);">Account & Help</span>
+
+        <a href="student-profile.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Profile & Settings
+        </a>
+
+        <a href="help.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Help & Support
+        </a>
+
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </a>
+      </nav>
+
+      <!-- Sidebar User Footer -->
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="sidebarUserAvatar">MS</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Maya Sharma</div>
+          <div class="user-role-label">B.Tech CSE • 3rd Year</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <!-- Topbar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="breadcrumbs">
+            <span>ProofVoice</span>
+            <span>/</span>
+            <span class="current">Student Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Tenant: Apex Tech (AIT)</span>
+          </div>
+
+          <a href="student-notifications.html" class="topbar-notification-btn" aria-label="View notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="notification-badge-count" style="display: none;">0</span>
+          </a>
+
+          <a href="student-profile.html" class="user-avatar" style="text-decoration:none;">MS</a>
+        </div>
+      </header>
+
+      <!-- App Content -->
+      <main class="app-content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Hello, <span id="studentGreetingName">Maya</span> 👋</h1>
+            <p>Here is an overview of your complaints and their current progress toward resolution.</p>
+          </div>
+          <div class="page-header-actions">
+            <a href="new-complaint.html" class="btn btn-primary" id="dashboardNewComplaintBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+              + New Complaint
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Action Banner -->
+        <div class="quick-action-banner">
+          <div class="quick-action-text">
+            <h2>Have an issue on campus?</h2>
+            <p>Speak or type to generate a structured grievance application in under two minutes.</p>
+          </div>
+          <a href="new-complaint.html" class="btn btn-secondary" style="background:#FFFFFF; color:var(--color-primary); font-weight:700;">
+            Voice Record Now 🎙️
+          </a>
+        </div>
+
+        <!-- Statistics Cards Grid -->
+        <div class="dashboard-stats-grid" id="studentStatsGrid">
+          <!-- Total Complaints -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Total Filed</span>
+              <div class="stat-icon stat-icon-blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-number" id="statTotal">--</div>
+            <div class="stat-subtext">Across campus categories</div>
+          </div>
+
+          <!-- Submitted -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Submitted</span>
+              <div class="stat-icon stat-icon-amber">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-number" id="statSubmitted">--</div>
+            <div class="stat-subtext">Pending desk review</div>
+          </div>
+
+          <!-- In Progress -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">In Progress</span>
+              <div class="stat-icon stat-icon-violet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-number" id="statInProgress">--</div>
+            <div class="stat-subtext">Assigned to department</div>
+          </div>
+
+          <!-- Resolved -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Resolved</span>
+              <div class="stat-icon stat-icon-green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-number" id="statResolved">--</div>
+            <div class="stat-subtext stat-trend-up">Verified resolution</div>
+          </div>
+        </div>
+
+        <!-- Two Column Content Grid -->
+        <div class="dashboard-grid">
+          <!-- Left: Recent Complaints Table -->
+          <div class="table-wrapper">
+            <div class="table-toolbar">
+              <h3 class="card-title">My Recent Complaints</h3>
+              <a href="my-complaints.html" class="btn btn-ghost btn-sm">View All →</a>
+            </div>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Complaint ID</th>
+                    <th>Subject</th>
+                    <th>Category</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recentComplaintsTableBody">
+                  <!-- Injected via student-dashboard.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty State for new users -->
+            <div class="empty-state" id="dashboardEmptyState" style="display:none;">
+              <div class="empty-state-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <div class="empty-state-title">You haven't submitted any complaints yet</div>
+              <div class="empty-state-text">Report any issue with campus labs, lighting, Wi-Fi, or sanitation to get started.</div>
+              <a href="new-complaint.html" class="btn btn-primary btn-sm" style="margin-top:var(--space-2);">Create Complaint</a>
+            </div>
+          </div>
+
+          <!-- Right: Status Distribution Chart & Activity -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+            <div class="chart-card">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Status Breakdown</h3>
+              <div class="chart-container">
+                <canvas id="studentStatusChart"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Recent Status Updates</h3>
+              <ul class="activity-list" id="studentActivityFeed">
+                <!-- Injected via student-dashboard.js -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/student-dashboard.js"></script>
+</body>
+</html>

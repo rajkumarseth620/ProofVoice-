@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile & Settings | ProofVoice</title>
+  <meta name="description" content="Manage your ProofVoice student account details, address, notification preferences, and accessibility settings.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Student Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="student-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Student Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Verified Institution</span>
+        <span class="sidebar-institution-name" id="sidebarInstName">Apex Institute of Technology</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="student-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="new-complaint.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Create Complaint
+        </a>
+        <a href="my-complaints.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          My Complaints
+        </a>
+        <a href="student-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+        </a>
+        <a href="student-profile.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Profile
+        </a>
+        <a href="help.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Help & Support
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="sidebarUserAvatar">MS</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Maya Sharma</div>
+          <div class="user-role-label" id="sidebarUserRole">Student</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="breadcrumbs">
+            <a href="student-dashboard.html">Dashboard</a>
+            <span>/</span>
+            <span class="current">My Profile & Settings</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <span id="topbarInstName">Apex Tech (AIT)</span>
+          </div>
+          <a href="login.html" class="btn btn-ghost btn-sm" style="color:var(--color-error);">Log Out</a>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1 id="profilePageMainTitle">Student Profile & Letter Settings</h1>
+            <p id="profilePageMainSubtitle">Manage your student credentials, correspondence address, and notification preferences. These details are used to auto-format formal grievance letters.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Left: Profile Photo & Credentials Form -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+            <!-- Profile Photo Management Card -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Profile Picture</h3>
+              <div style="display:flex; align-items:center; gap:var(--space-6); flex-wrap:wrap;">
+                <div style="position:relative; width:100px; height:100px; flex-shrink:0;">
+                  <div id="profilePhotoDisplay" style="width:100px; height:100px; border-radius:50%; background:#4F46E5; color:#fff; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; background-size:cover; background-position:center; border:3px solid var(--color-border); box-shadow:var(--shadow-sm); overflow:hidden;">
+                    MS
+                  </div>
+                  <span id="photoRoleBadge" style="position:absolute; bottom:0; right:0; background:var(--color-navy); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; border:2px solid #fff; letter-spacing:0.5px;">STUDENT</span>
+                </div>
+
+                <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:var(--space-2);">
+                  <div style="font-weight:700; color:var(--color-navy); font-size:var(--text-lg);" id="photoCardUserName">Maya Sharma</div>
+                  <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">
+                    Upload a clear photo to personalize your profile, topbar avatar, and official institutional filings.
+                    <br>Supported formats: <strong>JPG, JPEG, PNG, WebP</strong>. Maximum file size: <strong>5 MB</strong>.
+                  </div>
+
+                  <div style="display:flex; gap:var(--space-3); align-items:center; flex-wrap:wrap; margin-top:var(--space-2);">
+                    <input type="file" id="profilePhotoInput" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnTriggerPhotoUpload">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      <span id="btnPhotoActionText">Change Photo</span>
+                    </button>
+
+                    <button type="button" class="btn btn-primary btn-sm" id="btnSavePhoto" style="display:none;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polyline points="20 6 9 17 4 12"/></svg>
+                      Save Photo
+                    </button>
+
+                    <button type="button" class="btn btn-ghost btn-sm" id="btnCancelPhoto" style="display:none;">
+                      Cancel
+                    </button>
+
+                    <button type="button" class="btn btn-ghost btn-sm" id="btnRemovePhoto" style="color:var(--color-error); display:none;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      Remove Photo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" id="profileFormCardTitle" style="margin-bottom:var(--space-4);">Academic Credentials & Formal Address</h3>
+
+              <div class="alert alert-info" id="profileFormAlert" style="font-size:12px; margin-bottom:var(--space-4);">
+                <strong>Formal Letter Integration:</strong> Your saved residential address, academic department, and enrollment number are automatically populated whenever you click "Generate Formal Application".
+              </div>
+
+              <form id="editStudentProfileForm">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                  <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label" id="labelFullName">Full Legal Name</label>
+                    <input type="text" id="profFullName" class="form-control" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" id="labelEmail">Institutional Email</label>
+                    <input type="email" id="profEmail" class="form-control" readonly style="background:#F8FAFC; color:var(--color-text-secondary);">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" id="labelStudentId">Student ID / Enrollment Identifier</label>
+                    <input type="text" id="profStudentId" class="form-control" required style="font-family:var(--font-mono);">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Verified Institution</label>
+                    <input type="text" id="profInstName" class="form-control" readonly style="background:#F8FAFC; color:var(--color-text-secondary);">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Institution Official Address</label>
+                    <input type="text" id="profInstAddress" class="form-control" readonly style="background:#F8FAFC; color:var(--color-text-secondary); font-size:12px;">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" id="labelDepartment">Department / Course</label>
+                    <input type="text" id="profDepartment" class="form-control" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" id="labelYearSem">Year / Semester</label>
+                    <input type="text" id="profYearSem" class="form-control" placeholder="e.g. 3rd Year, 5th Semester" required>
+                  </div>
+
+                  <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label" id="labelAddress">Residential / Correspondence Address (For Formal Letters)</label>
+                    <input type="text" id="profResidentialAddress" class="form-control" placeholder="e.g. Room 312, Sarojini Hall, Campus Greens, Jamshedpur 831014" required>
+                    <span class="form-hint" id="hintAddress">This address is placed at the top of formal letters addressed to the Dean.</span>
+                  </div>
+
+                  <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label">Contact Phone Number</label>
+                    <input type="tel" id="profPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="saveProfileBtn" style="margin-top:var(--space-4);">
+                  Save Profile Changes
+                </button>
+              </form>
+            </div>
+
+            <!-- Password Change Card -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Change Password</h3>
+              <form id="changePasswordForm" onsubmit="event.preventDefault(); showToast('success', 'Security Updated', 'Password updated successfully in demo session.');">
+                <div class="form-group">
+                  <label class="form-label">Current Password</label>
+                  <input type="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                  <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" class="form-control" placeholder="At least 8 characters" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" class="form-control" placeholder="Re-type new password" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-sm" style="margin-top:var(--space-2);">Update Password</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right Column: Preferences & Security Status -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+            <!-- Verification Status Card -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-3);">Account Verification</h3>
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:var(--space-4);">
+                <div style="width:40px; height:40px; border-radius:50%; background:var(--color-success-bg); color:var(--color-success); display:flex; align-items:center; justify-content:center; font-size:18px;">
+                  ✓
+                </div>
+                <div>
+                  <div style="font-weight:700; color:var(--color-navy);" id="profStatusLabel">Verified Campus Member</div>
+                  <div style="font-size:12px; color:var(--color-text-secondary);">Student identity confirmed by institution</div>
+                </div>
+              </div>
+              <div style="font-size:12px; line-height:1.5; color:var(--color-text-secondary); background:var(--color-surface-alt); padding:10px; border-radius:var(--radius-md); border:1px solid var(--color-border);">
+                Institutional membership is bound to your university records and cannot be transferred without administrative authorization.
+              </div>
+            </div>
+
+            <!-- Notification Preferences -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Notification Preferences</h3>
+              <div style="display:flex; flex-direction:column; gap:var(--space-4);">
+                <label class="form-check">
+                  <input type="checkbox" checked>
+                  <div>
+                    <strong style="font-size:var(--text-sm); color:var(--color-navy); display:block;">In-App Status Alerts</strong>
+                    <span class="text-xs text-muted">Receive live notifications when an administrator or technician updates your ticket.</span>
+                  </div>
+                </label>
+
+                <label class="form-check">
+                  <input type="checkbox" checked>
+                  <div>
+                    <strong style="font-size:var(--text-sm); color:var(--color-navy); display:block;">Email Summaries</strong>
+                    <span class="text-xs text-muted">Receive confirmation receipts and resolution notices at your institutional email.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Accessibility & Audio -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Accessibility & Voice</h3>
+              <div class="form-group">
+                <label class="form-label">Text-to-Speech Playback Speed</label>
+                <select class="form-control">
+                  <option value="0.8">0.8x - Relaxed</option>
+                  <option value="1.0" selected>1.0x - Standard</option>
+                  <option value="1.2">1.2x - Faster</option>
+                </select>
+              </div>
+
+              <label class="form-check" style="margin-top:var(--space-3);">
+                <input type="checkbox">
+                <div>
+                  <strong style="font-size:var(--text-sm); color:var(--color-navy); display:block;">Prefer High Contrast UI</strong>
+                  <span class="text-xs text-muted">Enhances borders and text contrast across tables and cards.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let user = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser()) || (window.proofVoiceDb && window.proofVoiceDb.getCurrentUser());
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const isAdmin = user.role === 'admin' || user.backendRole === 'INSTITUTION_ADMIN';
+      if (isAdmin) {
+        window.location.replace('admin-profile.html');
+        return;
+      }
+
+      const institution = (window.proofVoiceDb && window.proofVoiceDb.getInstitution(user.institutionId)) || {
+        name: user.institutionName || 'Apex Institute of Technology',
+        officialAddress: 'Main Campus, Jamshedpur 831014'
+      };
+
+      // Populate Institution Information
+      const instName = user.institutionName || (institution && institution.name) || 'Apex Institute of Technology';
+      const instAddress = (institution && (institution.officialAddress || `${institution.city || ''}, ${institution.state || ''}`)) || 'Main Campus';
+      document.getElementById('sidebarInstName').textContent = instName;
+      document.getElementById('topbarInstName').textContent = instName;
+      document.getElementById('profInstName').value = instName;
+      document.getElementById('profInstAddress').value = instAddress;
+
+      // Populate User Credentials
+      document.getElementById('sidebarUserName').textContent = user.fullName || 'User';
+      document.getElementById('photoCardUserName').textContent = user.fullName || 'User';
+      document.getElementById('sidebarUserRole').textContent = `${user.department || 'Student'}${user.yearSemester ? ' • ' + user.yearSemester : ''}`;
+
+      document.getElementById('profFullName').value = user.fullName || '';
+      document.getElementById('profEmail').value = user.email || '';
+      document.getElementById('profStudentId').value = user.studentIdentifier || '';
+      document.getElementById('profDepartment').value = user.department || '';
+      document.getElementById('profYearSem').value = isAdmin ? (user.designation || '') : (user.yearSemester || '');
+      document.getElementById('profResidentialAddress').value = user.residentialAddress || '';
+      document.getElementById('profPhone').value = user.phone || '';
+
+      // Profile Photo Display and Interaction Handling
+      const photoDisplay = document.getElementById('profilePhotoDisplay');
+      const photoInput = document.getElementById('profilePhotoInput');
+      const btnTriggerUpload = document.getElementById('btnTriggerPhotoUpload');
+      const btnSavePhoto = document.getElementById('btnSavePhoto');
+      const btnCancelPhoto = document.getElementById('btnCancelPhoto');
+      const btnRemovePhoto = document.getElementById('btnRemovePhoto');
+      const btnPhotoActionText = document.getElementById('btnPhotoActionText');
+
+      let currentPhotoUrl = user.profileImage || null;
+      let selectedPhotoFile = null;
+
+      function renderProfilePhoto(url) {
+        const initials = (user.avatar || (user.fullName ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2) : 'PV')).toUpperCase();
+        if (url) {
+          photoDisplay.textContent = '';
+          photoDisplay.style.backgroundImage = `url('${url}')`;
+          photoDisplay.style.backgroundSize = 'cover';
+          photoDisplay.style.backgroundPosition = 'center';
+          photoDisplay.style.backgroundColor = 'transparent';
+          btnPhotoActionText.textContent = 'Change Photo';
+          btnRemovePhoto.style.display = 'inline-flex';
+        } else {
+          photoDisplay.style.backgroundImage = 'none';
+          photoDisplay.style.backgroundColor = isAdmin ? '#1E293B' : '#4F46E5';
+          photoDisplay.textContent = initials;
+          btnPhotoActionText.textContent = 'Upload Photo';
+          btnRemovePhoto.style.display = 'none';
+        }
+      }
+
+      renderProfilePhoto(currentPhotoUrl);
+
+      // In live session, refresh profile photo asynchronously to stay in sync with database
+      if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+        window.proofVoiceApi.getCurrentUser().then(fresh => {
+          if (fresh && fresh.profileImage && fresh.profileImage !== currentPhotoUrl) {
+            currentPhotoUrl = fresh.profileImage;
+            user.profileImage = currentPhotoUrl;
+            renderProfilePhoto(currentPhotoUrl);
+            if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+          }
+        }).catch(() => {});
+      }
+
+      // Trigger File Browser
+      btnTriggerUpload.addEventListener('click', () => {
+        photoInput.click();
+      });
+
+      // Handle File Selection with client-side validation
+      photoInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        // Size check (Max 5MB)
+        const maxBytes = 5 * 1024 * 1024;
+        if (file.size > maxBytes) {
+          showToast('error', 'File Too Large', `The selected file is ${(file.size / (1024 * 1024)).toFixed(2)} MB. Maximum allowed size is 5 MB.`);
+          photoInput.value = '';
+          return;
+        }
+
+        // Extension & MIME check
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+          showToast('error', 'Unsupported Format', 'Please upload an image in JPG, JPEG, PNG, or WebP format.');
+          photoInput.value = '';
+          return;
+        }
+
+        selectedPhotoFile = file;
+
+        // Preview image in real-time
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          renderProfilePhoto(evt.target.result);
+          btnSavePhoto.style.display = 'inline-flex';
+          btnCancelPhoto.style.display = 'inline-flex';
+          btnTriggerUpload.style.display = 'none';
+          btnRemovePhoto.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Cancel Preview
+      btnCancelPhoto.addEventListener('click', () => {
+        selectedPhotoFile = null;
+        photoInput.value = '';
+        renderProfilePhoto(currentPhotoUrl);
+        btnSavePhoto.style.display = 'none';
+        btnCancelPhoto.style.display = 'none';
+        btnTriggerUpload.style.display = 'inline-flex';
+        if (currentPhotoUrl) btnRemovePhoto.style.display = 'inline-flex';
+      });
+
+      // Save Photo to Backend
+      btnSavePhoto.addEventListener('click', async () => {
+        if (!selectedPhotoFile) return;
+
+        btnSavePhoto.disabled = true;
+        btnSavePhoto.innerHTML = `<span class="spinner"></span> Uploading...`;
+
+        try {
+          const res = await window.proofVoiceApi.uploadProfilePhoto(selectedPhotoFile);
+          currentPhotoUrl = res.profile_image_url || null;
+          user.profileImage = currentPhotoUrl;
+
+          // Re-render display
+          renderProfilePhoto(currentPhotoUrl);
+          btnSavePhoto.style.display = 'none';
+          btnCancelPhoto.style.display = 'none';
+          btnTriggerUpload.style.display = 'inline-flex';
+          if (currentPhotoUrl) btnRemovePhoto.style.display = 'inline-flex';
+
+          // Sync topbars & sidebars
+          if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+
+          showToast('success', 'Profile Photo Saved', 'Your new profile picture has been uploaded and applied.');
+        } catch (err) {
+          showToast('error', 'Upload Failed', err.message || 'Unable to upload profile photo.');
+          renderProfilePhoto(currentPhotoUrl);
+        } finally {
+          btnSavePhoto.disabled = false;
+          btnSavePhoto.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Photo
+          `;
+          photoInput.value = '';
+          selectedPhotoFile = null;
+        }
+      });
+
+      // Remove Photo
+      btnRemovePhoto.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to remove your profile photo? Your initials will be displayed instead.')) {
+          return;
+        }
+
+        btnRemovePhoto.disabled = true;
+        btnRemovePhoto.innerHTML = `<span class="spinner"></span> Removing...`;
+
+        try {
+          await window.proofVoiceApi.removeProfilePhoto();
+          currentPhotoUrl = null;
+          user.profileImage = null;
+
+          renderProfilePhoto(null);
+          btnSavePhoto.style.display = 'none';
+          btnCancelPhoto.style.display = 'none';
+          btnTriggerUpload.style.display = 'inline-flex';
+          btnRemovePhoto.style.display = 'none';
+
+          if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+
+          showToast('info', 'Photo Removed', 'Profile picture removed. Initials are now active.');
+        } catch (err) {
+          showToast('error', 'Removal Failed', err.message || 'Unable to remove profile photo.');
+        } finally {
+          btnRemovePhoto.disabled = false;
+          btnRemovePhoto.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Remove Photo
+          `;
+        }
+      });
+
+      // Handle Profile Edit Form Submission
+      const form = document.getElementById('editStudentProfileForm');
+      const saveBtn = document.getElementById('saveProfileBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fullName = document.getElementById('profFullName').value.trim();
+        const studentId = document.getElementById('profStudentId').value.trim();
+        const department = document.getElementById('profDepartment').value.trim();
+        const yearSem = document.getElementById('profYearSem').value.trim();
+        const address = document.getElementById('profResidentialAddress').value.trim();
+        const phone = document.getElementById('profPhone').value.trim();
+
+        if (!fullName || !studentId || !department || !address) {
+          showToast('error', 'Missing Information', 'Please complete all required fields.');
+          return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<span class="spinner"></span> Saving Changes...`;
+
+        try {
+          const profilePayload = {
+            fullName,
+            studentIdentifier: studentId,
+            department,
+            phone,
+            profileComplete: true
+          };
+
+          if (isAdmin) {
+            profilePayload.designation = yearSem;
+            profilePayload.residentialAddress = address;
+          } else {
+            profilePayload.yearSemester = yearSem;
+            profilePayload.residentialAddress = address;
+          }
+
+          await window.proofVoiceApi.updateUserProfile(user.id, profilePayload);
+
+          // Update cached user
+          user.fullName = fullName;
+          user.studentIdentifier = studentId;
+          user.department = department;
+          user.phone = phone;
+          if (isAdmin) user.designation = yearSem;
+          else user.yearSemester = yearSem;
+          user.residentialAddress = address;
+
+          if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+
+          showToast('success', 'Profile Updated', 'Profile credentials updated successfully.');
+          setTimeout(() => window.location.reload(), 600);
+        } catch (err) {
+          showToast('error', 'Update Failed', err.message);
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Profile Changes';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

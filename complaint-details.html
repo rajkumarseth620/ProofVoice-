@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaint Details & Tracking | ProofVoice</title>
+  <meta name="description" content="Track live progress, departmental assignments, and official remarks for your submitted complaint.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/complaints.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Student Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="student-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Student Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Verified Institution</span>
+        <span class="sidebar-institution-name" id="sidebarInstName">Apex Institute of Technology</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="student-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="new-complaint.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Create Complaint
+        </a>
+        <a href="my-complaints.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          My Complaints
+        </a>
+        <a href="student-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+        </a>
+        <a href="student-profile.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Profile
+        </a>
+        <a href="help.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Help & Support
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="sidebarAvatar">MS</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Maya Sharma</div>
+          <div class="user-role-label" id="sidebarUserRole">Student</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <div class="breadcrumbs">
+            <a href="student-dashboard.html">Dashboard</a>
+            <span>/</span>
+            <a href="my-complaints.html">My Complaints</a>
+            <span>/</span>
+            <span class="current" id="breadcrumbId">Tracking Details</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <span id="topbarInst">Apex Tech (AIT)</span>
+          </div>
+          <a href="my-complaints.html" class="btn btn-secondary btn-sm">← Back to Complaints</a>
+        </div>
+      </header>
+
+      <main class="app-content" id="complaintDetailsHeader">
+        <!-- Top Header Card -->
+        <div class="card" style="margin-bottom:var(--space-6); padding:var(--space-6);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:var(--space-4);">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:var(--space-2);">
+                <span class="font-mono" style="font-weight:700; color:var(--color-primary); font-size:var(--text-base);" id="detailsComplaintId">
+                  PV-DEMO-000
+                </span>
+                <span id="detailsStatusBadge">--</span>
+                <span id="detailsPriorityBadge">--</span>
+              </div>
+              <h1 style="font-size:var(--text-2xl); color:var(--color-navy); margin-bottom:var(--space-1);" id="detailsComplaintTitle">
+                Loading complaint details...
+              </h1>
+              <div class="text-xs text-muted" style="display:flex; gap:12px; flex-wrap:wrap;">
+                <span>Submitted on: <strong id="detailsSubmissionDate">--</strong></span>
+                <span>•</span>
+                <span>Assigned Department: <strong id="detailsAssignedDept">--</strong></span>
+                <span>•</span>
+                <span>Campus Location: <strong id="detailsLocation">--</strong></span>
+              </div>
+            </div>
+
+            <!-- Read Aloud TTS Button -->
+            <button type="button" class="btn btn-secondary" id="detailsTtsBtn" title="Play audio preview">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              Read Aloud
+            </button>
+          </div>
+        </div>
+
+        <!-- Special Status Alert Container (Resolved / Rejected / Awaiting Student) -->
+        <div id="specialStatusAlertContainer"></div>
+
+        <div class="dashboard-grid">
+          <!-- Left Column: Grievance Content & Formal Letter -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+            
+            <!-- Original Description Card -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-3);">Original Student Description</h3>
+              <div style="background:var(--color-surface-alt); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4); font-size:var(--text-sm); line-height:1.6; color:var(--color-text-secondary);" id="detailsOriginalDescription">
+                Loading original description...
+              </div>
+            </div>
+
+            <!-- Final Submitted Formal Letter (A4-Style Preview) -->
+            <div class="formal-letter-card" style="box-shadow:var(--shadow-xs); padding:var(--space-8); margin-bottom:0; background:#FFFFFF;">
+              <div class="formal-letter-header" style="padding-bottom:var(--space-3); margin-bottom:var(--space-4); border-bottom:1px solid var(--color-border);">
+                <div>
+                  <span style="font-weight:700; color:var(--color-navy); font-size:var(--text-sm); text-transform:uppercase;">
+                    Formal Submitted Application
+                  </span>
+                  <div class="text-xs text-muted">Official formal grievance letter addressed to institutional authorities</div>
+                </div>
+                <span class="badge badge-submitted">Official Record</span>
+              </div>
+              <pre class="formal-letter-body" id="detailsFormalApplication" style="white-space:pre-wrap; font-family:var(--font-sans); font-size:13px; line-height:1.7; color:var(--color-text-primary); margin:0;">
+                Loading formal letter...
+              </pre>
+            </div>
+          </div>
+
+          <!-- Right Column: Status Timeline & Department Resolution -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+            <!-- Status Timeline Card -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Redressal Timeline</h3>
+              <div class="timeline" id="detailsTimeline">
+                <!-- Injected via student-dashboard.js -->
+              </div>
+            </div>
+
+            <!-- Help Contact Box -->
+            <div class="card" style="padding:var(--space-6); background:var(--color-surface-alt); border:1px solid var(--color-border);">
+              <h4 style="font-size:var(--text-sm); color:var(--color-navy); margin-bottom:var(--space-2);">Grievance Redressal Policy</h4>
+              <p style="font-size:var(--text-xs); color:var(--color-text-secondary); line-height:1.5;">
+                Every grievance is logged with an institutional timestamp. The handling department is accountable for resolving issues within the campus SLA target. If an issue is resolved unsatisfactorily, you may submit a reopening request.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Reopen Complaint Modal -->
+  <div class="modal-backdrop" id="reopenComplaintModal">
+    <div class="modal-card" style="max-width:560px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Request Grievance Reopening</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('reopenComplaintModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:var(--text-xs); color:var(--color-text-secondary); margin-bottom:var(--space-3);">
+          Please explain why this issue remains unresolved or why an appeal is warranted. Your remarks will be appended to the grievance history and notified to the Dean:
+        </p>
+        <textarea class="form-control" id="reopenReasonInput" rows="5" placeholder="e.g. The technician visited but the projector power unit continues to trip every 10 minutes. The problem has not been rectified." required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('reopenComplaintModal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="submitReopenBtn">Submit Reopen Request</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/student-dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.proofVoiceDb.getCurrentUser();
+      const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+
+      if (institution) {
+        document.getElementById('sidebarInstName').textContent = institution.name;
+        document.getElementById('topbarInst').textContent = institution.name;
+      }
+      if (user) {
+        document.getElementById('sidebarUserName').textContent = user.fullName;
+        document.getElementById('sidebarUserRole').textContent = `${user.department || 'Student'} • ${user.yearSemester || ''}`;
+        if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+      }
+    });
+  </script>
+</body>
+</html>

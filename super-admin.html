@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Super-Admin | ProofVoice</title>
+  <meta name="description" content="ProofVoice Multi-Tenant Platform Administration, institutional workspace approvals, and platform metrics.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body style="background-color:#0F172A; color:#F8FAFC;">
+
+  <div class="app-layout" style="background-color:#0F172A;">
+    <!-- Super Admin Sidebar -->
+    <aside class="app-sidebar" style="background-color:#1E293B; border-color:#334155; color:#F8FAFC;">
+      <div class="sidebar-header" style="border-color:#334155;">
+        <a href="super-admin.html" class="brand-logo" style="color:#FFFFFF;">
+          <div class="brand-icon-wrapper" style="background:linear-gradient(135deg, #6366F1, #8B5CF6);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name" style="color:#FFFFFF;">Proof<span>Voice</span></span>
+            <span class="brand-sub" style="color:#A5B4FC;">Platform Root</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge" style="background:#0F172A; border-color:#334155;">
+        <span class="sidebar-institution-label" style="color:#94A3B8;">Global Tier</span>
+        <span class="sidebar-institution-name" style="color:#FFFFFF;">Platform Super-Admin</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#overview" class="sidebar-nav-item active" style="color:#FFFFFF; background:rgba(99, 102, 241, 0.2);" onclick="switchSuperTab('overview', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Overview & Stats
+        </a>
+        <a href="#institutions" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('institutions', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11m-8-11v11m-4-11v11m8-11v11"/>
+          </svg>
+          Active Institutions
+        </a>
+        <a href="#pending-inst" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('pending-inst', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/>
+          </svg>
+          Pending Institution Requests
+          <span class="badge" id="superPendingInstBadge" style="background:#F59E0B; color:#0F172A; font-size:10px; margin-left:auto;">1</span>
+        </a>
+        <a href="#admin-requests" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('admin-requests', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6"/>
+          </svg>
+          Admin Access Requests
+          <span class="badge" id="superPendingAdminBadge" style="background:#6366F1; color:#FFFFFF; font-size:10px; margin-left:auto;">1</span>
+        </a>
+        <a href="#audit-logs" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('audit-logs', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Platform Audit Logs
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:#F87171; margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </a>
+      </nav>
+
+      <div class="sidebar-footer" style="border-color:#334155;">
+        <div class="user-avatar" style="background:#6366F1; color:#FFFFFF;">PA</div>
+        <div class="user-info-text">
+          <div class="user-name" style="color:#FFFFFF;">Platform Root</div>
+          <div class="user-role-label" style="color:#94A3B8;">System Super-Admin</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar" style="background-color:#1E293B; border-color:#334155; color:#FFFFFF;">
+        <div class="topbar-left">
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar" style="color:#FFFFFF;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="breadcrumbs" style="color:#94A3B8;">
+            <span>Platform</span>
+            <span>/</span>
+            <span class="current" style="color:#FFFFFF;">Super-Admin Console</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <a href="admin-dashboard.html" class="btn btn-secondary btn-sm" style="background:#334155; color:#FFFFFF; border:none;">Switch to Admin Desk</a>
+          <div class="institution-pill" style="background:#0F172A; border-color:#334155; color:#A5B4FC;">
+            <span>Platform Root Authorization</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1 style="color:#FFFFFF;">Platform Super-Admin Workspace</h1>
+            <p style="color:#94A3B8;">Review pending institutional workspace registrations, manage authorized administrators, and inspect global health.</p>
+          </div>
+        </div>
+
+        <!-- Global Platform KPIs -->
+        <div class="dashboard-stats-grid">
+          <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+            <div class="stat-card-title" style="color:#94A3B8;">Active Institutions</div>
+            <div class="stat-number" style="color:#FFFFFF; margin-top:8px;" id="superTotalInst">2</div>
+            <div class="stat-subtext" style="color:#10B981;">Operational tenants</div>
+          </div>
+
+          <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+            <div class="stat-card-title" style="color:#94A3B8;">Pending Institutions</div>
+            <div class="stat-number" style="color:#F59E0B; margin-top:8px;" id="superPendingInst">1</div>
+            <div class="stat-subtext" style="color:#F59E0B;">Awaiting workspace verification</div>
+          </div>
+
+          <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+            <div class="stat-card-title" style="color:#94A3B8;">Pending Admin Requests</div>
+            <div class="stat-number" style="color:#818CF8; margin-top:8px;" id="superPendingAdmins">1</div>
+            <div class="stat-subtext" style="color:#818CF8;">Faculty/Staff verification</div>
+          </div>
+
+          <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+            <div class="stat-card-title" style="color:#94A3B8;">Server Uptime</div>
+            <div class="stat-number" style="color:#10B981; margin-top:8px;">99.98%</div>
+            <div class="stat-subtext" style="color:#94A3B8;">Zero isolation breaches</div>
+          </div>
+        </div>
+
+        <!-- Section 1: Pending Institution Registration Requests -->
+        <div id="sectionPendingInst" class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-8); padding:var(--space-6);">
+          <div class="card-header" style="border-color:#334155; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h3 class="card-title" style="color:#FFFFFF;">Pending Institution Registration Requests</h3>
+              <p class="text-xs" style="color:#94A3B8; margin-top:4px;">Institutions must be officially verified before student/faculty onboarding can begin.</p>
+            </div>
+            <span class="badge" id="superPendingInstPill" style="background:#FEF3C7; color:#92400E;">1 Pending</span>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" style="color:#E2E8F0;">
+              <thead>
+                <tr style="background:#0F172A; border-color:#334155;">
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Institution Name</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Type & Location</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Official Desk Email</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Contact Representative</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155; text-align:right;">Super-Admin Action</th>
+                </tr>
+              </thead>
+              <tbody id="superPendingTableBody">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 2: Administrator Access Requests -->
+        <div id="sectionAdminRequests" class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-8); padding:var(--space-6);">
+          <div class="card-header" style="border-color:#334155; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h3 class="card-title" style="color:#FFFFFF;">Pending Administrator Access Requests</h3>
+              <p class="text-xs" style="color:#94A3B8; margin-top:4px;">Security Rule: Administrator access is never self-granted and requires authorized vetting.</p>
+            </div>
+            <span class="badge" id="superAdminRequestsPill" style="background:#EEF2FF; color:#4338CA;">1 Pending</span>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" style="color:#E2E8F0;">
+              <thead>
+                <tr style="background:#0F172A; border-color:#334155;">
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Applicant Name</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Designation & Office</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Target Institution</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Official Email</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155; text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="superAdminRequestsTableBody">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 3: Registered Active Institutions -->
+        <div id="sectionActiveInst" class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-8); padding:var(--space-6);">
+          <div class="card-header" style="border-color:#334155;">
+            <h3 class="card-title" style="color:#FFFFFF;">Active Registered Institutions (Multi-Tenant Workspaces)</h3>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" style="color:#E2E8F0;">
+              <thead>
+                <tr style="background:#0F172A; border-color:#334155;">
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Tenant ID</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Institution</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Type & Location</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Default Grievance Recipient</th>
+                  <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Tenant Status</th>
+                </tr>
+              </thead>
+              <tbody id="superActiveTableBody">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 4: Platform Audit Logs -->
+        <div id="sectionAuditLogs" class="card" style="background:#1E293B; border-color:#334155; padding:var(--space-6);">
+          <div class="card-header" style="border-color:#334155;">
+            <h3 class="card-title" style="color:#FFFFFF;">Platform Security & Isolation Audit Logs</h3>
+          </div>
+          <div style="font-family:monospace; font-size:12px; color:#94A3B8; line-height:1.7;">
+            <div style="padding:6px 0; border-bottom:1px solid #334155;">[2026-10-27 18:42:10 UTC] <span style="color:#10B981;">SEC_OK:</span> Multi-tenant database boundary check passed for tenant Apex Institute of Technology (inst_apex_01).</div>
+            <div style="padding:6px 0; border-bottom:1px solid #334155;">[2026-10-27 17:30:22 UTC] <span style="color:#10B981;">SEC_OK:</span> Isolated query for Horizon State University (inst_horizon_02); 0 cross-tenant leaks.</div>
+            <div style="padding:6px 0; border-bottom:1px solid #334155;">[2026-10-27 16:15:05 UTC] <span style="color:#F59E0B;">AUTH_PEND:</span> Administrator access request submitted by Prof. Rajesh Nair (req_adm_09). Awaiting super-admin vetting.</div>
+            <div style="padding:6px 0;">[2026-10-27 15:00:00 UTC] <span style="color:#10B981;">SYS_HEALTH:</span> Django REST Framework mock service healthy. Gnani AI timely-status: Disconnected (Demo stub active).</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    function renderSuperAdminConsole() {
+      const allInst = window.proofVoiceDb.getAllInstitutions();
+      const verifiedInst = allInst.filter(i => i.status === 'Verified');
+      const pendingInst = allInst.filter(i => i.status === 'Pending Verification');
+      const adminReqs = window.proofVoiceDb.getAdminRequests();
+      const pendingAdmins = adminReqs.filter(r => r.status === 'Pending');
+
+      // KPIs
+      document.getElementById('superTotalInst').textContent = verifiedInst.length;
+      document.getElementById('superPendingInst').textContent = pendingInst.length;
+      document.getElementById('superPendingAdmins').textContent = pendingAdmins.length;
+      document.getElementById('superPendingInstBadge').textContent = pendingInst.length;
+      document.getElementById('superPendingAdminBadge').textContent = pendingAdmins.length;
+      document.getElementById('superPendingInstPill').textContent = `${pendingInst.length} Pending`;
+      document.getElementById('superAdminRequestsPill').textContent = `${pendingAdmins.length} Pending`;
+
+      // 1. Pending Institutions Table
+      const pendingTbody = document.getElementById('superPendingTableBody');
+      if (pendingInst.length === 0) {
+        pendingTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94A3B8; padding:2rem;">No pending institutional requests. All workspaces verified.</td></tr>`;
+      } else {
+        pendingTbody.innerHTML = pendingInst.map(inst => `
+          <tr style="border-color:#334155;">
+            <td style="font-weight:600; color:#FFFFFF;">${escapeHtml(inst.name)}</td>
+            <td style="color:#94A3B8;">${escapeHtml(inst.type || 'College')} • ${escapeHtml(inst.city)}, ${escapeHtml(inst.state)}</td>
+            <td class="font-mono text-xs" style="color:#93C5FD;">${escapeHtml(inst.officialEmail)}</td>
+            <td>
+              <div style="color:#FFFFFF;">${escapeHtml(inst.contactPerson || 'Authorized Officer')}</div>
+              <div class="text-xs" style="color:#94A3B8;">${escapeHtml(inst.address || '')}</div>
+            </td>
+            <td style="text-align:right;">
+              <button class="btn btn-primary btn-sm" onclick="handleApproveInst('${inst.id}')">
+                ✓ Approve Workspace
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="showToast('info', 'Registration Declined', 'Request for ${escapeHtml(inst.name)} declined.')">
+                Decline
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // 2. Pending Administrator Requests Table
+      const adminTbody = document.getElementById('superAdminRequestsTableBody');
+      if (pendingAdmins.length === 0) {
+        adminTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94A3B8; padding:2rem;">No pending administrator access requests.</td></tr>`;
+      } else {
+        adminTbody.innerHTML = pendingAdmins.map(req => {
+          const targetInst = window.proofVoiceDb.getInstitution(req.institutionId);
+          return `
+            <tr style="border-color:#334155;">
+              <td style="font-weight:600; color:#FFFFFF;">${escapeHtml(req.fullName)}</td>
+              <td>
+                <div style="color:#E2E8F0;">${escapeHtml(req.designation)}</div>
+                <div class="text-xs" style="color:#94A3B8;">Dept: ${escapeHtml(req.department || 'Administration')}</div>
+              </td>
+              <td style="color:#A5B4FC;">${escapeHtml(targetInst ? targetInst.name : req.institutionId)}</td>
+              <td class="font-mono text-xs" style="color:#93C5FD;">${escapeHtml(req.officialEmail)}</td>
+              <td style="text-align:right;">
+                <button class="btn btn-primary btn-sm" onclick="handleApproveAdmin('${req.id}')">
+                  ✓ Grant Admin Role
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="handleRejectAdmin('${req.id}')">
+                  Reject
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 3. Active Institutions Table
+      const activeTbody = document.getElementById('superActiveTableBody');
+      activeTbody.innerHTML = verifiedInst.map(inst => `
+        <tr style="border-color:#334155;">
+          <td class="font-mono text-xs" style="color:#93C5FD;">${escapeHtml(inst.id)}</td>
+          <td style="font-weight:600; color:#FFFFFF;">${escapeHtml(inst.name)}</td>
+          <td style="color:#94A3B8;">${escapeHtml(inst.type || 'College')} • ${escapeHtml(inst.city)}, ${escapeHtml(inst.state)}</td>
+          <td style="color:#CBD5E1;">${escapeHtml(inst.defaultRecipientDesignation || 'The Dean')}</td>
+          <td><span class="badge badge-resolved">Active Workspace</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function handleApproveInst(instId) {
+      window.proofVoiceDb.approveInstitution(instId);
+      showToast('success', 'Workspace Approved', 'Institutional workspace is now verified and active for campus onboarding.');
+      renderSuperAdminConsole();
+    }
+
+    function handleApproveAdmin(reqId) {
+      const res = window.proofVoiceDb.approveAdminRequest(reqId);
+      if (res) {
+        showToast('success', 'Administrator Approved', `Administrator access granted for ${res.fullName}. Account activated.`);
+        renderSuperAdminConsole();
+      }
+    }
+
+    function handleRejectAdmin(reqId) {
+      window.proofVoiceDb.rejectAdminRequest(reqId);
+      showToast('info', 'Request Rejected', 'Administrator access request was rejected.');
+      renderSuperAdminConsole();
+    }
+
+    function switchSuperTab(tabId, el) {
+      document.querySelectorAll('.sidebar-nav-item').forEach(item => item.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSuperAdminConsole();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review & Confirm Application | ProofVoice</title>
+  <meta name="description" content="Review your synthesized institutional formal grievance application before explicit confirmation and submission.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/complaints.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .formal-letter-card, .formal-letter-card * {
+        visibility: visible;
+      }
+      .formal-letter-card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+      .demo-banner, .app-sidebar, .app-topbar, .page-header, .horizontal-stepper, .review-actions-bar, .card-confirmation {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Student Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="student-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Student Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Verified Institution</span>
+        <span class="sidebar-institution-name" id="sidebarInstName">Apex Institute of Technology</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="student-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="new-complaint.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Create Complaint
+        </a>
+        <a href="my-complaints.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          My Complaints
+        </a>
+        <a href="student-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+        </a>
+        <a href="student-profile.html" class="sidebar-nav-item" style="margin-top:var(--space-4);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="sidebarAvatar">MS</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Maya Sharma</div>
+          <div class="user-role-label" id="sidebarUserRole">Student</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <div class="breadcrumbs">
+            <a href="student-dashboard.html">Dashboard</a>
+            <span>/</span>
+            <a href="new-complaint.html">Create Complaint</a>
+            <span>/</span>
+            <span class="current">Review Application</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <span id="topbarInst">Apex Tech (AIT)</span>
+          </div>
+          <a href="student-profile.html" class="user-avatar" id="topbarAvatar" style="text-decoration:none;">MS</a>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <!-- Horizontal Stepper -->
+        <div class="horizontal-stepper">
+          <div class="h-step is-done">
+            <div class="h-step-circle">✓</div>
+            <span class="h-step-label">Describe Issue</span>
+          </div>
+          <div class="h-step is-active">
+            <div class="h-step-circle">2</div>
+            <span class="h-step-label">Review Application</span>
+          </div>
+          <div class="h-step">
+            <div class="h-step-circle">3</div>
+            <span class="h-step-label">Confirm & Track</span>
+          </div>
+        </div>
+
+        <div class="page-header" style="margin-bottom:var(--space-6);">
+          <div class="page-header-title">
+            <h1>Review Your Formal Application</h1>
+            <p>ProofVoice has synthesized an official grievance letter addressed to the institutional authority. Review every section before explicit submission.</p>
+          </div>
+          <div class="page-header-actions review-actions-bar">
+            <!-- Read Aloud Button -->
+            <button type="button" class="btn btn-secondary" id="reviewTtsBtn" title="Play audio preview">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              Read Aloud
+            </button>
+            <!-- Print / PDF Button -->
+            <button type="button" class="btn btn-secondary" id="reviewPrintBtn" title="Print or save as PDF">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Print / PDF
+            </button>
+            <!-- Edit Button -->
+            <button type="button" class="btn btn-secondary" id="editApplicationBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Edit Text
+            </button>
+          </div>
+        </div>
+
+        <!-- Recipient Authority Selector Control -->
+        <div class="card" style="padding:var(--space-4) var(--space-6); margin-bottom:var(--space-6); background:var(--color-surface-alt); border:1px solid var(--color-border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <label for="reviewRecipientSelect" style="font-size:12px; font-weight:700; color:var(--color-navy); display:block; margin-bottom:2px;">
+                Addressed Authority Designation (Configurable):
+              </label>
+              <span style="font-size:11px; color:var(--color-text-secondary);">Select the appropriate institutional desk for this category:</span>
+            </div>
+            <select id="reviewRecipientSelect" class="form-control" style="width:auto; min-width:280px; font-weight:600;">
+              <option value="The Dean">The Dean (Default Authority)</option>
+              <option value="The Principal">The Principal</option>
+              <option value="The Head of Department">The Head of Department</option>
+              <option value="The Registrar">The Registrar</option>
+              <option value="The Chief Warden, Hostel Administration">The Chief Warden (Hostel)</option>
+              <option value="The Chief Information Officer / Network Administrator">The IT Administrator</option>
+              <option value="The In-Charge, Academic Laboratories & IT Facilities">The In-Charge, Academic Labs</option>
+              <option value="The Estate Officer / Sanitation Supervisor">The Estate Officer / Sanitation</option>
+              <option value="The Executive Engineer, Electrical Infrastructure">The Executive Engineer (Electrical)</option>
+              <option value="The Transport Coordinator">The Transport Coordinator</option>
+              <option value="The University Librarian">The University Librarian</option>
+              <option value="The Chief Proctor / Campus Security Officer">The Chief Proctor / Campus Security</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Formal Letter Document Container (A4-Style White Document) -->
+        <div class="formal-letter-card" style="background:#FFFFFF; border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-10) var(--space-8); box-shadow:var(--shadow-md); margin-bottom:var(--space-6); font-family:var(--font-sans);">
+          
+          <!-- Document Header -->
+          <div class="formal-letter-header" style="border-bottom:2px solid var(--color-border); padding-bottom:var(--space-4); margin-bottom:var(--space-6); display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div class="formal-letter-institution" id="reviewInstitutionName" style="font-size:var(--text-lg); font-weight:700; color:var(--color-navy);">
+                Apex Institute of Technology
+              </div>
+              <div style="font-size:var(--text-xs); color:var(--color-text-secondary); margin-top:2px;">
+                Official Student Grievance Redressal Application
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span class="badge badge-draft" style="font-size:11px; font-weight:600;">Formal Draft Preview</span>
+              <div style="font-size:11px; color:var(--color-text-muted); margin-top:4px;">Pending Confirmation</div>
+            </div>
+          </div>
+
+          <!-- Metadata Summary Row -->
+          <div class="formal-letter-meta-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; background:var(--color-surface-alt); padding:var(--space-4); border-radius:var(--radius-md); border:1px solid var(--color-border); margin-bottom:var(--space-6);">
+            <div class="formal-meta-item">
+              <div class="formal-meta-label" style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase;">Grievance Subject</div>
+              <div class="formal-meta-val" id="reviewTitle" style="font-weight:600; color:var(--color-navy); font-size:13px;">--</div>
+            </div>
+            <div class="formal-meta-item">
+              <div class="formal-meta-label" style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase;">Campus Location</div>
+              <div class="formal-meta-val" id="reviewLocation" style="font-weight:600; color:var(--color-navy); font-size:13px;">--</div>
+            </div>
+            <div class="formal-meta-item">
+              <div class="formal-meta-label" style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase;">Category & Urgency</div>
+              <div class="formal-meta-val" style="display:flex; gap:6px; align-items:center; font-size:13px;">
+                <span id="reviewCategory" style="font-weight:600;">--</span>
+                <span id="reviewPriority">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Complete Letter Body -->
+          <pre class="formal-letter-body" id="reviewLetterBody" style="white-space:pre-wrap; font-family:var(--font-sans); font-size:14px; line-height:1.75; color:var(--color-text-primary); margin:0;">
+            <!-- Populated via complaint-workflow.js -->
+          </pre>
+
+          <!-- Formal Signoff Stamp -->
+          <div class="formal-letter-signoff" style="margin-top:var(--space-8); padding-top:var(--space-4); border-top:1px dashed var(--color-border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div class="signoff-student">
+              <p style="font-size:11px; color:var(--color-text-muted); margin:0;">Transmitted via Verified Student Account</p>
+              <p style="font-weight:700; color:var(--color-navy); margin:2px 0 0;" id="reviewStudentSignoff">Maya Sharma</p>
+            </div>
+            <div class="signoff-stamp" style="font-size:11px; padding:6px 12px; border-radius:var(--radius-md); background:#EEF2FF; color:var(--color-primary); font-weight:600; border:1px solid #C7D2FE;">
+              ProofVoice Verified Draft
+            </div>
+          </div>
+        </div>
+
+        <!-- Explicit Confirmation Checkbox (Section 8.E) -->
+        <div class="card card-confirmation" style="padding:var(--space-6); margin-bottom:var(--space-6); background:#F8FAFC; border:1px solid #CBD5E1;">
+          <label class="form-check" style="align-items:flex-start;">
+            <input type="checkbox" id="confirmVerificationCheck" style="margin-top:3px;" required>
+            <span style="font-size:var(--text-sm); color:var(--color-navy); font-weight:600; line-height:1.5;">
+              I have thoroughly reviewed this formal grievance application. I confirm that all described facts, location details, and student information are accurate, and I authorize formal transmission to the institutional authorities.
+            </span>
+          </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <a href="new-complaint.html" class="btn btn-secondary">
+            ← Back to Complaint Form
+          </a>
+          <button type="button" class="btn btn-primary btn-lg" id="confirmSubmitBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Confirm and Submit Application
+          </button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Edit Application Modal -->
+  <div class="modal-backdrop" id="editAppModal">
+    <div class="modal-card" style="max-width:700px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Formal Application Text</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('editAppModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:var(--text-xs); color:var(--color-text-secondary); margin-bottom:var(--space-3);">
+          You can edit any portion of the formal letter before final submission. The recipient and sender details will reflect your changes:
+        </p>
+        <textarea class="form-control" id="editAppTextArea" rows="14" style="font-family:var(--font-sans); font-size:13px; line-height:1.6;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('editAppModal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveAppEditBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submission Success Confirmation Modal (Section 8.F) -->
+  <div class="modal-backdrop" id="submissionSuccessModal">
+    <div class="modal-card" style="max-width:540px; text-align:center;">
+      <div class="modal-body" style="padding:var(--space-8);">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--color-success-bg); color:var(--color-success); display:flex; align-items:center; justify-content:center; margin:0 auto var(--space-4); font-size:32px;">
+          ✓
+        </div>
+        <h2 style="font-size:var(--text-xl); color:var(--color-navy); margin-bottom:var(--space-2);">
+          Your application has been submitted successfully!
+        </h2>
+        <p style="font-size:var(--text-sm); color:var(--color-text-secondary); margin-bottom:var(--space-6);">
+          Your formal application has been recorded by the institutional system and dispatched to the appropriate grievance authority.
+        </p>
+
+        <!-- Summary Ticket Card -->
+        <div style="background:var(--color-surface-alt); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4); margin-bottom:var(--space-6); text-align:left; font-size:var(--text-sm);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="text-muted">Unique Complaint ID:</span>
+            <span class="font-mono" style="font-weight:700; color:var(--color-primary);" id="successComplaintId">PV-DEMO-000</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="text-muted">Addressed Recipient:</span>
+            <strong id="successRecipient">The Dean</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="text-muted">Institution:</span>
+            <strong id="successInstitution">Apex Institute of Technology</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="text-muted">Submission Timestamp:</span>
+            <span id="successDate">--</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span class="text-muted">Initial Status:</span>
+            <span id="successStatus"><span class="badge badge-submitted">Submitted</span></span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <a href="student-dashboard.html" class="btn btn-secondary">Go to Dashboard</a>
+          <a href="complaint-details.html" class="btn btn-primary" id="successViewLink">View Complaint →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/complaint-workflow.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.proofVoiceDb.getCurrentUser();
+      const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+
+      if (institution) {
+        document.getElementById('sidebarInstName').textContent = institution.name;
+        document.getElementById('topbarInst').textContent = institution.name;
+      }
+      if (user) {
+        document.getElementById('sidebarUserName').textContent = user.fullName;
+        document.getElementById('sidebarUserRole').textContent = `${user.department || 'Student'} • ${user.yearSemester || ''}`;
+        document.getElementById('reviewStudentSignoff').textContent = `${user.fullName} (ID: ${user.studentIdentifier || 'Verified Student'})`;
+        if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+      }
+
+      window.complaintWorkflow.initReviewPage();
+    });
+  </script>
+</body>
+</html>

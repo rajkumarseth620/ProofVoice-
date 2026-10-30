@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Complaints | ProofVoice</title>
+  <meta name="description" content="Search, filter, and track all complaints you have submitted to your institution.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="student-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Student Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Verified Institution</span>
+        <span class="sidebar-institution-name">Apex Institute of Technology</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="student-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="new-complaint.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Create Complaint
+        </a>
+        <a href="my-complaints.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          My Complaints
+        </a>
+        <a href="student-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+          <span class="nav-count" id="sidebarNotifCount" style="display: none;">0</span>
+        </a>
+        <a href="student-profile.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Profile & Settings
+        </a>
+        <a href="help.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Help & Support
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar">MS</div>
+        <div class="user-info-text">
+          <div class="user-name">Maya Sharma</div>
+          <div class="user-role-label">B.Tech CSE • 3rd Year</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="breadcrumbs">
+            <a href="student-dashboard.html">Dashboard</a>
+            <span>/</span>
+            <span class="current">My Complaints</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <span>Apex Tech (AIT)</span>
+          </div>
+          <a href="new-complaint.html" class="btn btn-primary btn-sm">+ New Complaint</a>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>My Complaints</h1>
+            <p>Search, filter, and review real-time progress on your submitted campus issues.</p>
+          </div>
+        </div>
+
+        <!-- Filterable Table Wrapper -->
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div class="table-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" id="myComplaintsSearch" class="form-control" placeholder="Search by ID, title, or room...">
+            </div>
+
+            <div class="table-filters">
+              <!-- Status Filter -->
+              <select id="myComplaintsStatusFilter" class="form-control" style="width:auto;">
+                <option value="All">All Statuses</option>
+                <option value="Submitted">Submitted</option>
+                <option value="Under Review">Under Review</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+
+              <!-- Category Filter -->
+              <select id="myComplaintsCategoryFilter" class="form-control" style="width:auto;">
+                <option value="All">All Categories</option>
+                <option value="Classroom and Laboratory">Classroom & Lab</option>
+                <option value="Water and Sanitation">Water & Sanitation</option>
+                <option value="Electricity and Lighting">Electricity & Lighting</option>
+                <option value="Internet and IT">Internet & IT</option>
+                <option value="Hostel and Accommodation">Hostel</option>
+              </select>
+
+              <span class="text-xs text-muted" id="complaintsCountSpan" style="margin-left:8px;">Showing complaints</span>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Complaint ID</th>
+                  <th>Title & Location</th>
+                  <th>Category</th>
+                  <th>Urgency</th>
+                  <th>Submitted</th>
+                  <th>Status</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="myComplaintsTableBody">
+                <!-- Injected via student-dashboard.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" id="myComplaintsEmpty" style="display:none;">
+            <div class="empty-state-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div class="empty-state-title">You haven't submitted any complaints yet</div>
+            <div class="empty-state-text">Voice or type your first campus grievance and track the resolution steps.</div>
+            <a href="new-complaint.html" class="btn btn-primary btn-sm" style="margin-top:var(--space-3);">Create Your First Complaint</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/student-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frequently Asked Questions (FAQ) | ProofVoice</title>
+  <meta name="description" content="Frequently asked questions about voice-based reporting, formal application drafting, multi-institution tenancy, and resolution tracking in ProofVoice.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Site Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="site-nav">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Campus Resolution</span>
+          </div>
+        </a>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="index.html#features" class="nav-link">Features</a></li>
+          <li><a href="help.html" class="nav-link">Help</a></li>
+          <li><a href="faq.html" class="nav-link active">FAQ</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-ghost btn-sm">Log In</a>
+          <a href="new-complaint.html" class="btn btn-primary btn-sm">Report an Issue</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main style="padding: var(--space-12) 0 var(--space-20);">
+    <div class="container container-narrow">
+      <div class="section-header" style="margin-bottom: var(--space-8);">
+        <span class="sub-badge">Frequently Asked Questions</span>
+        <h1>Frequently Asked Questions</h1>
+        <p>Everything you need to know about ProofVoice voice reporting, formal application drafting, and administrative grievance redressal.</p>
+        
+        <!-- FAQ Search Box -->
+        <div style="margin-top: var(--space-6); position: relative;">
+          <input type="text" id="faqSearchInput" class="form-control" placeholder="Search questions or keywords (e.g. voice, review, status, tracking)..." style="padding: 0.875rem 1.25rem; font-size: var(--text-base); border-radius: var(--radius-xl);">
+        </div>
+      </div>
+
+      <!-- FAQ Accordion -->
+      <div class="accordion" id="faqAccordion">
+
+        <!-- Item 1 -->
+        <div class="accordion-item is-open">
+          <button class="accordion-trigger">
+            <span>How do I record a voice-based complaint?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            Navigate to the <strong>Report an Issue</strong> page and ensure the "Voice Input" tab is active. Click the microphone button and grant your browser microphone permission when prompted. Describe your concern naturally. When finished speaking, tap the button again or click "Stop Recording". ProofVoice will convert your speech to text and let you edit the transcript before generating your formal application.
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span>Can I edit my transcription before submitting?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            Yes, absolutely. You have complete control. The transcription box is an editable text area where you can fix any misheard words, add room numbers, or append more details before clicking "Generate Formal Application".
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span>Why do I need to review my application before submission?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            ProofVoice strictly requires explicit student confirmation. Before any complaint is formally transmitted to institutional authorities, you are presented with the full structured grievance letter. You can read it, listen to it using the "Read Aloud" button, or edit it. The system will never submit a complaint on your behalf without your explicit checkbox confirmation.
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span>What do the different complaint statuses mean?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            <ul style="padding-left: 20px; line-height: 1.8;">
+              <li><strong>Submitted:</strong> Your formal application has been logged and assigned an authoritative tracking ID.</li>
+              <li><strong>Under Review:</strong> Institutional administrators have received the grievance and are inspecting the details.</li>
+              <li><strong>In Progress:</strong> A specific department (e.g., IT Services, Sanitation) or technician has been assigned and is actively working on the fix.</li>
+              <li><strong>Awaiting Student:</strong> The administration has requested clarifying information or confirmation from you.</li>
+              <li><strong>Resolved:</strong> Work has been completed and verified by the department.</li>
+              <li><strong>Rejected:</strong> The issue could not be processed, with a mandatory recorded reason provided.</li>
+              <li><strong>Reopened:</strong> The issue recurred or resolution was incomplete according to policy.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span>How does ProofVoice support multiple institutions?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            ProofVoice features a multi-tenant backend architecture. When you register with your university, college, or school, your account is bound to your specific institutional workspace. Administrator accounts can only view and manage complaints from their own campus. Complaint records are isolated through server-side authorization.
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span>Who receives the formal complaint letter?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            By default, applications are addressed to "The Dean". However, your institution administrator can configure department- and category-specific recipients (such as Chief Hostel Warden for housing issues, Network Administrator for IT, or the Principal). Students can also review and choose the appropriate recipient before confirming submission.
+          </div>
+        </div>
+
+        <!-- Item 7 -->
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span>How do I listen to updates with Text-to-Speech?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            On the Complaint Details and Review pages, click the <strong>Read Aloud</strong> button. This speaks the formal application or administrative remarks aloud, ensuring accessibility for all campus members.
+          </div>
+        </div>
+
+        <!-- Item 8 -->
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            <span>How is my personal information protected?</span>
+            <span class="accordion-icon">▼</span>
+          </button>
+          <div class="accordion-content">
+            ProofVoice only collects necessary details such as your student identifier and campus contact email. Audio recordings are processed solely to generate the complaint text and are not retained indefinitely. Private internal administrator notes are strictly hidden from student views.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Institutional Contact Box -->
+      <div class="card" style="margin-top: var(--space-10); padding: var(--space-6); background: var(--color-surface-alt);">
+        <h3 style="font-size: var(--text-base); color: var(--color-navy); margin-bottom: var(--space-2);">
+          Need further institutional assistance?
+        </h3>
+        <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;">
+          For institutional policy questions, please contact your university's Dean of Student Welfare or Grievance Redressal Committee directly through your campus portal.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 ProofVoice Platform. All rights reserved.</div>
+        <div style="display:flex; gap:16px;">
+          <a href="privacy.html" style="color:#64748B;">Privacy Policy</a>
+          <a href="terms.html" style="color:#64748B;">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Accordion toggle
+      document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+          const item = trigger.closest('.accordion-item');
+          item.classList.toggle('is-open');
+        });
+      });
+
+      // FAQ Live Search
+      const searchInput = document.getElementById('faqSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          document.querySelectorAll('.accordion-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (text.includes(q)) {
+              item.style.display = 'block';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>

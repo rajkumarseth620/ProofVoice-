@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Complaint | ProofVoice</title>
+  <meta name="description" content="Report a campus issue using voice or text. ProofVoice helps structure your formal grievance application addressed to institutional authorities.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/complaints.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Student Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="student-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Student Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Verified Institution</span>
+        <span class="sidebar-institution-name" id="studentInstitutionName">
+          Apex Institute of Technology
+        </span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-title">Navigation</span>
+        <a href="student-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="new-complaint.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Create Complaint
+        </a>
+        <a href="my-complaints.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          My Complaints
+        </a>
+        <a href="student-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+          <span class="nav-count" id="sidebarNotifCount" style="display: none;">0</span>
+        </a>
+        <a href="student-profile.html" class="sidebar-nav-item" style="margin-top:var(--space-4);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Profile
+        </a>
+        <a href="help.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Help & Support
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="sidebarAvatar">MS</div>
+        <div class="user-info-text">
+          <div class="user-name" id="sidebarUserName">Maya Sharma</div>
+          <div class="user-role-label" id="sidebarUserRole">Student</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="breadcrumbs">
+            <a href="student-dashboard.html">Dashboard</a>
+            <span>/</span>
+            <span class="current">Create Complaint</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <span id="topbarInst">Apex Tech (AIT)</span>
+          </div>
+          <a href="student-profile.html" class="user-avatar" id="topbarAvatar" style="text-decoration:none;">MS</a>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <!-- Horizontal Stepper -->
+        <div class="horizontal-stepper">
+          <div class="h-step is-active">
+            <div class="h-step-circle">1</div>
+            <span class="h-step-label">Describe Issue</span>
+          </div>
+          <div class="h-step">
+            <div class="h-step-circle">2</div>
+            <span class="h-step-label">Review Application</span>
+          </div>
+          <div class="h-step">
+            <div class="h-step-circle">3</div>
+            <span class="h-step-label">Confirm & Track</span>
+          </div>
+        </div>
+
+        <!-- Sender Profile Preview Banner -->
+        <div class="card" id="senderProfilePreview" style="padding:var(--space-4) var(--space-6); margin-bottom:var(--space-6); background:var(--color-surface-alt); border:1px solid var(--color-border);">
+          <!-- Injected via complaint-workflow.js -->
+        </div>
+
+        <div class="page-header" style="margin-bottom:var(--space-6);">
+          <div class="page-header-title">
+            <h1>Tell Us What Needs Attention</h1>
+            <p>Describe your issue naturally. ProofVoice will help prepare a formal application for the appropriate institutional authority.</p>
+          </div>
+        </div>
+
+        <!-- Two-Tab Input Area (Voice vs Text) -->
+        <div class="card" style="padding:var(--space-6); margin-bottom:var(--space-6);">
+          <div class="tab-nav" role="tablist">
+            <button type="button" class="tab-btn active" data-tab="voiceTab" id="tabVoiceBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+              </svg>
+              Voice Input (Recommended)
+            </button>
+            <button type="button" class="tab-btn" data-tab="textTab" id="tabTextBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              Text Description
+            </button>
+          </div>
+
+          <!-- TAB 1: Voice Input -->
+          <div class="tab-pane active" id="voiceTab">
+            <div class="voice-record-card" style="border:none; box-shadow:none; padding:var(--space-4) 0; margin-bottom:0;">
+              
+              <!-- Language Selector for Prisma STT -->
+              <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:var(--space-4); flex-wrap:wrap;">
+                <label for="voiceLanguageSelect" style="font-size:12px; font-weight:600; color:var(--color-navy); margin:0;">
+                  🎙️ Spoken Language:
+                </label>
+                <select id="voiceLanguageSelect" class="form-control" style="width:auto; min-width:200px; font-size:12px; height:34px; padding:2px 10px; border-radius:var(--radius-md);">
+                  <option value="en-IN" selected>English (India) — en-IN</option>
+                  <option value="hi-IN">Hindi (हिन्दी) — hi-IN</option>
+                  <option value="mr-IN">Marathi (मराठी) — mr-IN</option>
+                  <option value="ta-IN">Tamil (தமிழ்) — ta-IN</option>
+                  <option value="te-IN">Telugu (తెలుగు) — te-IN</option>
+                  <option value="kn-IN">Kannada (ಕನ್ನಡ) — kn-IN</option>
+                  <option value="bn-IN">Bengali (বাংলা) — bn-IN</option>
+                  <option value="gu-IN">Gujarati (ગુજરાતી) — gu-IN</option>
+                </select>
+              </div>
+
+              <p class="recording-status-text" id="recordingStatusText">
+                Click <strong>Record Complaint</strong> below and speak naturally.
+              </p>
+
+              <div class="recording-timer" id="recordingTimer">00:00</div>
+
+              <!-- Animated Waveform Canvas Container -->
+              <div class="waveform-canvas-container">
+                <canvas id="waveformCanvas" width="600" height="64"></canvas>
+              </div>
+
+              <!-- Big Microphone Button -->
+              <div class="mic-button-wrapper" style="text-align:center;">
+                <button type="button" class="mic-record-btn" id="micRecordBtn" aria-label="Record Complaint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="22"/>
+                  </svg>
+                </button>
+                <div class="recording-pulse-ring"></div>
+                <div id="micButtonLabel" style="margin-top:10px; font-weight:700; font-size:15px; color:var(--color-primary); cursor:pointer;">
+                  Record Complaint
+                </div>
+              </div>
+
+              <!-- Control Buttons -->
+              <div class="voice-controls-row">
+                <button type="button" class="btn btn-secondary btn-sm" id="pauseRecordBtn" style="display:none;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+                  </svg>
+                  Pause
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" id="stopRecordBtn" style="display:none;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="4" width="16" height="16"/>
+                  </svg>
+                  Stop Recording
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="retryRecordBtn" style="display:none;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                  </svg>
+                  Record Again
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" id="discardRecordBtn" style="display:none; color:var(--color-error);">
+                  Discard
+                </button>
+              </div>
+
+              <!-- Audio Preview Player Container -->
+              <div id="audioPreviewContainer" style="margin: 10px 0;"></div>
+
+              <!-- Transcription Preview -->
+              <div class="transcription-box" id="transcriptionBox" style="display:none;">
+                <div class="transcription-header">
+                  <span class="transcription-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Speech Transcription (Editable)
+                  </span>
+                  <span class="text-xs text-muted">You can edit any words if needed</span>
+                </div>
+                <textarea class="form-control" id="transcriptionInput" rows="4" placeholder="Your spoken words will appear here..."></textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                  <button type="button" class="btn btn-primary btn-sm" id="copyToDescriptionBtn">
+                    ✓ Insert into Description Field
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="clearTranscriptionBtn">
+                    Clear Text
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: Text Input -->
+          <div class="tab-pane" id="textTab">
+            <div class="form-group" style="margin-bottom:0;">
+              <textarea class="form-control" id="complaintTextDesc" rows="7" placeholder="Describe the problem you are experiencing in detail... For example: The ceiling projector in Computer Lab 304 flickers and turns off repeatedly during practical lab sessions."></textarea>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('complaintTextDesc').value=''">Clear Text</button>
+                <span class="text-xs text-muted" id="charCounter">0 / 2000 characters</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grievance Information & Flexible Campus Location -->
+        <div class="card" style="padding:var(--space-6); margin-bottom:var(--space-6);">
+          <h3 class="card-title" style="margin-bottom:var(--space-4);">Grievance Details & Campus Location</h3>
+
+          <!-- Flexible Location Helpers -->
+          <div style="margin-bottom:var(--space-4); background:var(--color-surface-alt); padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-border);">
+            <div style="font-size:12px; font-weight:700; color:var(--color-navy); margin-bottom:6px;">
+              Campus Location Details (Flexible for Any Institution)
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px;">
+              <div>
+                <label style="font-size:11px; color:var(--color-text-secondary); display:block; margin-bottom:2px;">Campus / Site</label>
+                <input type="text" id="locCampus" class="form-control" placeholder="e.g. Main Campus" style="font-size:12px;">
+              </div>
+              <div>
+                <label style="font-size:11px; color:var(--color-text-secondary); display:block; margin-bottom:2px;">Building / Block</label>
+                <input type="text" id="locBuilding" class="form-control" placeholder="e.g. Block B" style="font-size:12px;">
+              </div>
+              <div>
+                <label style="font-size:11px; color:var(--color-text-secondary); display:block; margin-bottom:2px;">Floor</label>
+                <input type="text" id="locFloor" class="form-control" placeholder="e.g. 3rd Floor" style="font-size:12px;">
+              </div>
+              <div>
+                <label style="font-size:11px; color:var(--color-text-secondary); display:block; margin-bottom:2px;">Room / Area</label>
+                <input type="text" id="locRoom" class="form-control" placeholder="e.g. Lab 304" style="font-size:12px;">
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+            <!-- Subject / Title -->
+            <div class="form-group" style="grid-column: span 2;">
+              <label for="complaintTitle" class="form-label">
+                Complaint Subject / Title <span class="required">*</span>
+              </label>
+              <input type="text" id="complaintTitle" class="form-control" placeholder="e.g. Ceiling projector malfunctioning in Computer Lab 304" required>
+            </div>
+
+            <!-- Full Location String -->
+            <div class="form-group" style="grid-column: span 2;">
+              <label for="complaintLocation" class="form-label">
+                Full Physical Location of Issue <span class="required">*</span>
+              </label>
+              <input type="text" id="complaintLocation" class="form-control" placeholder="e.g. Academic Block B, 3rd Floor, Room 304" required>
+              <span class="form-hint">Note: Do not confuse the student's personal correspondence address with the physical location of the campus issue.</span>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="complaintCategory" class="form-label">Category</label>
+              <select id="complaintCategory" class="form-control">
+                <option value="">-- Auto-detect from description --</option>
+                <option value="Classroom and Laboratory">Classroom and Laboratory</option>
+                <option value="Electricity and Lighting">Electricity and Lighting</option>
+                <option value="Water and Sanitation">Water and Sanitation</option>
+                <option value="Internet and IT">Internet and IT</option>
+                <option value="Hostel and Accommodation">Hostel and Accommodation</option>
+                <option value="Library">Library</option>
+                <option value="Transport">Transport</option>
+                <option value="Infrastructure and Maintenance">Infrastructure and Maintenance</option>
+                <option value="Safety and Security">Safety and Security</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Priority -->
+            <div class="form-group">
+              <label for="complaintPriority" class="form-label">Urgency Level</label>
+              <select id="complaintPriority" class="form-control">
+                <option value="Low">Low - Routine observation</option>
+                <option value="Medium" selected>Medium - Noticeable disruption</option>
+                <option value="High">High - Impairs classes / lab sessions</option>
+                <option value="Urgent">Urgent - Safety or hazard concern</option>
+              </select>
+            </div>
+
+            <!-- Recipient Preview -->
+            <div class="form-group" style="grid-column: span 2;">
+              <div style="font-size:12px; color:var(--color-text-secondary); background:var(--color-primary-light); padding:10px 14px; border-radius:var(--radius-md); border:1px solid #C7D2FE;">
+                ✉️ <strong>Application Recipient:</strong> This formal application will be addressed to: <strong id="recipientAuthorityPreview">The Dean</strong>. You can review or adjust this recipient designation in the next step.
+              </div>
+            </div>
+
+            <!-- Optional Attachment Notice -->
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label">Supporting Photo or Document (Optional)</label>
+              <input type="file" id="complaintAttachment" class="form-control" accept="image/*,.pdf">
+              <span class="form-hint">Supported formats: JPG, PNG, PDF (Max 5MB). Encrypted on server.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Synthesis Action Button -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <a href="student-dashboard.html" class="btn btn-secondary">Cancel</a>
+          <button type="button" class="btn btn-primary btn-lg" id="generateApplicationBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Generate Formal Application →
+          </button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/voice-recorder.js"></script>
+  <script src="js/complaint-workflow.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.proofVoiceDb.getCurrentUser();
+      const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+
+      if (institution) {
+        document.getElementById('studentInstitutionName').textContent = institution.name;
+        document.getElementById('topbarInst').textContent = institution.name;
+      }
+      if (user) {
+        document.getElementById('sidebarUserName').textContent = user.fullName;
+        document.getElementById('sidebarUserRole').textContent = `${user.department || 'Student'} • ${user.yearSemester || ''}`;
+        if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+      }
+
+      window.complaintWorkflow.initCreationPage();
+    });
+  </script>
+</body>
+</html>

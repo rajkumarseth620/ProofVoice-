@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Student Profile | ProofVoice</title>
+  <meta name="description" content="Complete your student credentials and correspondence address to enable automated formal grievance letter preparation.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body style="background-color: var(--color-bg);">
+
+  <div style="min-height: 100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:var(--space-8) var(--space-4);">
+    <div style="width:100%; max-width:640px;">
+      
+      <!-- Brand Logo -->
+      <div style="text-align:center; margin-bottom:var(--space-6);">
+        <a href="student-dashboard.html" class="brand-logo" style="display:inline-flex;">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Campus Resolution</span>
+          </div>
+        </a>
+        <h1 style="font-size:var(--text-2xl); color:var(--color-navy); margin-top:var(--space-4); margin-bottom:var(--space-1);">
+          Complete Your Student Profile
+        </h1>
+        <p style="font-size:var(--text-sm); color:var(--color-text-secondary);">
+          Your formal complaint letters require your verified academic department and correspondence address. Complete this once to enable automatic application generation.
+        </p>
+      </div>
+
+      <!-- Profile Completion Card -->
+      <div class="card" style="padding:var(--space-8); border-radius:var(--radius-xl); box-shadow:var(--shadow-md);">
+        <form id="profileCompletionForm" novalidate>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+            
+            <!-- Full Name (Readonly or editable) -->
+            <div class="form-group" style="grid-column: span 2;">
+              <label for="profFullName" class="form-label">Full Name <span class="required">*</span></label>
+              <input type="text" id="profFullName" class="form-control" required>
+            </div>
+
+            <!-- Verified Institution (Readonly from session) -->
+            <div class="form-group">
+              <label for="profInstName" class="form-label">Verified Institution</label>
+              <input type="text" id="profInstName" class="form-control" readonly style="background:#F8FAFC; color:var(--color-text-secondary);">
+            </div>
+
+            <!-- Institution Address -->
+            <div class="form-group">
+              <label for="profInstAddress" class="form-label">Institution Address</label>
+              <input type="text" id="profInstAddress" class="form-control" readonly style="background:#F8FAFC; color:var(--color-text-secondary); font-size:12px;">
+            </div>
+
+            <!-- Student ID -->
+            <div class="form-group">
+              <label for="profStudentId" class="form-label">Student ID / Enrollment Number <span class="required">*</span></label>
+              <input type="text" id="profStudentId" class="form-control" placeholder="e.g. AIT-2023-CS-042" required style="font-family:var(--font-mono);">
+            </div>
+
+            <!-- Department / Course -->
+            <div class="form-group">
+              <label for="profDepartment" class="form-label">Department / Course <span class="required">*</span></label>
+              <input type="text" id="profDepartment" class="form-control" placeholder="e.g. Computer Science & Engineering" required>
+            </div>
+
+            <!-- Year / Semester -->
+            <div class="form-group">
+              <label for="profYearSem" class="form-label">Year / Semester <span class="required">*</span></label>
+              <input type="text" id="profYearSem" class="form-control" placeholder="e.g. 3rd Year, 5th Semester" required>
+            </div>
+
+            <!-- Contact Number -->
+            <div class="form-group">
+              <label for="profPhone" class="form-label">Contact Phone Number (Optional)</label>
+              <input type="tel" id="profPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+            </div>
+
+            <!-- Residential Address -->
+            <div class="form-group" style="grid-column: span 2;">
+              <label for="profAddress" class="form-label">
+                Student Residential / Correspondence Address <span class="required">*</span>
+              </label>
+              <input type="text" id="profAddress" class="form-control" placeholder="e.g. Room 312, Sarojini Hall, Campus Greens, Jamshedpur 831014" required>
+              <span class="form-hint">Used as the sender address in your official complaint letters addressed to the Dean.</span>
+            </div>
+          </div>
+
+          <div class="alert alert-info" style="font-size:12px; margin-top:var(--space-4); margin-bottom:var(--space-6);">
+            <strong>Privacy Guarantee:</strong> Your profile details are saved to your verified account and will never be exposed to other students or unauthorized third parties.
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+            <a href="student-dashboard.html" class="btn btn-secondary">Skip for Now</a>
+            <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+              Save Profile & Continue →
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.proofVoiceDb.getCurrentUser();
+      const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+
+      const nameInput = document.getElementById('profFullName');
+      const instNameInput = document.getElementById('profInstName');
+      const instAddrInput = document.getElementById('profInstAddress');
+      const studentIdInput = document.getElementById('profStudentId');
+      const deptInput = document.getElementById('profDepartment');
+      const yearSemInput = document.getElementById('profYearSem');
+      const phoneInput = document.getElementById('profPhone');
+      const addressInput = document.getElementById('profAddress');
+
+      if (user) {
+        nameInput.value = user.fullName || '';
+        studentIdInput.value = user.studentIdentifier || '';
+        deptInput.value = user.department || '';
+        yearSemInput.value = user.yearSemester || '';
+        phoneInput.value = user.phone || '';
+        addressInput.value = user.residentialAddress || '';
+      }
+
+      if (institution) {
+        instNameInput.value = institution.name || '';
+        instAddrInput.value = institution.officialAddress || `${institution.city}, ${institution.state}`;
+      }
+
+      const form = document.getElementById('profileCompletionForm');
+      const saveBtn = document.getElementById('saveProfileBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fullName = nameInput.value.trim();
+        const studentId = studentIdInput.value.trim();
+        const department = deptInput.value.trim();
+        const yearSem = yearSemInput.value.trim();
+        const address = addressInput.value.trim();
+        const phone = phoneInput.value.trim();
+
+        if (!fullName || !studentId || !department || !address) {
+          showToast('error', 'Missing Information', 'Please complete your name, student ID, department, and correspondence address.');
+          return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<span class="spinner"></span> Saving Profile...`;
+
+        try {
+          await window.proofVoiceApi.updateUserProfile(user.id, {
+            fullName,
+            studentIdentifier: studentId,
+            department,
+            yearSemester: yearSem,
+            residentialAddress: address,
+            phone,
+            profileComplete: true
+          });
+
+          showToast('success', 'Profile Completed', 'Your student credentials have been saved.');
+          setTimeout(() => {
+            window.location.href = 'student-dashboard.html';
+          }, 800);
+        } catch (err) {
+          showToast('error', 'Save Failed', err.message);
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Profile & Continue →';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

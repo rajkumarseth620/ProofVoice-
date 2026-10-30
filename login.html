@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In | ProofVoice</title>
+  <meta name="description" content="Sign in to your ProofVoice institutional complaint and resolution management workspace.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-split-wrapper">
+    <!-- Left Brand Panel -->
+    <div class="auth-side-panel">
+      <div>
+        <a href="index.html" class="brand-logo" style="color: #FFFFFF;">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name" style="color:#FFFFFF;">Proof<span style="color:#60A5FA;">Voice</span></span>
+            <span class="brand-sub" style="color:#94A3B8;">Campus Resolution</span>
+          </div>
+        </a>
+
+        <h2>Welcome back.</h2>
+        <p>Sign in to submit grievances, follow real-time department updates, or coordinate institutional resolutions.</p>
+
+        <!-- 3 Concise Benefits -->
+        <div class="auth-side-illustration">
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">🎙️</div>
+            <div class="auth-benefit-text">
+              <h4>Voice-First Efficiency</h4>
+              <p>Speak your concerns naturally without getting bogged down in formatting.</p>
+            </div>
+          </div>
+
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">🔒</div>
+            <div class="auth-benefit-text">
+              <h4>Independent Institutional Isolation</h4>
+              <p>Each university's grievance data is isolated through server authorization.</p>
+            </div>
+          </div>
+
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">📈</div>
+            <div class="auth-benefit-text">
+              <h4>Transparent Resolution Timelines</h4>
+              <p>Receive clear department accountability from initial receipt to final fix.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-side-footer">
+        © 2026 ProofVoice. Multi-Tenant Campus Resolution Platform.
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container">
+        <div class="auth-header">
+          <h1>Sign In</h1>
+          <p>Enter your institutional email credentials below.</p>
+        </div>
+
+        <!-- Role Selection Tabs (Informational Hint - Backend Enforces Permissions) -->
+        <div class="auth-role-tabs" role="tablist">
+          <button type="button" class="auth-role-tab active" data-role="student" id="roleTabStudent">
+            Student Member
+          </button>
+          <button type="button" class="auth-role-tab" data-role="admin" id="roleTabAdmin">
+            Institution Admin
+          </button>
+        </div>
+
+        <!-- Demonstration Notice -->
+        <div class="alert alert-info" style="font-size:12px; margin-bottom:var(--space-4);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <div>
+            <strong>Local MySQL seed accounts:</strong> Use the buttons below only after running <code>python manage.py seed_demo_data</code>. They do not bypass authentication.
+          </div>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <!-- Email Input -->
+          <div class="form-group">
+            <label for="loginEmail" class="form-label">
+              Institutional Email <span class="required">*</span>
+            </label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="e.g. maya.sharma@apextech.edu" required autocomplete="email">
+            <div class="form-error" id="emailError" style="display:none;"></div>
+          </div>
+
+          <!-- Password Input -->
+          <div class="form-group">
+            <label for="loginPassword" class="form-label">
+              Password <span class="required">*</span>
+              <a href="forgot-password.html" style="font-size:12px; font-weight:normal;">Forgot password?</a>
+            </label>
+            <div class="input-password-wrapper">
+              <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="pwd-toggle-btn" id="pwdToggleBtn" aria-label="Toggle password visibility">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="pwdEyeIcon">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="form-error" id="passwordError" style="display:none;"></div>
+          </div>
+
+          <!-- Options Row -->
+          <div class="auth-options-row">
+            <label class="form-check">
+              <input type="checkbox" id="rememberMe" checked>
+              <span>Remember this device</span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary w-100" id="signInSubmitBtn">
+            Sign In to ProofVoice
+          </button>
+        </form>
+
+        <!-- Quick Demo Fill Buttons -->
+        <div class="auth-demo-accounts">
+          <p>Quick-Fill Demo Credentials:</p>
+          <div class="demo-fill-buttons">
+            <button type="button" class="btn btn-secondary btn-sm" id="fillStudentBtn">
+              Student (Maya)
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="fillAdminBtn">
+              Admin (Dr. Roy)
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="fillSuperAdminBtn">
+              Super-Admin
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-footer-prompt">
+          Don't have an account yet? <a href="register.html">Register as Student</a><br>
+          <span style="font-size:12px; margin-top:4px; display:inline-block;">
+            Are you an institution official? <a href="institution-register.html">Request institutional access</a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let selectedRole = 'student';
+
+      // Role Tabs
+      const studentTab = document.getElementById('roleTabStudent');
+      const adminTab = document.getElementById('roleTabAdmin');
+      const emailInput = document.getElementById('loginEmail');
+      const pwdInput = document.getElementById('loginPassword');
+
+      studentTab.addEventListener('click', () => {
+        selectedRole = 'student';
+        studentTab.classList.add('active');
+        adminTab.classList.remove('active');
+      });
+
+      adminTab.addEventListener('click', () => {
+        selectedRole = 'admin';
+        adminTab.classList.add('active');
+        studentTab.classList.remove('active');
+      });
+
+      // Quick-fill buttons (seeded accounts from seed_demo_data)
+      document.getElementById('fillStudentBtn').addEventListener('click', () => {
+        selectedRole = 'student';
+        studentTab.classList.add('active');
+        adminTab.classList.remove('active');
+        emailInput.value = 'student@apex.edu';
+        pwdInput.value = 'Student@12345';
+        showToast('info', 'Credentials Loaded', 'Student: student@apex.edu / Student@12345');
+      });
+
+      document.getElementById('fillAdminBtn').addEventListener('click', () => {
+        selectedRole = 'admin';
+        adminTab.classList.add('active');
+        studentTab.classList.remove('active');
+        emailInput.value = 'admin@apex.edu';
+        pwdInput.value = 'Admin@12345';
+        showToast('info', 'Credentials Loaded', 'Admin: admin@apex.edu / Admin@12345');
+      });
+
+      document.getElementById('fillSuperAdminBtn').addEventListener('click', () => {
+        selectedRole = 'superadmin';
+        adminTab.classList.remove('active');
+        studentTab.classList.remove('active');
+        emailInput.value = 'superadmin@proofvoice.edu';
+        pwdInput.value = 'Admin@12345';
+        showToast('info', 'Credentials Loaded', 'Superadmin: superadmin@proofvoice.edu / Admin@12345');
+      });
+
+      // Password Toggle
+      const pwdToggleBtn = document.getElementById('pwdToggleBtn');
+      pwdToggleBtn.addEventListener('click', () => {
+        const isPassword = pwdInput.type === 'password';
+        pwdInput.type = isPassword ? 'text' : 'password';
+        pwdToggleBtn.innerHTML = isPassword
+          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`
+          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      });
+
+      emailInput.value = '';
+      pwdInput.value = '';
+
+      // Form Submit
+      const form = document.getElementById('loginForm');
+      const submitBtn = document.getElementById('signInSubmitBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        const password = pwdInput.value;
+
+        // Inline validation
+        const emailErr = document.getElementById('emailError');
+        const pwdErr = document.getElementById('passwordError');
+        emailErr.style.display = 'none';
+        pwdErr.style.display = 'none';
+        emailInput.classList.remove('is-invalid');
+        pwdInput.classList.remove('is-invalid');
+
+        if (!email) {
+          emailErr.textContent = 'Please enter your institutional email.';
+          emailErr.style.display = 'block';
+          emailInput.classList.add('is-invalid');
+          return;
+        }
+
+        if (!password) {
+          pwdErr.textContent = 'Please enter your password.';
+          pwdErr.style.display = 'block';
+          pwdInput.classList.add('is-invalid');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner"></span> Signing in...`;
+
+        try {
+          const res = await window.proofVoiceApi.login(email, password, selectedRole);
+          const displayName = (res.user && (res.user.fullName || res.user.full_name)) || 'User';
+          const role = (res.user && (res.user.role || res.role || '')).toLowerCase();
+
+          if (res.isOfflineFallback) {
+            showToast('info', 'Offline Mode Active', `Django server offline on :8000. Proceeding in demonstration mode as ${displayName}.`);
+          } else {
+            showToast('success', 'Sign In Successful', `Welcome back, ${displayName}!`);
+          }
+
+          setTimeout(() => {
+            if (role === 'admin' || role === 'institution_admin') {
+              window.location.href = 'admin-dashboard.html';
+            } else if (role === 'superadmin' || role === 'platform_superadmin') {
+              window.location.href = 'super-admin.html';
+            } else {
+              window.location.href = 'student-dashboard.html';
+            }
+          }, 800);
+        } catch (err) {
+          showToast('error', 'Sign In Failed', err.message || 'Invalid email or password.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Sign In to ProofVoice';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

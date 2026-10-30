@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | ProofVoice</title>
+  <meta name="description" content="ProofVoice Privacy Policy, data isolation principles, voice recording consent, and security practices.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Site Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="site-nav">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Campus Resolution</span>
+          </div>
+        </a>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="help.html" class="nav-link">FAQ & Help</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-ghost btn-sm">Log In</a>
+          <a href="new-complaint.html" class="btn btn-primary btn-sm">Report an Issue</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main style="padding: var(--space-12) 0 var(--space-20);">
+    <div class="container container-narrow">
+      <div style="margin-bottom: var(--space-8);">
+        <span class="sub-badge">Legal & Security</span>
+        <h1 style="margin-top:var(--space-2); margin-bottom:var(--space-2);">Privacy Policy</h1>
+        <p class="text-muted">Last updated: October 2026</p>
+      </div>
+
+      <div class="card" style="padding: var(--space-8); line-height: 1.8; font-size: var(--text-sm); color: #334155;">
+        <h2 style="font-size: var(--text-lg); margin-bottom: var(--space-2);">1. Purpose and Overview</h2>
+        <p>ProofVoice ("Platform") is committed to protecting the privacy and personal integrity of students, faculty, and institutional administrators. This policy explains what information is collected, how voice recordings are handled, and how multi-tenant isolation ensures data remains strictly within your verified educational institution.</p>
+
+        <h2 style="font-size: var(--text-lg); margin-top: var(--space-6); margin-bottom: var(--space-2);">2. Data We Collect</h2>
+        <p>We collect only the minimal data strictly necessary to route and resolve institutional grievances:</p>
+        <ul style="padding-left: 20px;">
+          <li><strong>Identity Data:</strong> Full name, institutional email address, student identifier (enrollment number), and academic department.</li>
+          <li><strong>Grievance Information:</strong> Complaint titles, category classification, campus location descriptions, and formal grievance application text.</li>
+          <li><strong>Voice Audio Inputs:</strong> Audio streams captured via browser microphone solely when the user explicitly clicks the recording control. ProofVoice never records audio automatically.</li>
+        </ul>
+
+        <h2 style="font-size: var(--text-lg); margin-top: var(--space-6); margin-bottom: var(--space-2);">3. Voice Audio Consent and Processing</h2>
+        <p>Voice recordings are collected only with your explicit browser permission. Audio is processed for the sole purpose of Speech-to-Text transcription. Users retain full rights to edit the resulting text transcript before application synthesis. Audio data is not sold, used for commercial profiling, or retained indefinitely.</p>
+
+        <h2 style="font-size: var(--text-lg); margin-top: var(--space-6); margin-bottom: var(--space-2);">4. Multi-Tenant Isolation & Authorization</h2>
+        <p>ProofVoice operates as a multi-tenant platform. Each educational institution's data is isolated through server-side authorization. Students have access only to their own submissions. Institutional administrators can access only grievances submitted within their authorized campus. Changing URL parameters or request identifiers will never disclose foreign tenant records.</p>
+
+        <h2 style="font-size: var(--text-lg); margin-top: var(--space-6); margin-bottom: var(--space-2);">5. Internal Administrator Notes vs Public Remarks</h2>
+        <p>Administrative personnel may record internal working notes during investigation. These notes are classified as confidential and are strictly isolated from student-facing interfaces to facilitate objective departmental review.</p>
+
+        <h2 style="font-size: var(--text-lg); margin-top: var(--space-6); margin-bottom: var(--space-2);">6. Contacting the Data Protection Officer</h2>
+        <p>For inquiries regarding data retention or to request account deletion, please contact your verified institution's Registrar or email our liaison at <code>privacy@proofvoice.platform.demo</code>.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 ProofVoice Platform. All rights reserved.</div>
+        <div style="display:flex; gap:16px;">
+          <a href="privacy.html" style="color:#FFFFFF;">Privacy Policy</a>
+          <a href="terms.html" style="color:#64748B;">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

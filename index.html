@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProofVoice | AI-Powered Voice-Based Complaint and Resolution Platform</title>
+  <meta name="description" content="ProofVoice transforms everyday institutional complaints into structured applications, helping colleges, universities, and schools improve accountability, transparency, and resolution.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="site-nav" aria-label="Main Navigation">
+        <a href="index.html" class="brand-logo" id="headerLogoLink">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Campus Resolution</span>
+          </div>
+        </a>
+
+        <ul class="nav-links" id="mainNavLinks">
+          <li><a href="index.html" class="nav-link active">Home</a></li>
+          <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#institutions" class="nav-link">For Institutions</a></li>
+          <li><a href="help.html" class="nav-link">FAQ & Help</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-ghost btn-sm" id="navLoginBtn">Log In</a>
+          <a href="new-complaint.html" class="btn btn-primary btn-sm" id="navGetStartedBtn">Report an Issue</a>
+          <button class="mobile-menu-toggle" aria-label="Toggle navigation menu" id="mobileMenuToggle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-grid">
+          <!-- Left Column -->
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span class="hero-badge-pulse"></span>
+              Your Voice. Your Campus. Your Solution.
+            </div>
+            <h1 class="hero-title">
+              Your Voice. <span>Your Campus.</span> Your Solution.
+            </h1>
+            <p class="hero-subtitle">
+              ProofVoice helps students and institutional members report problems through voice or text, prepare formal applications addressed to the appropriate authority, submit them after reviewing, and track their progress until resolution.
+            </p>
+            <div class="hero-cta-group">
+              <a href="new-complaint.html" class="btn btn-primary btn-lg" id="heroReportIssueBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+                Report an Issue
+              </a>
+              <a href="#how-it-works" class="btn btn-secondary btn-lg" id="heroExploreBtn">
+                Explore How It Works
+              </a>
+            </div>
+            <div class="hero-trust">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span>Designed for transparency, accessibility, and institutional accountability.</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Interactive Product Visual Mockup -->
+          <div class="hero-mockup-wrapper">
+            <!-- Floating Badge 1 -->
+            <div class="mockup-float-badge mockup-float-1">
+              <div style="width:24px; height:24px; border-radius:50%; background:#ECFDF3; color:#159B72; display:flex; align-items:center; justify-content:center;">
+                ✓
+              </div>
+              <div>
+                <div style="color:var(--color-navy); font-size:11px;">Application Ready</div>
+                <div style="color:var(--color-text-secondary); font-size:10px;">Formatted in 1.2s</div>
+              </div>
+            </div>
+
+            <!-- Main Mockup Container -->
+            <div class="mockup-main-card">
+              <div class="mockup-header">
+                <div class="mockup-status-dot">
+                  <span></span> Live Complaint Assistant
+                </div>
+                <div class="badge badge-submitted font-mono">
+                  PV-DEMO-2026
+                </div>
+              </div>
+
+              <!-- Voice Recording Box -->
+              <div class="mockup-voice-box">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; font-weight:600; color:var(--color-navy);">Voice Input Stream</span>
+                  <span class="badge badge-in-progress" style="font-size:10px;">Recording Active</span>
+                </div>
+                <div class="mockup-waveform">
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                  <div class="mockup-bar"></div>
+                </div>
+                <div class="mockup-audio-timer">
+                  <span>00:18 / 02:00</span>
+                  <span style="color:var(--color-primary); font-weight:600;">Gnani Prisma Ready</span>
+                </div>
+              </div>
+
+              <!-- Formal Letter Preview Mini -->
+              <div class="mockup-app-preview">
+                <strong>To: Head of Department, Computer Science</strong><br>
+                <em>"I am formally submitting this grievance regarding non-functional lab projectors in Block B, Lab 304 disrupting practical lectures..."</em>
+              </div>
+
+              <!-- Stepper Progress Mockup -->
+              <div class="mockup-stepper">
+                <div class="mockup-step-item is-done">
+                  <div class="mockup-step-circle">✓</div>
+                  <span class="mockup-step-label">Submitted</span>
+                </div>
+                <div class="mockup-step-item is-done">
+                  <div class="mockup-step-circle">✓</div>
+                  <span class="mockup-step-label">Reviewed</span>
+                </div>
+                <div class="mockup-step-item is-active">
+                  <div class="mockup-step-circle">3</div>
+                  <span class="mockup-step-label">In Progress</span>
+                </div>
+                <div class="mockup-step-item">
+                  <div class="mockup-step-circle">4</div>
+                  <span class="mockup-step-label">Resolved</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating Badge 2 -->
+            <div class="mockup-float-badge mockup-float-2">
+              <div style="width:24px; height:24px; border-radius:50%; background:#EEF2FF; color:var(--color-primary); display:flex; align-items:center; justify-content:center;">
+                ⚡
+              </div>
+              <div>
+                <div style="color:var(--color-navy); font-size:11px;">Status Updated</div>
+                <div style="color:var(--color-text-secondary); font-size:10px;">Assigned to IT Services</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem & Solution Section -->
+    <section class="problem-solution-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="sub-badge">Problem & Resolution</span>
+          <h2>Reporting an issue should not be complicated.</h2>
+          <p>Traditional complaint methods leave students frustrated and administrative teams overwhelmed with disorganized requests.</p>
+        </div>
+
+        <div class="compare-grid">
+          <!-- The Old Challenge -->
+          <div class="compare-col compare-col-old">
+            <div class="compare-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              Common Campus Challenges
+            </div>
+            <ul class="compare-list">
+              <li class="compare-item">
+                <span>✕</span> Writing formal, structured grievance applications can be daunting and time-consuming for students.
+              </li>
+              <li class="compare-item">
+                <span>✕</span> Students rarely know which specific administrative authority or department to contact.
+              </li>
+              <li class="compare-item">
+                <span>✕</span> Paper complaints or scattered emails get lost with zero transparency on current progress.
+              </li>
+              <li class="compare-item">
+                <span>✕</span> Communication regarding final resolution or delayed repair timelines remains completely unclear.
+              </li>
+            </ul>
+          </div>
+
+          <!-- ProofVoice Solution -->
+          <div class="compare-col compare-col-new">
+            <div class="compare-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              How ProofVoice Solves It
+            </div>
+            <ul class="compare-list">
+              <li class="compare-item">
+                <span>✓</span> <strong>Voice-first reporting:</strong> Describe your issue naturally by speaking or typing in your words.
+              </li>
+              <li class="compare-item">
+                <span>✓</span> <strong>Structured application generation:</strong> Automated assistance drafts formal institutional letters.
+              </li>
+              <li class="compare-item">
+                <span>✓</span> <strong>Explicit confirmation:</strong> Review and verify every word before authoritative submission.
+              </li>
+              <li class="compare-item">
+                <span>✓</span> <strong>Transparent timeline tracking:</strong> Follow every update from submission to verified resolution.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section" id="how-it-works">
+      <div class="container">
+        <div class="section-header">
+          <span class="sub-badge">Simple 4-Step Process</span>
+          <h2>From voice note to verified resolution</h2>
+          <p>A streamlined workflow engineered for students and institutional authorities alike.</p>
+        </div>
+
+        <div class="steps-grid">
+          <!-- Step 1 -->
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3>Speak or Type</h3>
+            <p>Describe your problem naturally in your preferred input method without worrying about institutional formatting.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3>Prepare Your Application</h3>
+            <p>Intelligent assistance converts your spoken or typed description into a structured, formal grievance application.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3>Review and Submit</h3>
+            <p>Check the generated letter, listen with text-to-speech, make custom edits, and explicitly confirm submission.</p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <h3>Track the Resolution</h3>
+            <p>Receive a unique complaint ID and follow department assignments and status changes until resolved.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature Showcase Grid -->
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <span class="sub-badge">Comprehensive Platform</span>
+          <h2>Built for modern institutional accountability</h2>
+          <p>Every tool needed to bridge the communication gap between campus members and administrative desks.</p>
+        </div>
+
+        <div class="features-grid">
+          <!-- Feature 1 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              </svg>
+            </div>
+            <h3>1. Voice-Based Reporting</h3>
+            <p>Enables students to speak their concerns directly into their device microphone with real-time waveform feedback.</p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <h3>2. Speech-to-Text</h3>
+            <p>Converts recorded voice inputs accurately into editable text transcripts ready for administrative review.</p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </div>
+            <h3>3. Formal Application Assistance</h3>
+            <p>Automatically structures informal accounts into formal institutional letters complete with salutations and impact summaries.</p>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </div>
+            <h3>4. Application Preview and Editing</h3>
+            <p>Review the drafted grievance document and edit any wording or specifics before granting submission authorization.</p>
+          </div>
+
+          <!-- Feature 5 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/>
+              </svg>
+            </div>
+            <h3>5. Unique Complaint Tracking ID</h3>
+            <p>Every grievance receives an authoritative sequence identifier for persistent records and easy institutional follow-up.</p>
+          </div>
+
+          <!-- Feature 6 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h3>6. Real-Time Status Updates</h3>
+            <p>Watch your complaint move through transparent milestones: Submitted, Under Review, In Progress, and Resolved.</p>
+          </div>
+
+          <!-- Feature 7 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+            </div>
+            <h3>7. Text-to-Speech for Updates</h3>
+            <p>Listen aloud to formal application drafts and administrative remarks with integrated audio playback.</p>
+          </div>
+
+          <!-- Feature 8 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              </svg>
+            </div>
+            <h3>8. Department Assignment</h3>
+            <p>Directs issues to appropriate campus teams such as IT Services, Water Works, Electrical Maintenance, or Hostel Life.</p>
+          </div>
+
+          <!-- Feature 9 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+            </div>
+            <h3>9. Duplicate Complaint Suggestions</h3>
+            <p>Detects existing open tickets at identical campus locations to prevent duplicated work orders and redundant tasks.</p>
+          </div>
+
+          <!-- Feature 10 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </div>
+            <h3>10. Institution-Specific Dashboards</h3>
+            <p>Dedicated workspaces with custom departments, categories, and permission tiers for each registered institution.</p>
+          </div>
+
+          <!-- Feature 11 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <h3>11. Analytics and Reports</h3>
+            <p>Track resolution times, volume trends, and recurring maintenance bottlenecks with actionable charts.</p>
+          </div>
+
+          <!-- Feature 12 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+            </div>
+            <h3>12. Notifications and Reminders</h3>
+            <p>Keeps both complainants and technicians informed through timely in-app notification alerts at every status change.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Multi-Tenant Institution Isolation Section -->
+    <section class="institutions-section" id="institutions">
+      <div class="container">
+        <div class="institutions-grid">
+          <div>
+            <span class="sub-badge" style="color:#93C5FD;">Multi-Tenant Architecture</span>
+            <h2>One platform. Multiple institutions. Independent workspaces.</h2>
+            <p style="margin-top:var(--space-3); line-height:1.7;">
+              ProofVoice is engineered to serve universities, polytechnics, and schools independently. Each institution operates in its own isolated administrative workspace without sharing complaint records with one another.
+            </p>
+            <div style="margin-top:var(--space-6);">
+              <a href="institution-register.html" class="btn btn-primary" id="landingInstRegisterBtn">
+                Register Your Institution
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div class="security-box">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#10B981;">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Server-Side Authorization & Isolation
+              </h4>
+              <p style="font-size: var(--text-xs); line-height: 1.6;">
+                Each institution's complaint data is isolated through server-side authorization. Students can access only their own submissions, and institutional administrators can review records only within their verified organization.
+              </p>
+            </div>
+
+            <div class="security-box" style="margin-top:var(--space-4);">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#3B82F6;">
+                  <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                Flexible Campus Locations
+              </h4>
+              <p style="font-size: var(--text-xs); line-height: 1.6;">
+                ProofVoice does not enforce hardcoded buildings or specific campuses. Any facility, wing, floor, or room can be specified flexibly across different institutions worldwide.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-box">
+          <h2>Your concern is the first step toward change.</h2>
+          <p>Create a structured complaint and keep track of its progress from submission to resolution.</p>
+          <div class="cta-buttons">
+            <a href="register.html" class="btn btn-primary btn-lg" id="finalCtaGetStartedBtn">Get Started as Student</a>
+            <a href="login.html" class="btn btn-secondary btn-lg" id="finalCtaSignInBtn">Sign In to Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo" style="color:#FFFFFF;">
+            <div class="brand-icon-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+              </svg>
+            </div>
+            <div class="brand-text">
+              <span class="brand-name" style="color:#FFFFFF;">Proof<span style="color:#60A5FA;">Voice</span></span>
+              <span class="brand-sub" style="color:#94A3B8;">Campus Resolution</span>
+            </div>
+          </a>
+          <p>
+            ProofVoice transforms everyday institutional complaints into structured applications, helping institutions improve accountability, transparency, and resolution.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="institution-register.html">For Institutions</a></li>
+            <li><a href="super-admin.html">Platform Super-Admin</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Support & Legal</h4>
+          <ul class="footer-links">
+            <li><a href="help.html">Help Center & FAQ</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="404.html">System Status</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Contact & Inquiries</h4>
+          <p class="footer-contact">
+            Institutional Liaison Desk<br>
+            <span style="color:#F1F5F9;">contact@proofvoice.edu-platform.demo</span><br>
+            Configurable institution endpoint placeholder.<br>
+            Support hours: 09:00 - 18:00 IST
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 ProofVoice Platform. All rights reserved.</div>
+        <div style="display:flex; gap:16px;">
+          <a href="privacy.html" style="color:#64748B;">Privacy</a>
+          <a href="terms.html" style="color:#64748B;">Terms</a>
+          <a href="help.html" style="color:#64748B;">Security</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Institution Settings & Recipient Mapping | ProofVoice Admin</title>
+  <meta name="description" content="Configure institution identity, recipient mapping for formal letters, departments, categories, and policies on ProofVoice.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Admin Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="admin-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper" style="background:linear-gradient(135deg, #1E293B, #334155);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Admin Desk</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Authorized Workspace</span>
+        <span class="sidebar-institution-name" id="sidebarInstName">Apex Institute of Technology</span>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Admin Sidebar">
+        <a href="admin-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="admin-complaints.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+          All Complaints
+        </a>
+        <a href="admin-complaints.html?status=Unassigned" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Unassigned Complaints
+        </a>
+        <a href="admin-complaints.html?status=Under+Review" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/>
+          </svg>
+          Under Review
+        </a>
+        <a href="admin-complaints.html?status=In+Progress" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          In Progress
+        </a>
+        <a href="admin-complaints.html?status=Resolved" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Resolved
+        </a>
+
+        <span class="sidebar-section-title" style="margin-top:var(--space-3);">Workspace & System</span>
+
+        <a href="departments.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          </svg>
+          Departments
+        </a>
+        <a href="users.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+          Users
+        </a>
+        <a href="analytics.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          Analytics & Reports
+        </a>
+        <a href="admin-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+          <span class="nav-count" id="adminSidebarNotifCount" style="display: none;">0</span>
+        </a>
+        <a href="institution-settings.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Institution Settings
+        </a>
+        <a href="admin-profile.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Profile
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="adminSidebarAvatar" style="background:#1E293B; color:#FFFFFF;">VR</div>
+        <div class="user-info-text">
+          <div class="user-name" id="adminSidebarName">Dr. Vikram Roy</div>
+          <div class="user-role-label" id="adminSidebarRole">Dean of Student Affairs</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="breadcrumbs">
+            <a href="admin-dashboard.html">Admin</a>
+            <span>/</span>
+            <span class="current">Institution Settings</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <span id="topbarInst">Apex Tech (AIT)</span>
+          </div>
+          <a href="login.html" class="btn btn-ghost btn-sm" style="color:var(--color-error);">Log Out</a>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Institution Workspace & Recipient Settings</h1>
+            <p>Customize your campus profile, official address, default complaint recipients, and category-to-authority mappings.</p>
+          </div>
+        </div>
+
+        <form id="instSettingsForm">
+          <div class="dashboard-grid">
+            <!-- Left Column: Identity & Recipient Mappings -->
+            <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+              
+              <!-- Institution Identity Card -->
+              <div class="card" style="padding:var(--space-6);">
+                <h3 class="card-title" style="margin-bottom:var(--space-4);">Institution Identity</h3>
+
+                <div class="form-group">
+                  <label class="form-label">Institution Legal Name <span class="required">*</span></label>
+                  <input type="text" id="settingInstName" class="form-control" required>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                  <div class="form-group">
+                    <label class="form-label">Institution Code</label>
+                    <input type="text" id="settingInstCode" class="form-control" readonly style="background:#F8FAFC; font-family:var(--font-mono);">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Institution Type <span class="required">*</span></label>
+                    <select id="settingInstType" class="form-control">
+                      <option value="Autonomous University">Autonomous University</option>
+                      <option value="Public University">Public University</option>
+                      <option value="State University">State University</option>
+                      <option value="Central University">Central University</option>
+                      <option value="College">College</option>
+                      <option value="Polytechnic College">Polytechnic College</option>
+                      <option value="School">School</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Official Physical Address (Required for Formal Letters) <span class="required">*</span></label>
+                  <input type="text" id="settingInstAddress" class="form-control" required>
+                  <span class="form-hint">Populates recipient header in generated formal application letters.</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                  <div class="form-group">
+                    <label class="form-label">Official Desk Email <span class="required">*</span></label>
+                    <input type="email" id="settingInstEmail" class="form-control" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Official Website</label>
+                    <input type="url" id="settingInstWebsite" class="form-control" placeholder="https://institution.edu">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">City</label>
+                    <input type="text" id="settingInstCity" class="form-control" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">State / Province</label>
+                    <input type="text" id="settingInstState" class="form-control" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recipient Configuration Card (Section 14) -->
+              <div class="card" style="padding:var(--space-6);">
+                <h3 class="card-title" style="margin-bottom:var(--space-2);">Complaint Recipient Configuration</h3>
+                <p class="text-xs text-muted" style="margin-bottom:var(--space-4);">
+                  These settings allow the formal application generator to address the appropriate authority for each grievance category.
+                </p>
+
+                <!-- Default Recipient -->
+                <div style="background:var(--color-surface-alt); padding:var(--space-4); border-radius:var(--radius-lg); border:1px solid var(--color-border); margin-bottom:var(--space-6);">
+                  <h4 style="font-size:13px; font-weight:700; color:var(--color-navy); margin-bottom:var(--space-3);">Default Complaint Recipient (Fallback)</h4>
+                  
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                    <div class="form-group">
+                      <label class="form-label">Default Recipient Designation <span class="required">*</span></label>
+                      <input type="text" id="settingDefaultRecipientDesig" class="form-control" value="The Dean" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Recipient Full Name (If known)</label>
+                      <input type="text" id="settingDefaultRecipientName" class="form-control" placeholder="e.g. Dr. Vikram Roy">
+                    </div>
+
+                    <div class="form-group" style="grid-column:span 2;">
+                      <label class="form-label">Official Recipient Address / Office Location</label>
+                      <input type="text" id="settingDefaultRecipientAddr" class="form-control" placeholder="e.g. Office of the Dean, Student Welfare">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Category-to-Authority Mapping Table -->
+                <h4 style="font-size:13px; font-weight:700; color:var(--color-navy); margin-bottom:var(--space-2);">Category-Specific Recipient Mappings</h4>
+                <div class="data-table-container">
+                  <table class="data-table" style="font-size:12px;">
+                    <thead>
+                      <tr>
+                        <th>Grievance Category</th>
+                        <th>Addressed Authority Designation</th>
+                        <th>Responsible Department</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recipientMappingTableBody">
+                      <!-- Populated dynamically via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Policies & Actions -->
+            <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+              <div class="card" style="padding:var(--space-6);">
+                <h3 class="card-title" style="margin-bottom:var(--space-4);">Resolution Policies & SLAs</h3>
+
+                <div class="form-group">
+                  <label class="form-label">Standard Resolution Target (SLA)</label>
+                  <select id="settingSlaHours" class="form-control">
+                    <option value="24">24 Hours - Rapid Response</option>
+                    <option value="48" selected>48 Hours - Standard Response</option>
+                    <option value="72">72 Hours - Extended Investigation</option>
+                  </select>
+                </div>
+
+                <div class="form-group" style="margin-top:var(--space-4);">
+                  <label class="form-check">
+                    <input type="checkbox" id="settingRequireVerification" checked>
+                    <div>
+                      <strong style="font-size:var(--text-sm); color:var(--color-navy); display:block;">Require Student ID Verification</strong>
+                      <span class="text-xs text-muted">Students must provide an institutional identifier matching university records to register.</span>
+                    </div>
+                  </label>
+                </div>
+
+                <div class="form-group" style="margin-top:var(--space-2);">
+                  <label class="form-check">
+                    <input type="checkbox" id="settingNotifyResolution" checked>
+                    <div>
+                      <strong style="font-size:var(--text-sm); color:var(--color-navy); display:block;">Email Notification on Ticket Closure</strong>
+                      <span class="text-xs text-muted">Dispatches confirmation email with resolution remarks when ticket is closed.</span>
+                    </div>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 btn-lg" id="saveInstSettingsBtn" style="margin-top:var(--space-6);">
+                  Save Institutional Configuration
+                </button>
+              </div>
+
+              <!-- Admin Security Badge -->
+              <div class="card" style="padding:var(--space-6); background:var(--color-surface-alt); border:1px solid var(--color-border);">
+                <h4 style="font-size:var(--text-sm); color:var(--color-navy); margin-bottom:var(--space-2);">Security & Authorization</h4>
+                <p style="font-size:var(--text-xs); color:var(--color-text-secondary); line-height:1.5;">
+                  Only verified institution administrators have permission to alter recipient configurations and departmental routings. Changes apply immediately to new formal grievance applications.
+                </p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.proofVoiceDb.getCurrentUser();
+      const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+
+      if (institution) {
+        document.getElementById('sidebarInstName').textContent = institution.name;
+        document.getElementById('topbarInst').textContent = institution.name;
+
+        document.getElementById('settingInstName').value = institution.name || '';
+        document.getElementById('settingInstCode').value = institution.code || '';
+        document.getElementById('settingInstType').value = institution.type || 'Autonomous University';
+        document.getElementById('settingInstAddress').value = institution.officialAddress || `${institution.city}, ${institution.state}`;
+        document.getElementById('settingInstEmail').value = institution.officialEmail || '';
+        document.getElementById('settingInstWebsite').value = institution.website || '';
+        document.getElementById('settingInstCity').value = institution.city || '';
+        document.getElementById('settingInstState').value = institution.state || '';
+
+        // Default Recipient
+        if (institution.defaultRecipient) {
+          document.getElementById('settingDefaultRecipientDesig').value = institution.defaultRecipient.designation || 'The Dean';
+          document.getElementById('settingDefaultRecipientName').value = institution.defaultRecipient.name || '';
+          document.getElementById('settingDefaultRecipientAddr').value = institution.defaultRecipient.address || '';
+        }
+
+        // Settings
+        if (institution.settings) {
+          document.getElementById('settingSlaHours').value = String(institution.settings.slaHours || 48);
+          document.getElementById('settingRequireVerification').checked = institution.settings.requireStudentVerification !== false;
+          document.getElementById('settingNotifyResolution').checked = institution.settings.notifyOnResolution !== false;
+        }
+
+        // Render Mappings
+        const tbody = document.getElementById('recipientMappingTableBody');
+        const mappings = institution.recipientMappings || {};
+        const categories = institution.categories || [
+          'Classroom and Laboratory', 'Electricity and Lighting', 'Water and Sanitation',
+          'Internet and IT', 'Hostel and Accommodation', 'Library', 'Transport', 'Infrastructure and Maintenance', 'Safety and Security', 'Other'
+        ];
+
+        tbody.innerHTML = categories.map(cat => {
+          const map = mappings[cat] || { designation: 'The Dean', department: 'General Administration' };
+          return `
+            <tr>
+              <td style="font-weight:600; color:var(--color-navy);">${escapeHtml(cat)}</td>
+              <td>
+                <input type="text" class="form-control form-control-sm mapping-desig" data-category="${escapeHtml(cat)}" value="${escapeHtml(map.designation || 'The Dean')}">
+              </td>
+              <td>
+                <input type="text" class="form-control form-control-sm mapping-dept" data-category="${escapeHtml(cat)}" value="${escapeHtml(map.department || 'General Administration')}">
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (user) {
+        document.getElementById('adminSidebarName').textContent = user.fullName;
+        document.getElementById('adminSidebarRole').textContent = user.designation || 'Administrator';
+        if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+      }
+
+      // Handle Save
+      const form = document.getElementById('instSettingsForm');
+      const saveBtn = document.getElementById('saveInstSettingsBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('settingInstName').value.trim();
+        const type = document.getElementById('settingInstType').value;
+        const address = document.getElementById('settingInstAddress').value.trim();
+        const email = document.getElementById('settingInstEmail').value.trim();
+        const website = document.getElementById('settingInstWebsite').value.trim();
+        const city = document.getElementById('settingInstCity').value.trim();
+        const state = document.getElementById('settingInstState').value.trim();
+
+        const defaultRecipient = {
+          designation: document.getElementById('settingDefaultRecipientDesig').value.trim() || 'The Dean',
+          name: document.getElementById('settingDefaultRecipientName').value.trim(),
+          address: document.getElementById('settingDefaultRecipientAddr').value.trim()
+        };
+
+        const updatedMappings = {};
+        document.querySelectorAll('.mapping-desig').forEach(input => {
+          const cat = input.dataset.category;
+          const deptInput = document.querySelector(`.mapping-dept[data-category="${cat}"]`);
+          updatedMappings[cat] = {
+            designation: input.value.trim() || 'The Dean',
+            department: deptInput ? deptInput.value.trim() : 'General Administration'
+          };
+        });
+
+        const settings = {
+          slaHours: parseInt(document.getElementById('settingSlaHours').value, 10),
+          requireStudentVerification: document.getElementById('settingRequireVerification').checked,
+          notifyOnResolution: document.getElementById('settingNotifyResolution').checked
+        };
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<span class="spinner"></span> Saving Configuration...`;
+
+        try {
+          await window.proofVoiceApi.updateInstitutionSettings(institution.id, {
+            name,
+            type,
+            officialAddress: address,
+            officialEmail: email,
+            website,
+            city,
+            state,
+            defaultRecipient,
+            recipientMappings: updatedMappings,
+            settings
+          });
+
+          showToast('success', 'Configuration Saved', 'Institution profile and recipient mappings updated.');
+          setTimeout(() => window.location.reload(), 700);
+        } catch (err) {
+          showToast('error', 'Save Failed', err.message);
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Institutional Configuration';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

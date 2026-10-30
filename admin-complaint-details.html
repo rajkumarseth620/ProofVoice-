@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Complaint | ProofVoice Admin</title>
+  <meta name="description" content="Review student grievance, assign departments, record internal notes, and manage resolutions.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/complaints.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- Admin Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="admin-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper" style="background:linear-gradient(135deg, #1E293B, #334155);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Admin Desk</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Authorized Workspace</span>
+        <span class="sidebar-institution-name" id="sidebarInstName">Apex Institute of Technology</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-title">Grievance Desk</span>
+        <a href="admin-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          </svg>
+          Overview
+        </a>
+        <a href="admin-complaints.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          All Complaints
+        </a>
+        <a href="admin-complaints.html?status=Unassigned" class="sidebar-nav-item" style="padding-left:var(--space-6); font-size:12px;">
+          • Unassigned Complaints
+        </a>
+        <a href="admin-complaints.html?status=Under+Review" class="sidebar-nav-item" style="padding-left:var(--space-6); font-size:12px;">
+          • Under Review
+        </a>
+        <a href="admin-complaints.html?status=In+Progress" class="sidebar-nav-item" style="padding-left:var(--space-6); font-size:12px;">
+          • In Progress
+        </a>
+        <a href="admin-complaints.html?status=Resolved" class="sidebar-nav-item" style="padding-left:var(--space-6); font-size:12px;">
+          • Resolved
+        </a>
+
+        <span class="sidebar-section-title" style="margin-top:var(--space-4);">Management</span>
+        <a href="departments.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          </svg>
+          Departments
+        </a>
+        <a href="users.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          </svg>
+          Campus Users
+        </a>
+        <a href="analytics.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+          </svg>
+          Analytics & Reports
+        </a>
+        <a href="admin-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+        </a>
+        <a href="institution-settings.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83"/>
+          </svg>
+          Institution Settings
+        </a>
+        <a href="admin-profile.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Profile
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="adminSidebarAvatar" style="background:#1E293B; color:#FFFFFF;">VR</div>
+        <div class="user-info-text">
+          <div class="user-name" id="adminSidebarName">Dr. Vikram Roy</div>
+          <div class="user-role-label" id="adminSidebarRole">Dean of Student Affairs</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="breadcrumbs">
+            <a href="admin-dashboard.html">Admin</a>
+            <span>/</span>
+            <a href="admin-complaints.html">Complaints</a>
+            <span>/</span>
+            <span class="current">Review & Actions</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="institution-pill">
+            <span id="topbarInst">Apex Tech (AIT)</span>
+          </div>
+          <a href="admin-complaints.html" class="btn btn-secondary btn-sm">← Back to Complaints Desk</a>
+        </div>
+      </header>
+
+      <main class="app-content" id="adminDetailsHeader">
+        <!-- Header Card -->
+        <div class="card" style="margin-bottom:var(--space-6); padding:var(--space-6);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:var(--space-4);">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:var(--space-2);">
+                <span class="font-mono" style="font-weight:700; color:var(--color-primary); font-size:var(--text-base);" id="adminId">
+                  PV-DEMO-000
+                </span>
+                <span id="adminStatusBadge">--</span>
+                <span id="adminPriorityBadge">--</span>
+              </div>
+              <h1 style="font-size:var(--text-2xl); color:var(--color-navy); margin-bottom:var(--space-1);" id="adminTitle">
+                Loading complaint...
+              </h1>
+              <div class="text-xs text-muted" style="display:flex; gap:12px; flex-wrap:wrap;">
+                <span>Student: <strong id="adminStudentName">--</strong></span>
+                <span>•</span>
+                <span>Campus Location: <strong id="adminLocation">--</strong></span>
+                <span>•</span>
+                <span>Received: <strong id="adminDate">--</strong></span>
+                <span>•</span>
+                <span>Category: <strong id="adminCategory">--</strong></span>
+              </div>
+            </div>
+
+            <!-- Read Aloud / Audio Preview -->
+            <button type="button" class="btn btn-secondary" id="adminTtsBtn" title="Play audio preview">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              Read Aloud
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Left Column: Grievance Content -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+            <!-- Original Input -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-3);">Original Student Input</h3>
+              <div style="background:var(--color-surface-alt); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4); font-size:var(--text-sm); line-height:1.6; color:var(--color-text-secondary);" id="adminOriginalInput">
+                --
+              </div>
+            </div>
+
+            <!-- Formal Submitted Letter -->
+            <div class="formal-letter-card" style="box-shadow:var(--shadow-xs); padding:var(--space-8); margin-bottom:0; background:#FFFFFF;">
+              <div class="formal-letter-header" style="padding-bottom:var(--space-4); margin-bottom:var(--space-4); border-bottom:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <span style="font-weight:700; color:var(--color-navy); font-size:var(--text-sm); text-transform:uppercase;">
+                    Official Submitted Application
+                  </span>
+                  <div class="text-xs text-muted">Formatted letter addressed to campus authority</div>
+                </div>
+                <span class="badge badge-submitted">Formal Record</span>
+              </div>
+              <pre class="formal-letter-body" id="adminFormalLetter" style="white-space:pre-wrap; font-family:var(--font-sans); font-size:13px; line-height:1.75; color:var(--color-text-primary); margin:0;">
+                --
+              </pre>
+            </div>
+
+            <!-- Private Internal Notes (Isolated from students) -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-3); display:flex; align-items:center; gap:8px;">
+                <span>🔒 Confidential Internal Notes</span>
+                <span class="badge" style="background:#FEF3C7; color:#92400E; font-size:10px;">Admin Only</span>
+              </h3>
+              <p class="text-xs text-muted" style="margin-bottom:var(--space-3);">
+                Internal remarks are private to administrative teams and technicians, strictly invisible to students.
+              </p>
+              <div id="adminInternalNotesList">
+                <!-- Injected via admin-dashboard.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Administrative Actions & Timeline -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-6);">
+            <!-- Actions Card -->
+            <div class="card" style="padding:var(--space-6); border:2px solid #E2E8F0;">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Administrative Actions</h3>
+
+              <div class="form-group">
+                <label for="updateStatusSelect" class="form-label">Update Grievance Status</label>
+                <select id="updateStatusSelect" class="form-control" style="font-weight:600;">
+                  <option value="Submitted">Submitted (Initial Receipt)</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="In Progress">In Progress (Work Order Dispatched)</option>
+                  <option value="Awaiting Student">Awaiting Student Confirmation</option>
+                  <option value="Resolved">Resolved (Work Completed)</option>
+                  <option value="Rejected">Rejected (Ineligible / Denied)</option>
+                  <option value="Reopened">Reopened</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="updateDeptSelect" class="form-label">Assign Department</label>
+                <select id="updateDeptSelect" class="form-control">
+                  <!-- Populated dynamically from institution departments -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="updateAssigneeInput" class="form-label">Assign Technician / Officer</label>
+                <input type="text" id="updateAssigneeInput" class="form-control" placeholder="e.g. Rajesh Nair (Sr. IT Technician)">
+              </div>
+
+              <!-- Public Remark -->
+              <div class="form-group">
+                <label for="updatePublicRemark" class="form-label">
+                  Public Remark for Student / Resolution Summary
+                </label>
+                <textarea id="updatePublicRemark" class="form-control" rows="2" placeholder="e.g. Technician inspected site. Silicon valve replaced and operational."></textarea>
+                <span class="form-hint">This remark will appear on the student's progress timeline.</span>
+              </div>
+
+              <!-- Internal Note -->
+              <div class="form-group">
+                <label for="updateInternalNote" class="form-label">
+                  Add Private Internal Note (Optional)
+                </label>
+                <textarea id="updateInternalNote" class="form-control" rows="2" placeholder="e.g. Vendor warranty check #SAN-402 completed."></textarea>
+                <span class="form-hint" style="color:#B45309;">Visible only to administrators and technicians.</span>
+              </div>
+
+              <button type="button" class="btn btn-primary w-100" id="saveAdminStatusBtn" style="margin-top:var(--space-2);">
+                Apply Updates & Notify Student
+              </button>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="card" style="padding:var(--space-6);">
+              <h3 class="card-title" style="margin-bottom:var(--space-4);">Activity History</h3>
+              <div class="timeline" id="adminHistoryTimeline">
+                <!-- Injected via admin-dashboard.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/admin-dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.proofVoiceDb.getCurrentUser();
+      const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+
+      if (institution) {
+        document.getElementById('sidebarInstName').textContent = institution.name;
+        document.getElementById('topbarInst').textContent = institution.name;
+      }
+      if (user) {
+        document.getElementById('adminSidebarName').textContent = user.fullName;
+        document.getElementById('adminSidebarRole').textContent = user.designation || 'Administrator';
+        if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+      }
+    });
+  </script>
+</body>
+</html>

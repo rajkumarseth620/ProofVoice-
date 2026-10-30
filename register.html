@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Registration | ProofVoice</title>
+  <meta name="description" content="Register as a student or campus member on ProofVoice to voice grievances and track formal resolutions.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-split-wrapper">
+    <!-- Left Hero Brand Panel -->
+    <div class="auth-side-panel">
+      <div>
+        <a href="index.html" class="brand-logo" style="color:#FFFFFF;">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name" style="color:#FFFFFF;">Proof<span style="color:#60A5FA;">Voice</span></span>
+            <span class="brand-sub" style="color:#94A3B8;">Campus Resolution</span>
+          </div>
+        </a>
+
+        <h2>Your Voice. Your Campus. Your Solution.</h2>
+        <p>Register your verified student profile to easily report campus problems through voice or text, synthesize formal grievance letters, and follow resolutions.</p>
+
+        <div class="auth-side-illustration">
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">🛡️</div>
+            <div class="auth-benefit-text">
+              <h4>Verified Student Identity</h4>
+              <p>Your submissions are protected and tied to your verified institution account.</p>
+            </div>
+          </div>
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">✍️</div>
+            <div class="auth-benefit-text">
+              <h4>Automated Formal Letter Preparation</h4>
+              <p>Your saved profile automatically formats official grievance letters addressed to the Dean.</p>
+            </div>
+          </div>
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">🔒</div>
+            <div class="auth-benefit-text">
+              <h4>Multi-Tenant Campus Separation</h4>
+              <p>Independent databases guarantee student privacy across institutions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-side-footer">
+        © 2026 ProofVoice. Multi-Tenant Campus Resolution Platform.
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container" style="max-width: 680px; padding: var(--space-8) var(--space-6);">
+        <div class="auth-header" style="margin-bottom:var(--space-6);">
+          <h1>Student Registration</h1>
+          <p>Complete your personal, institutional, and correspondence details below.</p>
+        </div>
+
+        <form id="studentRegisterForm" novalidate>
+          <!-- SECTION 1: Personal Details -->
+          <div class="card" style="padding:var(--space-6); margin-bottom:var(--space-6); border:1px solid var(--color-border);">
+            <h3 style="font-size:var(--text-base); color:var(--color-navy); margin-bottom:var(--space-4); display:flex; align-items:center; gap:8px;">
+              <span style="width:24px; height:24px; border-radius:50%; background:var(--color-primary-light); color:var(--color-primary); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">1</span>
+              Personal Details
+            </h3>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="regFullName" class="form-label">Full Legal Name <span class="required">*</span></label>
+                <input type="text" id="regFullName" class="form-control" placeholder="e.g. Maya Sharma" required autocomplete="name">
+                <div class="form-error" id="nameError" style="display:none;"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="regEmail" class="form-label">Email Address <span class="required">*</span></label>
+                <input type="email" id="regEmail" class="form-control" placeholder="student@apextech.edu" required autocomplete="email">
+                <div class="form-error" id="emailError" style="display:none;"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="regStudentId" class="form-label">Student ID / Enrollment No. <span class="required">*</span></label>
+                <input type="text" id="regStudentId" class="form-control" placeholder="e.g. AIT-2023-CS-042" required style="font-family:var(--font-mono);">
+                <div class="form-error" id="studentIdError" style="display:none;"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="regPassword" class="form-label">Password <span class="required">*</span></label>
+                <div class="input-password-wrapper">
+                  <input type="password" id="regPassword" class="form-control" placeholder="At least 8 characters" required autocomplete="new-password">
+                  <button type="button" class="pwd-toggle-btn" id="regPwdToggleBtn" aria-label="Toggle password">👁️</button>
+                </div>
+                <div class="password-strength-container" style="margin-top:6px;">
+                  <div class="password-strength-bars">
+                    <div class="strength-bar" id="bar1"></div>
+                    <div class="strength-bar" id="bar2"></div>
+                    <div class="strength-bar" id="bar3"></div>
+                  </div>
+                  <span class="strength-text" id="strengthText" style="font-size:11px;">Enter password</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="regConfirmPassword" class="form-label">Confirm Password <span class="required">*</span></label>
+                <input type="password" id="regConfirmPassword" class="form-control" placeholder="Re-enter password" required autocomplete="new-password">
+                <div class="form-error" id="confirmPwdError" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Institution Details -->
+          <div class="card" style="padding:var(--space-6); margin-bottom:var(--space-6); border:1px solid var(--color-border);">
+            <h3 style="font-size:var(--text-base); color:var(--color-navy); margin-bottom:var(--space-4); display:flex; align-items:center; gap:8px;">
+              <span style="width:24px; height:24px; border-radius:50%; background:var(--color-primary-light); color:var(--color-primary); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">2</span>
+              Institution Details
+            </h3>
+
+            <div class="alert alert-info" style="font-size:12px; margin-bottom:var(--space-4);">
+              <strong>Verification Requirement:</strong> Joining an institution requires institutional verification or an approval workflow. If your institution is not yet registered, it must be verified before student workspaces are activated.
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="regInstitutionSelect" class="form-label">Select Verified Institution <span class="required">*</span></label>
+                <select id="regInstitutionSelect" class="form-control" required>
+                  <option value="">-- Choose your college, university, or school --</option>
+                </select>
+                <div class="form-error" id="instError" style="display:none;"></div>
+              </div>
+
+              <!-- Unlisted institution fallback -->
+              <div class="form-group" id="customInstWrapper" style="grid-column: span 2; display:none;">
+                <label for="regCustomInstName" class="form-label">Enter Institution Name <span class="required">*</span></label>
+                <input type="text" id="regCustomInstName" class="form-control" placeholder="e.g. National Institute of Technology">
+                <span class="form-hint">Unlisted institutions require platform administrator verification before official membership is activated.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="regInstType" class="form-label">Institution Type <span class="required">*</span></label>
+                <select id="regInstType" class="form-control" required>
+                  <option value="University">University</option>
+                  <option value="College" selected>College</option>
+                  <option value="School">School</option>
+                  <option value="Polytechnic">Polytechnic</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="regInstDomain" class="form-label">Official Domain / Email</label>
+                <input type="text" id="regInstDomain" class="form-control" placeholder="e.g. apextech.edu">
+              </div>
+
+              <div class="form-group">
+                <label for="regCountry" class="form-label">Country <span class="required">*</span></label>
+                <input type="text" id="regCountry" class="form-control" value="India" required>
+              </div>
+
+              <div class="form-group">
+                <label for="regState" class="form-label">State / Province <span class="required">*</span></label>
+                <input type="text" id="regState" class="form-control" placeholder="e.g. Jharkhand" required>
+              </div>
+
+              <div class="form-group">
+                <label for="regCity" class="form-label">City <span class="required">*</span></label>
+                <input type="text" id="regCity" class="form-control" placeholder="e.g. Jamshedpur" required>
+              </div>
+
+              <div class="form-group">
+                <label for="regInviteCode" class="form-label">Invitation / Verification Code (Optional)</label>
+                <input type="text" id="regInviteCode" class="form-control" placeholder="e.g. AIT-2026-ENROLL">
+              </div>
+
+              <div class="form-group">
+                <label for="regDepartment" class="form-label">Department / Course <span class="required">*</span></label>
+                <input type="text" id="regDepartment" class="form-control" placeholder="e.g. Computer Science & Engineering" required>
+              </div>
+
+              <div class="form-group">
+                <label for="regYearSem" class="form-label">Year / Semester <span class="required">*</span></label>
+                <input type="text" id="regYearSem" class="form-control" placeholder="e.g. 3rd Year, 5th Semester" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: Contact & Correspondence Details -->
+          <div class="card" style="padding:var(--space-6); margin-bottom:var(--space-6); border:1px solid var(--color-border);">
+            <h3 style="font-size:var(--text-base); color:var(--color-navy); margin-bottom:var(--space-4); display:flex; align-items:center; gap:8px;">
+              <span style="width:24px; height:24px; border-radius:50%; background:var(--color-primary-light); color:var(--color-primary); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">3</span>
+              Contact & Correspondence Details
+            </h3>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="regAddress" class="form-label">
+                  Student Residential / Correspondence Address <span class="required">*</span>
+                </label>
+                <input type="text" id="regAddress" class="form-control" placeholder="e.g. Room 312, Sarojini Hall, Campus Greens, Jamshedpur 831014" required>
+                <span class="form-hint">Required for official formal complaint letters addressed to institutional authorities.</span>
+                <div class="form-error" id="addressError" style="display:none;"></div>
+              </div>
+
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="regPhone" class="form-label">Contact Number (Optional)</label>
+                <input type="tel" id="regPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms Checkbox -->
+          <div class="form-group" style="margin-top:var(--space-4);">
+            <label class="form-check" style="align-items:flex-start;">
+              <input type="checkbox" id="regTerms" required style="margin-top:3px;">
+              <span style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">
+                I agree to the <a href="terms.html" target="_blank">Terms of Service</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>. I understand that institution membership requires verification and that passwords are never stored in plaintext.
+              </span>
+            </label>
+            <div class="form-error" id="termsError" style="display:none;"></div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary w-100 btn-lg" id="regSubmitBtn" style="margin-top:var(--space-4);">
+            Create Verified Student Account
+          </button>
+        </form>
+
+        <div class="auth-footer-prompt" style="text-align:center; margin-top:var(--space-6);">
+          Already registered? <a href="login.html">Sign in here</a> • 
+          <a href="institution-register.html">Institution Admin Registration</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Populate institutions from data store
+      const instSelect = document.getElementById('regInstitutionSelect');
+      const customWrapper = document.getElementById('customInstWrapper');
+      const stateInput = document.getElementById('regState');
+      const cityInput = document.getElementById('regCity');
+      const countryInput = document.getElementById('regCountry');
+
+      async function loadInstitutions() {
+        let institutions = [];
+        try {
+          if (window.proofVoiceApi) {
+            institutions = await window.proofVoiceApi.getInstitutions();
+          }
+        } catch (err) {
+          institutions = [];
+        }
+        if ((!institutions || institutions.length === 0) && window.proofVoiceDb) {
+          institutions = window.proofVoiceDb.getAllInstitutions();
+        }
+        institutions.forEach(inst => {
+          const city = inst.city || '';
+          instSelect.innerHTML += `<option value="${inst.id}">${escapeHtml(inst.name)} (${escapeHtml(inst.code || '')}) - ${escapeHtml(city)}</option>`;
+        });
+        instSelect.innerHTML += `<option value="OTHER">+ My Institution is Not Listed</option>`;
+
+        instSelect.addEventListener('change', () => {
+          if (instSelect.value === 'OTHER') {
+            customWrapper.style.display = 'block';
+          } else {
+            customWrapper.style.display = 'none';
+            const selected = institutions.find(i => String(i.id) === String(instSelect.value));
+            if (selected) {
+              if (selected.state) stateInput.value = selected.state;
+              if (selected.city) cityInput.value = selected.city;
+              if (selected.country) countryInput.value = selected.country;
+            }
+          }
+        });
+      }
+      if (instSelect) {
+        loadInstitutions();
+      }
+
+      // Password Strength Calculator
+      const pwdInput = document.getElementById('regPassword');
+      const bar1 = document.getElementById('bar1');
+      const bar2 = document.getElementById('bar2');
+      const bar3 = document.getElementById('bar3');
+      const strengthText = document.getElementById('strengthText');
+
+      pwdInput.addEventListener('input', () => {
+        const val = pwdInput.value;
+        bar1.className = 'strength-bar';
+        bar2.className = 'strength-bar';
+        bar3.className = 'strength-bar';
+
+        if (val.length === 0) {
+          strengthText.textContent = 'Enter password';
+        } else if (val.length < 6) {
+          bar1.classList.add('weak');
+          strengthText.textContent = 'Weak';
+        } else if (val.length < 10) {
+          bar1.classList.add('medium');
+          bar2.classList.add('medium');
+          strengthText.textContent = 'Medium';
+        } else {
+          bar1.classList.add('strong');
+          bar2.classList.add('strong');
+          bar3.classList.add('strong');
+          strengthText.textContent = 'Strong (Good)';
+        }
+      });
+
+      // Password Toggle
+      const toggleBtn = document.getElementById('regPwdToggleBtn');
+      toggleBtn.addEventListener('click', () => {
+        pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
+      });
+
+      // Form Submit
+      const form = document.getElementById('studentRegisterForm');
+      const submitBtn = document.getElementById('regSubmitBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fullName = document.getElementById('regFullName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const studentId = document.getElementById('regStudentId').value.trim();
+        const pwd = pwdInput.value;
+        const confirmPwd = document.getElementById('regConfirmPassword').value;
+        const instId = instSelect.value;
+        const customName = document.getElementById('regCustomInstName').value.trim();
+        const department = document.getElementById('regDepartment').value.trim();
+        const yearSem = document.getElementById('regYearSem').value.trim();
+        const address = document.getElementById('regAddress').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const termsChecked = document.getElementById('regTerms').checked;
+
+        // Reset errors
+        document.querySelectorAll('.form-error').forEach(el => el.style.display = 'none');
+
+        if (!fullName) {
+          document.getElementById('nameError').textContent = 'Please enter your full legal name.';
+          document.getElementById('nameError').style.display = 'block';
+          return;
+        }
+
+        if (!email || !email.includes('@')) {
+          document.getElementById('emailError').textContent = 'Please enter a valid email address.';
+          document.getElementById('emailError').style.display = 'block';
+          return;
+        }
+
+        if (!studentId) {
+          document.getElementById('studentIdError').textContent = 'Please enter your student ID or enrollment identifier.';
+          document.getElementById('studentIdError').style.display = 'block';
+          return;
+        }
+
+        if (!instId || (instId === 'OTHER' && !customName)) {
+          document.getElementById('instError').textContent = 'Please select or enter your institution name.';
+          document.getElementById('instError').style.display = 'block';
+          return;
+        }
+
+        if (!address) {
+          document.getElementById('addressError').textContent = 'Please provide your correspondence address for formal letters.';
+          document.getElementById('addressError').style.display = 'block';
+          return;
+        }
+
+        if (pwd.length < 8) {
+          showToast('error', 'Weak Password', 'Password must be at least 8 characters long.');
+          return;
+        }
+
+        if (pwd !== confirmPwd) {
+          document.getElementById('confirmPwdError').textContent = 'Passwords do not match.';
+          document.getElementById('confirmPwdError').style.display = 'block';
+          return;
+        }
+
+        if (!termsChecked) {
+          document.getElementById('termsError').textContent = 'You must accept the terms and privacy policy.';
+          document.getElementById('termsError').style.display = 'block';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner"></span> Creating Account...`;
+
+        try {
+          let finalInstId = instId;
+          if (instId === 'OTHER') {
+            showToast('error', 'Institution Not Verified', 'Unlisted institutions must be verified by a platform administrator before student accounts can be created. Please select a verified institution from the list.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Create Verified Student Account';
+            return;
+          }
+
+          await window.proofVoiceApi.registerStudent({
+            fullName,
+            email,
+            password: pwd,
+            institutionId: finalInstId,
+            studentIdentifier: studentId,
+            department,
+            yearSemester: yearSem,
+            residentialAddress: address,
+            phone
+          });
+
+          showToast('success', 'Registration Successful', 'Welcome to ProofVoice! Account profile saved.');
+          setTimeout(() => {
+            window.location.href = 'student-dashboard.html';
+          }, 800);
+        } catch (err) {
+          showToast('error', 'Registration Failed', err.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Create Verified Student Account';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

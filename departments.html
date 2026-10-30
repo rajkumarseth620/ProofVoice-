@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Departments & Categories | ProofVoice Admin</title>
+  <meta name="description" content="Configure and manage institution-specific departments and complaint categories.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <a href="admin-dashboard.html" class="brand-logo">
+          <div class="brand-icon-wrapper" style="background:linear-gradient(135deg, #1E293B, #334155);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Proof<span>Voice</span></span>
+            <span class="brand-sub">Admin Desk</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-institution-badge">
+        <span class="sidebar-institution-label">Authorized Workspace</span>
+        <span class="sidebar-institution-name">Apex Institute of Technology</span>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Admin Sidebar">
+        <a href="admin-dashboard.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="admin-complaints.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+          All Complaints
+        </a>
+        <a href="admin-complaints.html?status=Unassigned" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Unassigned Complaints
+        </a>
+        <a href="admin-complaints.html?status=Under+Review" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/>
+          </svg>
+          Under Review
+        </a>
+        <a href="admin-complaints.html?status=In+Progress" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          In Progress
+        </a>
+        <a href="admin-complaints.html?status=Resolved" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Resolved
+        </a>
+
+        <span class="sidebar-section-title" style="margin-top:var(--space-3);">Workspace & System</span>
+
+        <a href="departments.html" class="sidebar-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          </svg>
+          Departments
+        </a>
+        <a href="users.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+          Users
+        </a>
+        <a href="analytics.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          Analytics & Reports
+        </a>
+        <a href="admin-notifications.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+          <span class="nav-count" id="adminSidebarNotifCount" style="display: none;">0</span>
+        </a>
+        <a href="institution-settings.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Institution Settings
+        </a>
+        <a href="admin-profile.html" class="sidebar-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          My Profile
+        </a>
+        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" style="background:#1E293B; color:#FFFFFF;">VR</div>
+        <div class="user-info-text">
+          <div class="user-name">Dr. Vikram Roy</div>
+          <div class="user-role-label">Dean of Student Affairs</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <div class="breadcrumbs">
+            <a href="admin-dashboard.html">Admin</a>
+            <span>/</span>
+            <span class="current">Departments & Categories</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openModal('addDeptModal')">
+            + Add Department
+          </button>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Institution Departments & Categories</h1>
+            <p>Define operational teams, assign routing rules, and customize complaint categories for your campus.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid" style="grid-template-columns: 1.3fr 0.7fr;">
+          <!-- Left: Active Departments -->
+          <div class="card" style="padding:var(--space-6);">
+            <div class="card-header">
+              <h3 class="card-title">Configured Service Departments</h3>
+              <span class="text-xs text-muted" id="deptCountLabel">8 Departments</span>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Department Name</th>
+                    <th>Routing Lead</th>
+                    <th>Status</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="deptTableBody">
+                  <!-- Dynamically rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: Categories List -->
+          <div class="card" style="padding:var(--space-6);">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 class="card-title">Complaint Categories</h3>
+                <div class="text-xs text-muted">Configured grievance categories for your campus</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openModal('addCategoryModal')">+ Category</button>
+            </div>
+
+            <p class="text-xs text-muted" style="margin-top:var(--space-2); margin-bottom:var(--space-4);">
+              Categories available to students on the complaint submission form:
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:8px;" id="categoryPillList">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add Department Modal -->
+  <div class="modal-backdrop" id="addDeptModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Service Department</h3>
+        <button class="modal-close-btn" onclick="closeModal('addDeptModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Department Name <span class="required">*</span></label>
+          <input type="text" id="newDeptName" class="form-control" placeholder="e.g. Sports & Gymnasium Facilities">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsible Desk / Lead Contact</label>
+          <input type="text" id="newDeptLead" class="form-control" placeholder="e.g. sports.incharge@campus.edu">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addDeptModal')">Cancel</button>
+        <button class="btn btn-primary" id="confirmAddDeptBtn">Create Department</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Category Modal -->
+  <div class="modal-backdrop" id="addCategoryModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Grievance Category</h3>
+        <button class="modal-close-btn" onclick="closeModal('addCategoryModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Category Name <span class="required">*</span></label>
+          <input type="text" id="newCatName" class="form-control" placeholder="e.g. Cafeteria and Canteen Hygiene">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addCategoryModal')">Cancel</button>
+        <button class="btn btn-primary" id="confirmAddCatBtn">Add Category</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    async function renderDepartmentsAndCategories() {
+      const user = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser()) || (window.proofVoiceDb && window.proofVoiceDb.getCurrentUser()) || {};
+      const institution = (window.proofVoiceDb && window.proofVoiceDb.getInstitution(user.institutionId)) || {
+        name: user.institutionName || 'Apex Institute of Technology',
+        departments: [
+          'Estate & Maintenance',
+          'Hostel Administration',
+          'Academic Affairs',
+          'IT & Network Services',
+          'Dean of Student Welfare'
+        ],
+        categories: [
+          'Hostel & Accommodation',
+          'Infrastructure & Maintenance',
+          'Academic & Faculty',
+          'Sanitation & Hygiene',
+          'IT & Network Issues'
+        ]
+      };
+
+      const deptTbody = document.getElementById('deptTableBody');
+      const deptCountLabel = document.getElementById('deptCountLabel');
+      const catsContainer = document.getElementById('categoryPillList');
+
+      let depts = [...(institution.departments || [])];
+      let cats = [...(institution.categories || [])];
+
+      // Merge locally added custom departments
+      let customDepts = [];
+      try {
+        customDepts = JSON.parse(localStorage.getItem('proofvoice_custom_departments') || '[]');
+      } catch (e) {}
+      customDepts.forEach(d => {
+        if (d && !depts.includes(d)) depts.push(d);
+      });
+
+      // Fetch live departments if connected to Django
+      if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+        try {
+          const liveDepts = await window.proofVoiceApi.getDepartments();
+          if (liveDepts && liveDepts.length > 0) {
+            liveDepts.forEach(ld => {
+              const dName = typeof ld === 'string' ? ld : (ld.name || '');
+              if (dName && !depts.includes(dName)) {
+                depts.push(dName);
+              }
+            });
+          }
+        } catch (e) {
+          console.warn('Could not fetch live departments:', e);
+        }
+      }
+
+      if (deptCountLabel) deptCountLabel.textContent = `${depts.length} Departments`;
+
+      if (deptTbody) {
+        if (depts.length === 0) {
+          deptTbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted" style="padding:2rem;">No service departments configured.</td></tr>`;
+        } else {
+          deptTbody.innerHTML = depts.map(dept => `
+            <tr>
+              <td style="font-weight:600; color:var(--color-navy);">${escapeHtml(dept)}</td>
+              <td class="text-xs text-muted">Institutional Roster Active</td>
+              <td><span class="badge badge-resolved">Operational</span></td>
+              <td class="text-right">
+                <button class="btn btn-ghost btn-sm" onclick="showToast('info', '${escapeHtml(dept)}', 'Department details verified.')">Details</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      if (catsContainer) {
+        catsContainer.innerHTML = cats.map(cat => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--color-surface-alt); border-radius:var(--radius-md); font-size:var(--text-sm);">
+            <span style="font-weight:500; color:var(--color-navy);">${escapeHtml(cat)}</span>
+            <span class="badge badge-draft">Active</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderDepartmentsAndCategories();
+
+      // Add Department
+      const addDeptBtn = document.getElementById('confirmAddDeptBtn');
+      if (addDeptBtn) {
+        addDeptBtn.addEventListener('click', async () => {
+          const nameInput = document.getElementById('newDeptName');
+          const leadInput = document.getElementById('newDeptLead');
+          const name = (nameInput?.value || '').trim();
+          const lead = (leadInput?.value || '').trim();
+
+          if (!name) {
+            showToast('error', 'Required Field', 'Please enter a department name.');
+            return;
+          }
+
+          addDeptBtn.disabled = true;
+          addDeptBtn.textContent = 'Creating...';
+
+          try {
+            // Save to custom departments array in localStorage
+            let customDepts = [];
+            try {
+              customDepts = JSON.parse(localStorage.getItem('proofvoice_custom_departments') || '[]');
+            } catch (e) {}
+            if (!customDepts.includes(name)) {
+              customDepts.push(name);
+              localStorage.setItem('proofvoice_custom_departments', JSON.stringify(customDepts));
+            }
+
+            if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+              await window.proofVoiceApi.addDepartment(name, lead);
+            }
+
+            const user = window.proofVoiceDb.getCurrentUser();
+            const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+            const currentDepts = institution.departments || [];
+            if (!currentDepts.includes(name)) {
+              currentDepts.push(name);
+              window.proofVoiceDb.updateInstitutionSettings(user.institutionId, { departments: currentDepts });
+            }
+
+            showToast('success', 'Department Added', `${name} created and active for grievance routing.`);
+            if (nameInput) nameInput.value = '';
+            if (leadInput) leadInput.value = '';
+            closeModal('addDeptModal');
+            await renderDepartmentsAndCategories();
+          } catch (err) {
+            showToast('error', 'Error', err.message || 'Could not create department.');
+          } finally {
+            addDeptBtn.disabled = false;
+            addDeptBtn.textContent = 'Create Department';
+          }
+        });
+      }
+
+      // Add Category
+      const addCatBtn = document.getElementById('confirmAddCatBtn');
+      if (addCatBtn) {
+        addCatBtn.addEventListener('click', () => {
+          const catName = document.getElementById('newCatName').value.trim();
+          if (!catName) {
+            showToast('error', 'Required Field', 'Please enter a category name.');
+            return;
+          }
+          const user = window.proofVoiceDb.getCurrentUser();
+          const institution = window.proofVoiceDb.getInstitution(user.institutionId);
+          const currentCats = institution.categories || [];
+          if (!currentCats.includes(catName)) {
+            currentCats.push(catName);
+            window.proofVoiceDb.updateInstitutionSettings(user.institutionId, { categories: currentCats });
+            showToast('success', 'Category Created', `${catName} is now available in complaint forms.`);
+            document.getElementById('newCatName').value = '';
+            closeModal('addCategoryModal');
+            renderDepartmentsAndCategories();
+          } else {
+            showToast('warning', 'Already Exists', 'This category already exists.');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# Environment files & Secrets
+.env
+.env.*
+!.env.example
+
+# Python runtime & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.log
+local_settings.py
+
+# Database & Testing artifacts
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+test_*.sqlite3
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Media & Static storage
+media/
+staticfiles/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Certificates
+*.pem
+*.key
+*.p12
+*.pfx
