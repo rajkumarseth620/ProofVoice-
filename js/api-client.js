@@ -8,9 +8,52 @@
  * Voice calls are proxied through /api/v1/ai/speech-to-text/ and /api/v1/ai/text-to-speech/.
  */
 
+/**
+ * ProofVoice API Configuration
+ *
+ * Supports two environments:
+ * 1. Local development: http://127.0.0.1:8000/api/v1
+ * 2. Production: A configurable HTTPS Django backend URL (e.g. deployed on Render).
+ *
+ * To point to your deployed production backend, you can:
+ * - Set the PRODUCTION_BACKEND_URL constant below, OR
+ * - Define window.PROOFVOICE_API_BASE in a script, OR
+ * - Set in browser console: localStorage.setItem('proofvoice_api_base_url', 'https://<your-backend>.onrender.com')
+ */
+const PRODUCTION_BACKEND_URL = ''; // Leave empty until backend is deployed, then paste your Render HTTPS URL here
+const LOCAL_BACKEND_URL = 'http://127.0.0.1:8000/api/v1';
+
+function resolveApiBaseUrl() {
+  // 1. Runtime override via window global
+  if (typeof window !== 'undefined' && window.PROOFVOICE_API_BASE) {
+    const base = String(window.PROOFVOICE_API_BASE).trim().replace(/\/+$/, '');
+    return base.endsWith('/api/v1') ? base : `${base}/api/v1`;
+  }
+
+  // 2. Runtime override via localStorage (enables live switching to production backend without code redeploy)
+  if (typeof localStorage !== 'undefined') {
+    const custom = localStorage.getItem('proofvoice_api_base_url');
+    if (custom && custom.trim()) {
+      const base = custom.trim().replace(/\/+$/, '');
+      return base.endsWith('/api/v1') ? base : `${base}/api/v1`;
+    }
+  }
+
+  // 3. Explicit production backend URL constant
+  if (PRODUCTION_BACKEND_URL && PRODUCTION_BACKEND_URL.trim()) {
+    const base = PRODUCTION_BACKEND_URL.trim().replace(/\/+$/, '');
+    return base.endsWith('/api/v1') ? base : `${base}/api/v1`;
+  }
+
+  // 4. Default to local development server
+  return LOCAL_BACKEND_URL;
+}
+
 const API_CONFIG = {
   USE_REAL_BACKEND: true,
-  BASE_URL: 'http://127.0.0.1:8000/api/v1',
+  get BASE_URL() {
+    return resolveApiBaseUrl();
+  },
   TIMEOUT_MS: 15000
 };
 
@@ -122,7 +165,8 @@ class ProofVoiceApiClient {
     const fullName = user.full_name || user.fullName || '';
     let profileImage = user.profile_image_url || user.profile_image || profile.profile_image || null;
     if (profileImage && typeof profileImage === 'string' && profileImage.startsWith('/')) {
-      profileImage = `http://127.0.0.1:8000${profileImage}`;
+      const backendOrigin = String(this.config.BASE_URL).replace(/\/api\/v1\/?$/, '');
+      profileImage = `${backendOrigin}${profileImage}`;
     }
     return {
       id: user.id,

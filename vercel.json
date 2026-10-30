@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "buildCommand": "echo 'Static build: no compilation required'",
+  "installCommand": "echo 'Static frontend: skipping pip and npm install'",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "trailingSlash": false
+}

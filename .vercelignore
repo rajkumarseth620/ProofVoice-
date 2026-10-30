@@ -1,0 +1,13 @@
+# Vercel Deployment Exclusions
+# ProofVoice frontend-only deployment ignores Python backend and environment files
+
+backend/
+requirements.txt
+*.py
+*.pyc
+__pycache__/
+.env
+.env.*
+*.sqlite3
+media/
+_audit_backup/
