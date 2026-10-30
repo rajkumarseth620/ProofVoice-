@@ -6,10 +6,14 @@ from .views import (
     AiProcessGrievanceView,
     AiSummarizeView,
     AiRefineView,
-    AiCategorizeView
+    AiCategorizeView,
+    AiChatbotView
 )
 
 urlpatterns = [
+    # Intelligent AI Support Assistant
+    path('chat/', AiChatbotView.as_view(), name='ai-chat'),
+
     # Gnani AI Gateway
     path('status/', GnaniStatusView.as_view(), name='gnani-status'),
     path('speech-to-text/', SpeechToTextView.as_view(), name='gnani-stt'),

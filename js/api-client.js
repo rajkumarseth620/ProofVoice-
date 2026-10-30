@@ -188,6 +188,8 @@ class ProofVoiceApiClient {
       residentialAddress: profile.address || '',
       phone: profile.phone || '',
       designation: profile.designation || '',
+      notifyInApp: profile.notify_in_app !== undefined ? Boolean(profile.notify_in_app) : true,
+      notifyEmail: profile.notify_email !== undefined ? Boolean(profile.notify_email) : true,
       profileImage,
       avatar: initialsFromName(fullName),
       profileComplete: Boolean(profile.is_profile_complete),
@@ -587,37 +589,75 @@ class ProofVoiceApiClient {
   async updateUserProfile(userId, profileData) {
     if (this.isLiveSession()) {
       try {
+        const payload = {
+          full_name: profileData.fullName || profileData.full_name,
+          student_id: profileData.studentIdentifier || profileData.student_id,
+          department: profileData.department,
+          course: profileData.course || profileData.department,
+          semester: profileData.yearSemester || profileData.semester,
+          phone: profileData.phone,
+          address: profileData.residentialAddress || profileData.address,
+          designation: profileData.designation
+        };
+        if (profileData.institutionId || profileData.institution_id) {
+          payload.institution_id = profileData.institutionId || profileData.institution_id;
+        }
+        if (profileData.notifyInApp !== undefined) {
+          payload.notify_in_app = Boolean(profileData.notifyInApp);
+        } else if (profileData.notify_in_app !== undefined) {
+          payload.notify_in_app = Boolean(profileData.notify_in_app);
+        }
+        if (profileData.notifyEmail !== undefined) {
+          payload.notify_email = Boolean(profileData.notifyEmail);
+        } else if (profileData.notify_email !== undefined) {
+          payload.notify_email = Boolean(profileData.notify_email);
+        }
+
         const res = await fetch(`${this.config.BASE_URL}/auth/profile/`, {
           method: 'PATCH',
           headers: this.getHeaders(),
-          body: JSON.stringify({
-            full_name: profileData.fullName || profileData.full_name,
-            student_id: profileData.studentIdentifier || profileData.student_id,
-            institution_id: profileData.institutionId || profileData.institution_id,
-            department: profileData.department,
-            course: profileData.course || profileData.department,
-            semester: profileData.yearSemester || profileData.semester,
-            phone: profileData.phone,
-            address: profileData.residentialAddress || profileData.address,
-            designation: profileData.designation
-          })
+          body: JSON.stringify(payload)
         });
         const data = await this.handleResponse(res);
         const stored = this.getStoredUser() || {};
+        let merged = stored;
         if (data && data.user) {
           const normalized = this.normalizeUser(data.user);
-          const merged = { ...stored, ...normalized };
+          merged = { ...stored, ...normalized };
           if (!merged.profileImage && stored.profileImage) {
             merged.profileImage = stored.profileImage;
           }
           localStorage.setItem(SESSION_USER_KEY, JSON.stringify(merged));
+          localStorage.setItem('proofvoice_auth_user', JSON.stringify(merged));
         }
-        return data;
+        if (window.proofVoiceDb) {
+          try {
+            window.proofVoiceDb.updateUserProfile(userId || (stored && stored.id), profileData);
+          } catch (e) {}
+        }
+        return { success: true, user: merged, ...data };
       } catch (err) {
-        console.warn('[ProofVoice API] Live updateUserProfile failed, saving locally:', err);
+        const isNetworkErr = !err.status && (
+          !err.data ||
+          (err.message && /failed to fetch|networkerror|load failed|fetch failed|refused|abort|connection refused/i.test(err.message))
+        );
+        if (!isNetworkErr) {
+          // Genuine backend error: throw so caller shows real validation error to user
+          throw err;
+        }
+        console.warn('[ProofVoice API] Live backend offline, saving locally:', err);
       }
     }
-    return window.proofVoiceDb.updateUserProfile(userId, profileData);
+    // Static hosting offline fallback
+    if (window.proofVoiceDb) {
+      window.proofVoiceDb.updateUserProfile(userId, profileData);
+      const stored = this.getStoredUser() || {};
+      const merged = { ...stored, ...profileData };
+      localStorage.setItem(SESSION_USER_KEY, JSON.stringify(merged));
+      localStorage.setItem('proofvoice_auth_user', JSON.stringify(merged));
+      return { success: true, user: merged };
+    }
+    throw new Error('Unable to update profile. Server is unreachable.');
   }
 
   async uploadProfilePhoto(file) {
@@ -1069,6 +1109,210 @@ class ProofVoiceApiClient {
       return data.audio_url || null;
     }
     return null;
+  }
+
+  async chatWithAi(message, history = [], voiceMode = false) {
+    if (this.config.USE_REAL_BACKEND) {
+      try {
+        const token = localStorage.getItem(SESSION_TOKEN_KEY);
+        const headers = { 'Content-Type': 'application/json' };
+        if (token && !String(token).startsWith('demo_token_')) {
+          headers.Authorization = `Token ${token}`;
+        }
+        const res = await fetch(`${this.config.BASE_URL}/ai/chat/`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ message, history, voice_mode: voiceMode })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data;
+        }
+      } catch (err) {
+        console.warn('[ProofVoice API] Live AI chat error, falling back to local engine:', err);
+      }
+    }
+    return this._localAiChatFallback(message, history, voiceMode);
+  }
+
+  _localAiChatFallback(message, history = [], voiceMode = false) {
+    const query = (message || '').trim();
+    const queryLower = query.toLowerCase();
+    const user = this.getCurrentUser();
+
+    if (!query) {
+      return {
+        success: true,
+        reply: "Hello! I am your ProofVoice Campus AI Assistant. How can I assist you with reporting issues, tracking complaints, or navigating your dashboard today?",
+        speak_text: "Hello! I am your ProofVoice Campus AI Assistant. How can I assist you today?",
+        topic: 'greeting',
+        suggested_actions: [
+          "How do I record a voice complaint?",
+          "Check my complaint status",
+          "How does application review work?",
+          "How do I update my profile?"
+        ]
+      };
+    }
+
+    // Greetings
+    if (/^(hi|hello|hey|greetings|good\s+(morning|afternoon|evening))\b/i.test(queryLower) && query.split(' ').length <= 4) {
+      const studentName = user ? (user.fullName || user.full_name || 'Student') : 'Student';
+      return {
+        success: true,
+        reply: `Hello ${studentName}! Welcome to ProofVoice Support. I can help you submit grievances, track your tickets, understand complaint statuses, or update your academic profile. What would you like to know?`,
+        speak_text: `Hello ${studentName}! Welcome to ProofVoice Support. What would you like to know?`,
+        topic: 'greeting',
+        suggested_actions: [
+          "What are my active complaints?",
+          "How do I record a voice complaint?",
+          "What does 'Under Review' mean?",
+          "How do notifications work?"
+        ]
+      };
+    }
+
+    // Complaints query
+    const isAccountQuery = /my complaint|my complaints|my ticket|my status|status of my|active complaint|track complaint|track my|recent complaint/i.test(queryLower);
+    const idMatch = query.match(/\b(PV-[\w\-]+|\b\d{4,6}\b)/i);
+
+    if (isAccountQuery || idMatch) {
+      const complaints = (window.proofVoiceDb && typeof window.proofVoiceDb.getComplaints === 'function') 
+        ? window.proofVoiceDb.getComplaints() 
+        : [];
+      const userComplaints = user 
+        ? (complaints || []).filter(c => String(c.studentId || c.student_id || c.studentEmail || c.student_email || '') === String(user.id || user.email))
+        : (complaints || []);
+
+      if (idMatch) {
+        const targetId = idMatch[1].trim().toUpperCase();
+        const found = (complaints || []).find(c => (c.id && String(c.id).toUpperCase() === targetId) || (c.complaintId && String(c.complaintId).toUpperCase() === targetId));
+        if (found) {
+          if (user && user.role === 'student' && found.studentId && found.studentId !== user.id && found.studentEmail !== user.email) {
+            return {
+              success: true,
+              reply: "For student privacy and security, you can only view complaints submitted by your own account.",
+              speak_text: "For student privacy and security, you can only view complaints submitted by your own account.",
+              topic: 'complaint_privacy_forbidden'
+            };
+          }
+          const reply = `**Complaint Details for \`${found.complaintId || found.id}\`:**\n\n• **Title:** ${found.title}\n• **Status:** **${found.status}**\n• **Category:** ${found.category || 'General'}\n• **Assigned Department:** ${found.assignedDepartment || 'Not assigned yet'}\n• **Location:** ${found.location || found.issueLocation || 'Campus'}\n• **Submitted On:** ${found.submittedAt || found.createdAt || 'Recently'}\n\nYou can view the full timeline on the [Complaint Details page](complaint-details.html?id=${found.complaintId || found.id}).`;
+          return {
+            success: true,
+            reply,
+            speak_text: `Complaint ${found.complaintId || found.id} has title: ${found.title}. Current status is: ${found.status}.`,
+            topic: 'complaint_single_status',
+            complaint_id: found.complaintId || found.id,
+            suggested_actions: [`View ${found.complaintId || found.id} Details`, "Check all my complaints", "Report an Issue"]
+          };
+        } else {
+          return {
+            success: true,
+            reply: `I could not find any complaint matching identifier \`${targetId}\` in your account records. Please check your tracking ID on the **My Complaints** page.`,
+            speak_text: `I could not find any complaint matching identifier ${targetId} in your account records.`,
+            topic: 'complaint_not_found',
+            suggested_actions: ["View My Complaints", "Report an Issue"]
+          };
+        }
+      }
+
+      if (!userComplaints || userComplaints.length === 0) {
+        return {
+          success: true,
+          reply: "You have not submitted any complaints yet. Whenever you encounter a problem with campus facilities, washrooms, classrooms, or hostel rooms, you can click **\"Report an Issue\"** to speak or type your grievance.",
+          speak_text: "You have not submitted any complaints yet. Click Report an Issue to speak or type your grievance.",
+          topic: 'no_complaints',
+          suggested_actions: ["Report an Issue with Voice", "How does voice reporting work?"]
+        };
+      }
+
+      const lines = [`You have **${userComplaints.length}** complaint${userComplaints.length !== 1 ? 's' : ''} on record:`];
+      userComplaints.slice(0, 5).forEach(c => {
+        lines.push(`• **${c.complaintId || c.id}** — *${c.title}* [${c.status}]`);
+      });
+      lines.push(`\nYou can ask me for details about any of these tickets or click **My Complaints** in the sidebar.`);
+      return {
+        success: true,
+        reply: lines.join('\n'),
+        speak_text: `You have ${userComplaints.length} complaints on record. The most recent is ${userComplaints[0].title} with status ${userComplaints[0].status}.`,
+        topic: 'complaints_summary',
+        suggested_actions: [`Status of ${userComplaints[0].complaintId || userComplaints[0].id}`, "View My Complaints", "Report an Issue"]
+      };
+    }
+
+    // Match topics
+    if (/voice|record|mic|speech to text|stt|audio|speak|transcription/i.test(queryLower)) {
+      return {
+        success: true,
+        reply: "**Reporting Issues via Voice:**\n\n1. Click **\"Report an Issue\"** or **\"Create Complaint\"**.\n2. Select the **Voice Input** tab and select your language.\n3. Tap the **Microphone** button and describe your campus concern naturally.\n4. ProofVoice transcribes your speech in real time. You can edit any misheard words and click **\"Generate Formal Application\"**.\n5. Review the formal letter before submitting.",
+        speak_text: "To report an issue with voice, click Report an Issue, select Voice Input, tap the microphone, speak naturally, and review your generated application before submitting.",
+        topic: 'voice_reporting',
+        suggested_actions: ["Can I edit my transcription?", "How do I review before submitting?", "Report an Issue Now"]
+      };
+    }
+
+    if (/register|unlisted|not listed|college not in list|affiliation|enroll/i.test(queryLower)) {
+      return {
+        success: true,
+        reply: "**Student Registration & Unlisted Institutions:**\n\n1. Visit the **Student Registration** page (`/register.html`).\n2. If your college is not listed, select **\"+ My Institution Is Not Listed\"**.\n3. Enter your institution name, institution type, city, state, country, and official domain.\n4. Complete your academic details. ProofVoice will immediately register your student account and grant access to your dashboard.\n5. Unlisted institutions are placed in administrative verification separately without blocking you.",
+        speak_text: "You can register even if your college is not listed. Select My Institution Is Not Listed, fill in your details, and you will get immediate access to your dashboard.",
+        topic: 'registration',
+        suggested_actions: ["Open Registration Page", "Sign In to Dashboard", "How do I report an issue?"]
+      };
+    }
+
+    if (/review|letter|formal application|mandatory|checkbox|draft/i.test(queryLower)) {
+      return {
+        success: true,
+        reply: "**Formal Application & Mandatory Review:**\n\nProofVoice never submits a grievance without your explicit review and confirmation:\n\n1. Our AI structures your words into a formal institutional grievance letter addressed to the appropriate authority.\n2. The letter automatically incorporates your saved residential address and department.\n3. You can click **\"Read Aloud\"** to listen to the generated draft.\n4. Check the declaration box and click **\"Submit Authoritative Complaint\"**.",
+        speak_text: "ProofVoice never submits a grievance without your explicit review. Our AI structures your words into a formal letter that you confirm before submission.",
+        topic: 'review_letter',
+        suggested_actions: ["Why is review mandatory?", "What do statuses mean?", "How do I listen aloud?"]
+      };
+    }
+
+    if (/status|statuses|under review|in progress|assigned|awaiting|resolved|reopened/i.test(queryLower)) {
+      return {
+        success: true,
+        reply: "**ProofVoice Complaint Statuses:**\n\n• **Submitted:** Grievance recorded and tracking ID assigned.\n• **Under Review:** Administrators have opened your application.\n• **Assigned:** Ticket routed to a specific department or technician.\n• **In Progress:** Work is actively underway.\n• **Awaiting Student:** Admin has requested clarifying information or confirmation.\n• **Resolved:** Repairs completed and verified with closing remark.\n• **Reopened:** Issue recurred or was incomplete.",
+        speak_text: "The main statuses are Submitted, Under Review, Assigned, In Progress, Awaiting Student, Resolved, and Reopened.",
+        topic: 'statuses',
+        suggested_actions: ["What are my active complaints?", "What does 'Under Review' mean?", "Can I reopen a complaint?"]
+      };
+    }
+
+    if (/profile|save profile|photo|picture|avatar|upload photo|address|student id/i.test(queryLower)) {
+      return {
+        success: true,
+        reply: "**Managing Your Profile & Settings:**\n\n1. Open **Profile & Settings** (`student-profile.html`) from the sidebar or click your avatar.\n2. Update your Legal Name, Student ID, Department, Year/Semester, and Residential Address.\n3. Click **Upload Photo** to update your picture.\n4. Click **\"Save Profile Changes\"** to save to the database.\nYour saved address automatically populates future formal grievance letters.",
+        speak_text: "You can update your name, student ID, department, address, and profile photo under Profile and Settings. Click Save Profile Changes to save.",
+        topic: 'profile',
+        suggested_actions: ["Edit My Profile", "What are my complaints?", "How do I report an issue?"]
+      };
+    }
+
+    if (/notification|notifications|alert|alerts|bell|unread/i.test(queryLower)) {
+      return {
+        success: true,
+        reply: "**Personalized Notifications:**\n\n• ProofVoice sends real notifications when events occur on your complaints (submission, assignment, admin remark, info request, resolution).\n• Click the **Notification Bell** on the top bar to view recent alerts or mark all as read.\n• You can customize your In-App and Email preferences under Profile & Settings.",
+        speak_text: "You receive personalized notifications for submission, status changes, admin remarks, and resolution on your tickets. Check the bell icon on the top bar.",
+        topic: 'notifications',
+        suggested_actions: ["How do I mark alerts as read?", "Configure notification preferences", "Open Notification Center"]
+      };
+    }
+
+    return {
+      success: true,
+      reply: "I don't have specific details on that topic in the ProofVoice support knowledge base. ProofVoice is designed specifically for reporting campus grievances, preparing formal applications, and tracking institutional resolution.\n\nFor institutional academic grading, fee refunds, or policy questions, please contact your university's Dean of Student Welfare or Campus Grievance Redressal Committee directly.",
+      speak_text: "I don't have that specific information. For institutional policy questions, please contact your Dean of Student Welfare.",
+      topic: 'unrecognized',
+      suggested_actions: [
+        "How do I record a complaint?",
+        "What do complaint statuses mean?",
+        "How do I update my profile?",
+        "What are my active complaints?"
+      ]
+    };
   }
 
   async getNotifications() {

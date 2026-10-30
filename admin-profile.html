@@ -327,17 +327,37 @@
       document.getElementById('profInstName').value = instName;
 
       // Populate Form & Cards
-      document.getElementById('adminSidebarName').textContent = user.fullName || 'Administrator';
-      document.getElementById('photoCardUserName').textContent = user.fullName || 'Administrator';
-      document.getElementById('adminSidebarRole').textContent = user.designation || 'Administrator';
+      function populateAdminFields(u) {
+        if (!u) return;
+        document.getElementById('adminSidebarName').textContent = u.fullName || 'Administrator';
+        document.getElementById('photoCardUserName').textContent = u.fullName || 'Administrator';
+        document.getElementById('adminSidebarRole').textContent = u.designation || 'Administrator';
 
-      document.getElementById('profFullName').value = user.fullName || '';
-      document.getElementById('profEmail').value = user.email || '';
-      document.getElementById('profStaffId').value = user.studentIdentifier || user.identifier || 'STAFF-AUTH';
-      document.getElementById('profDepartment').value = user.department || 'Academic Administration';
-      document.getElementById('profDesignation').value = user.designation || 'Administrator';
-      document.getElementById('profOfficeAddress').value = user.residentialAddress || 'Main Administration Block';
-      document.getElementById('profPhone').value = user.phone || '';
+        document.getElementById('profFullName').value = u.fullName || '';
+        document.getElementById('profEmail').value = u.email || '';
+        document.getElementById('profStaffId').value = u.studentIdentifier || u.identifier || 'STAFF-AUTH';
+        document.getElementById('profDepartment').value = u.department || 'Academic Administration';
+        document.getElementById('profDesignation').value = u.designation || 'Administrator';
+        document.getElementById('profOfficeAddress').value = u.residentialAddress || 'Main Administration Block';
+        document.getElementById('profPhone').value = u.phone || '';
+      }
+
+      populateAdminFields(user);
+
+      // In live session, refresh profile asynchronously to stay in sync with database
+      if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+        window.proofVoiceApi.getCurrentUser().then(fresh => {
+          if (fresh) {
+            user = { ...user, ...fresh };
+            populateAdminFields(user);
+            if (fresh.profileImage) {
+              currentPhotoUrl = fresh.profileImage;
+              renderProfilePhoto(currentPhotoUrl);
+            }
+            if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+          }
+        }).catch(() => {});
+      }
 
       // Profile Photo Display and Interaction Handling
       const photoDisplay = document.getElementById('profilePhotoDisplay');
@@ -541,22 +561,18 @@
             profileComplete: true
           };
 
-          await window.proofVoiceApi.updateUserProfile(user.id, profilePayload);
-
-          // Update cached user
-          user.fullName = fullName;
-          user.studentIdentifier = staffId;
-          user.department = department;
-          user.designation = designation;
-          user.residentialAddress = address;
-          user.phone = phone;
+          const res = await window.proofVoiceApi.updateUserProfile(user.id, profilePayload);
+          const updatedUser = (res && res.user) || window.proofVoiceApi.getStoredUser() || user;
+          user = updatedUser;
+          populateAdminFields(user);
 
           if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
 
-          showToast('success', 'Profile Updated', 'Administrator profile credentials updated successfully.');
-          setTimeout(() => window.location.reload(), 600);
+          showToast('success', 'Profile Updated', 'Administrator profile credentials updated successfully in database.');
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Profile Changes';
         } catch (err) {
-          showToast('error', 'Update Failed', err.message);
+          showToast('error', 'Update Failed', err.message || 'Unable to update profile.');
           saveBtn.disabled = false;
           saveBtn.innerHTML = 'Save Profile Changes';
         }

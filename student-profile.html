@@ -278,7 +278,7 @@
               <h3 class="card-title" style="margin-bottom:var(--space-4);">Notification Preferences</h3>
               <div style="display:flex; flex-direction:column; gap:var(--space-4);">
                 <label class="form-check">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" checked id="prefInAppAlerts">
                   <div>
                     <strong style="font-size:var(--text-sm); color:var(--color-navy); display:block;">In-App Status Alerts</strong>
                     <span class="text-xs text-muted">Receive live notifications when an administrator or technician updates your ticket.</span>
@@ -286,7 +286,7 @@
                 </label>
 
                 <label class="form-check">
-                  <input type="checkbox" checked>
+                  <input type="checkbox" checked id="prefEmailSummaries">
                   <div>
                     <strong style="font-size:var(--text-sm); color:var(--color-navy); display:block;">Email Summaries</strong>
                     <span class="text-xs text-muted">Receive confirmation receipts and resolution notices at your institutional email.</span>
@@ -351,19 +351,6 @@
       document.getElementById('profInstName').value = instName;
       document.getElementById('profInstAddress').value = instAddress;
 
-      // Populate User Credentials
-      document.getElementById('sidebarUserName').textContent = user.fullName || 'User';
-      document.getElementById('photoCardUserName').textContent = user.fullName || 'User';
-      document.getElementById('sidebarUserRole').textContent = `${user.department || 'Student'}${user.yearSemester ? ' • ' + user.yearSemester : ''}`;
-
-      document.getElementById('profFullName').value = user.fullName || '';
-      document.getElementById('profEmail').value = user.email || '';
-      document.getElementById('profStudentId').value = user.studentIdentifier || '';
-      document.getElementById('profDepartment').value = user.department || '';
-      document.getElementById('profYearSem').value = isAdmin ? (user.designation || '') : (user.yearSemester || '');
-      document.getElementById('profResidentialAddress').value = user.residentialAddress || '';
-      document.getElementById('profPhone').value = user.phone || '';
-
       // Profile Photo Display and Interaction Handling
       const photoDisplay = document.getElementById('profilePhotoDisplay');
       const photoInput = document.getElementById('profilePhotoInput');
@@ -397,13 +384,39 @@
 
       renderProfilePhoto(currentPhotoUrl);
 
-      // In live session, refresh profile photo asynchronously to stay in sync with database
+      function populateProfileFields(u) {
+        if (!u) return;
+        document.getElementById('sidebarUserName').textContent = u.fullName || 'User';
+        document.getElementById('photoCardUserName').textContent = u.fullName || 'User';
+        document.getElementById('sidebarUserRole').textContent = `${u.department || 'Student'}${u.yearSemester ? ' • ' + u.yearSemester : ''}`;
+
+        document.getElementById('profFullName').value = u.fullName || '';
+        document.getElementById('profEmail').value = u.email || '';
+        document.getElementById('profStudentId').value = u.studentIdentifier || '';
+        document.getElementById('profDepartment').value = u.department || '';
+        document.getElementById('profYearSem').value = isAdmin ? (u.designation || '') : (u.yearSemester || '');
+        document.getElementById('profResidentialAddress').value = u.residentialAddress || '';
+        document.getElementById('profPhone').value = u.phone || '';
+
+        const inAppCheck = document.getElementById('prefInAppAlerts');
+        if (inAppCheck && u.notifyInApp !== undefined) inAppCheck.checked = Boolean(u.notifyInApp);
+        const emailCheck = document.getElementById('prefEmailSummaries');
+        if (emailCheck && u.notifyEmail !== undefined) emailCheck.checked = Boolean(u.notifyEmail);
+      }
+
+      // Initial populate from cached session
+      populateProfileFields(user);
+
+      // In live session, refresh entire profile from Django database to ensure latest DB persistence
       if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
         window.proofVoiceApi.getCurrentUser().then(fresh => {
-          if (fresh && fresh.profileImage && fresh.profileImage !== currentPhotoUrl) {
-            currentPhotoUrl = fresh.profileImage;
-            user.profileImage = currentPhotoUrl;
-            renderProfilePhoto(currentPhotoUrl);
+          if (fresh) {
+            user = { ...user, ...fresh };
+            populateProfileFields(user);
+            if (fresh.profileImage) {
+              currentPhotoUrl = fresh.profileImage;
+              renderProfilePhoto(currentPhotoUrl);
+            }
             if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
           }
         }).catch(() => {});
@@ -556,11 +569,17 @@
         saveBtn.innerHTML = `<span class="spinner"></span> Saving Changes...`;
 
         try {
+          const inAppAlerts = document.getElementById('prefInAppAlerts') ? document.getElementById('prefInAppAlerts').checked : true;
+          const emailSummaries = document.getElementById('prefEmailSummaries') ? document.getElementById('prefEmailSummaries').checked : true;
+
           const profilePayload = {
             fullName,
             studentIdentifier: studentId,
             department,
+            course: department,
             phone,
+            notifyInApp: inAppAlerts,
+            notifyEmail: emailSummaries,
             profileComplete: true
           };
 
@@ -572,23 +591,18 @@
             profilePayload.residentialAddress = address;
           }
 
-          await window.proofVoiceApi.updateUserProfile(user.id, profilePayload);
-
-          // Update cached user
-          user.fullName = fullName;
-          user.studentIdentifier = studentId;
-          user.department = department;
-          user.phone = phone;
-          if (isAdmin) user.designation = yearSem;
-          else user.yearSemester = yearSem;
-          user.residentialAddress = address;
+          const res = await window.proofVoiceApi.updateUserProfile(user.id, profilePayload);
+          const updatedUser = (res && res.user) || window.proofVoiceApi.getStoredUser() || user;
+          user = updatedUser;
+          populateProfileFields(user);
 
           if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
 
-          showToast('success', 'Profile Updated', 'Profile credentials updated successfully.');
-          setTimeout(() => window.location.reload(), 600);
+          showToast('success', 'Profile Saved', 'Profile credentials saved successfully to database.');
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Profile Changes';
         } catch (err) {
-          showToast('error', 'Update Failed', err.message);
+          showToast('error', 'Update Failed', err.message || 'Unable to update profile.');
           saveBtn.disabled = false;
           saveBtn.innerHTML = 'Save Profile Changes';
         }

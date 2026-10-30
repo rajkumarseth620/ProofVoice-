@@ -113,7 +113,7 @@ class AdminComplaintAssignView(APIView):
         )
 
         # Notify student
-        Notification.objects.create(
+        Notification.create_for_event(
             recipient=complaint.student,
             institution=complaint.institution,
             complaint=complaint,
@@ -187,14 +187,29 @@ class AdminComplaintStatusView(APIView):
             internal_note=internal_note
         )
 
-        # Notify student
-        Notification.objects.create(
+        # Notify student with contextual alert
+        notif_type = Notification.NotificationType.STATUS_CHANGE
+        if new_status == Complaint.Status.AWAITING_STUDENT:
+            notif_type = Notification.NotificationType.INFO_REQUESTED
+            notif_title = f"Information Requested: {complaint.complaint_id}"
+            notif_msg = f"Administrative action requires clarification on your complaint '{complaint.title}'. Remark: {public_remark or 'Please inspect your complaint details.'}"
+        elif new_status == Complaint.Status.UNDER_REVIEW:
+            notif_title = f"Under Review: {complaint.complaint_id}"
+            notif_msg = f"Your complaint '{complaint.title}' is now actively under administrative review."
+        elif new_status == Complaint.Status.IN_PROGRESS:
+            notif_title = f"In Progress: {complaint.complaint_id}"
+            notif_msg = f"Work has begun on your complaint '{complaint.title}'."
+        else:
+            notif_title = f"Status Update: {complaint.complaint_id}"
+            notif_msg = f"Your complaint '{complaint.title}' status is now {complaint.get_status_display()}."
+
+        Notification.create_for_event(
             recipient=complaint.student,
             institution=complaint.institution,
             complaint=complaint,
-            notification_type=Notification.NotificationType.STATUS_CHANGE,
-            title=f"Status Update: {complaint.complaint_id}",
-            message=f"Your complaint '{complaint.title}' status is now {complaint.get_status_display()}."
+            notification_type=notif_type,
+            title=notif_title,
+            message=notif_msg
         )
 
         return Response({
@@ -232,11 +247,11 @@ class AdminComplaintRemarksView(APIView):
         )
 
         # Notify student
-        Notification.objects.create(
+        Notification.create_for_event(
             recipient=complaint.student,
             institution=complaint.institution,
             complaint=complaint,
-            notification_type=Notification.NotificationType.STATUS_CHANGE,
+            notification_type=Notification.NotificationType.REMARK,
             title=f"New Remark on {complaint.complaint_id}",
             message=f"Administrator remarked: {remark}"
         )
@@ -313,7 +328,7 @@ class AdminComplaintResolutionView(APIView):
         )
 
         # Notify student
-        Notification.objects.create(
+        Notification.create_for_event(
             recipient=complaint.student,
             institution=complaint.institution,
             complaint=complaint,

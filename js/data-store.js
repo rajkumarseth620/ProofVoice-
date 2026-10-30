@@ -740,16 +740,26 @@ class DataStore {
   // User Profile
   updateUserProfile(userId, profileData) {
     const db = this.getDb();
-    const user = db.users.find(u => u.id === userId);
+    if (!db.users) db.users = [];
+    let user = db.users.find(u => String(u.id) === String(userId) || (profileData.email && String(u.email).toLowerCase() === String(profileData.email).toLowerCase()));
+    if (!user && db.currentSession && db.currentSession.userId) {
+      user = db.users.find(u => String(u.id) === String(db.currentSession.userId));
+    }
+    if (!user && db.users.length > 0) {
+      user = db.users[0];
+    }
     if (!user) return false;
 
     if (profileData.fullName) user.fullName = profileData.fullName;
     if (profileData.studentIdentifier !== undefined) user.studentIdentifier = profileData.studentIdentifier;
     if (profileData.department !== undefined) user.department = profileData.department;
+    if (profileData.course !== undefined) user.course = profileData.course;
     if (profileData.yearSemester !== undefined) user.yearSemester = profileData.yearSemester;
     if (profileData.residentialAddress !== undefined) user.residentialAddress = profileData.residentialAddress;
     if (profileData.phone !== undefined) user.phone = profileData.phone;
     if (profileData.profileComplete !== undefined) user.profileComplete = profileData.profileComplete;
+    if (profileData.notifyInApp !== undefined) user.notifyInApp = profileData.notifyInApp;
+    if (profileData.notifyEmail !== undefined) user.notifyEmail = profileData.notifyEmail;
 
     this.saveDb(db);
     return user;

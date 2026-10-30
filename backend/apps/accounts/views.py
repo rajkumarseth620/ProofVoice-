@@ -154,10 +154,10 @@ class ProfileView(APIView):
     def patch(self, request):
         serializer = ProfileUpdateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.update(request.user, serializer.validated_data)
+            user = serializer.update(request.user, serializer.validated_data)
             return Response({
                 'message': 'Profile updated successfully.',
-                'user': UserSerializer(request.user, context={'request': request}).data
+                'user': UserSerializer(user, context={'request': request}).data
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -178,9 +178,19 @@ class ComplaintSubmitView(APIView):
             public_remark=public_remark
         )
 
+        # Notify submitting student
+        Notification.create_for_event(
+            recipient=request.user,
+            institution=complaint.institution,
+            complaint=complaint,
+            notification_type=Notification.NotificationType.SUBMISSION,
+            title=f"Complaint Submitted: {complaint.complaint_id}",
+            message=f"Your complaint '{complaint.title}' has been successfully logged with tracking ID {complaint.complaint_id}."
+        )
+
         # Notify institution administrators if present
         for admin_user in admins:
-            Notification.objects.create(
+            Notification.create_for_event(
                 recipient=admin_user,
                 institution=complaint.institution,
                 complaint=complaint,
@@ -312,6 +322,16 @@ class ComplaintReopenView(APIView):
             public_remark=f"Student reopened complaint: {reason}"
         )
 
+        # Notify student recipient
+        Notification.create_for_event(
+            recipient=request.user,
+            institution=complaint.institution,
+            complaint=complaint,
+            notification_type=Notification.NotificationType.REOPENED,
+            title=f"Complaint Reopened: {complaint.complaint_id}",
+            message=f"Your complaint '{complaint.title}' has been successfully reopened for further administrative review."
+        )
+
         # Notify institution administrators
         admins = User.objects.filter(
             role=User.Role.INSTITUTION_ADMIN,
@@ -319,11 +339,11 @@ class ComplaintReopenView(APIView):
             admin_profile__approval_status='APPROVED'
         )
         for admin_user in admins:
-            Notification.objects.create(
+            Notification.create_for_event(
                 recipient=admin_user,
                 institution=complaint.institution,
                 complaint=complaint,
-                notification_type=Notification.NotificationType.STATUS_CHANGE,
+                notification_type=Notification.NotificationType.REOPENED,
                 title=f"Complaint Reopened: {complaint.complaint_id}",
                 message=f"Student {request.user.full_name} has reopened complaint '{complaint.title}'."
             )

@@ -406,36 +406,136 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(() => {});
   }
 
-  // Check Profile Completion on Student Pages
-  if (window.proofVoiceDb) {
-    const user = window.proofVoiceDb.getCurrentUser();
-    if (user && user.role === 'student' && !user.profileComplete) {
-      const isProfilePage = window.location.pathname.includes('student-profile');
-      if (!isProfilePage) {
-        let onboardingBanner = document.getElementById('profileIncompleteBanner');
-        if (!onboardingBanner) {
-          const mainContent = document.querySelector('.app-content');
-          if (mainContent) {
-            onboardingBanner = document.createElement('div');
-            onboardingBanner.id = 'profileIncompleteBanner';
-            onboardingBanner.className = 'alert alert-warning';
-            onboardingBanner.style.marginBottom = 'var(--space-6)';
-            onboardingBanner.style.display = 'flex';
-            onboardingBanner.style.justifyContent = 'space-between';
-            onboardingBanner.style.alignItems = 'center';
-            onboardingBanner.style.flexWrap = 'wrap';
-            onboardingBanner.style.gap = 'var(--space-3)';
-            onboardingBanner.innerHTML = `
-              <div>
-                <strong>Action Required: Complete Your Student Profile</strong>
-                <div style="font-size:12px; margin-top:2px;">Your formal application letters require a verified student address and department to address institutional authorities.</div>
-              </div>
-              <a href="student-profile-complete.html" class="btn btn-warning btn-sm" style="font-weight:600;">Complete Profile Now →</a>
-            `;
-            mainContent.insertBefore(onboardingBanner, mainContent.firstChild);
-          }
-        }
-      }
-    }
-  }
+  // Setup Header Notification Dropdown
+  setupNotificationDropdown();
 });
+
+function setupNotificationDropdown() {
+  const notifBtns = document.querySelectorAll('.topbar-notification-btn');
+  if (!notifBtns.length) return;
+
+  const isNotifPage = window.location.pathname.includes('notifications.html');
+
+  notifBtns.forEach(btn => {
+    // If not already wrapped in a relative container, ensure relative positioning
+    const parent = btn.parentElement;
+    if (parent && getComputedStyle(parent).position === 'static') {
+      parent.style.position = 'relative';
+    }
+
+    btn.addEventListener('click', async (e) => {
+      if (isNotifPage) return; // On notification center page, allow normal link
+      e.preventDefault();
+      e.stopPropagation();
+
+      let dropdown = parent.querySelector('.topbar-notif-dropdown');
+      if (dropdown) {
+        dropdown.remove();
+        return;
+      }
+
+      // Close any other open dropdowns
+      document.querySelectorAll('.topbar-notif-dropdown').forEach(d => d.remove());
+
+      dropdown = document.createElement('div');
+      dropdown.className = 'topbar-notif-dropdown';
+      dropdown.innerHTML = `
+        <div class="topbar-notif-header">
+          <div style="font-weight:700; color:var(--color-navy); font-size:13px; display:flex; align-items:center; gap:6px;">
+            <span>Notifications</span>
+            <span class="badge" id="dropUnreadCountBadge" style="background:var(--color-primary-light); color:var(--color-primary); font-size:10px;">...</span>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" id="dropMarkAllReadBtn" style="font-size:11px; padding:2px 8px;">Mark All Read</button>
+        </div>
+        <div class="topbar-notif-list" id="dropNotifList">
+          <div style="padding:16px; text-align:center; color:var(--color-text-secondary); font-size:12px;">Loading alerts...</div>
+        </div>
+        <div class="topbar-notif-footer">
+          <a href="student-notifications.html" style="font-size:12px; color:var(--color-primary); font-weight:600; text-decoration:none;">View All in Notification Center →</a>
+        </div>
+      `;
+      parent.appendChild(dropdown);
+
+      // Fetch latest notifications
+      let notifs = [];
+      if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+        try {
+          const live = await window.proofVoiceApi.getNotifications();
+          if (Array.isArray(live)) notifs = live;
+        } catch (err) {}
+      }
+      if (!notifs.length && window.proofVoiceDb) {
+        notifs = window.proofVoiceDb.getNotifications() || [];
+      }
+
+      const listEl = dropdown.querySelector('#dropNotifList');
+      const countBadge = dropdown.querySelector('#dropUnreadCountBadge');
+      const unreadCount = notifs.filter(n => !n.is_read && !n.read).length;
+      if (countBadge) countBadge.textContent = `${unreadCount} Unread`;
+
+      if (!notifs.length) {
+        listEl.innerHTML = `<div style="padding:24px 16px; text-align:center; color:var(--color-text-secondary); font-size:12px;">No notifications yet.</div>`;
+      } else {
+        listEl.innerHTML = notifs.slice(0, 6).map(n => {
+          const isUnread = !n.is_read && !n.read;
+          const compId = n.complaint_identifier || n.complaint_id || (n.complaint && (n.complaint.complaint_id || n.complaint.id)) || '';
+          const targetUrl = n.action_url || (compId ? `complaint-details.html?id=${compId}` : 'student-notifications.html');
+          const timeStr = n.created_at ? new Date(n.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+
+          return `
+            <a href="${targetUrl}" class="topbar-notif-item ${isUnread ? 'unread' : ''}" data-id="${n.id}" data-comp-id="${compId}">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:12px; color:var(--color-navy);">${escapeHtml(n.title)}</strong>
+                <span style="font-size:10px; color:var(--color-text-muted);">${timeStr}</span>
+              </div>
+              <div style="font-size:11px; color:var(--color-text-secondary); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                ${escapeHtml(n.message || '')}
+              </div>
+            </a>
+          `;
+        }).join('');
+
+        // Item click: mark read and set active complaint
+        listEl.querySelectorAll('.topbar-notif-item').forEach(item => {
+          item.addEventListener('click', async () => {
+            const id = item.dataset.id;
+            const cId = item.dataset.compId;
+            if (cId) {
+              sessionStorage.setItem('proofvoice_current_complaint_id', cId);
+              localStorage.setItem('proofvoice_last_viewed_complaint_id', cId);
+            }
+            if (window.proofVoiceApi) {
+              await window.proofVoiceApi.markNotificationRead(id).catch(() => {});
+            }
+          });
+        });
+      }
+
+      // Mark all read button
+      const markAllBtn = dropdown.querySelector('#dropMarkAllReadBtn');
+      if (markAllBtn) {
+        markAllBtn.addEventListener('click', async (evt) => {
+          evt.stopPropagation();
+          markAllBtn.textContent = 'Updating...';
+          if (window.proofVoiceApi) {
+            await window.proofVoiceApi.markAllNotificationsRead().catch(() => {});
+          } else if (window.proofVoiceDb) {
+            window.proofVoiceDb.markAllNotificationsRead();
+          }
+          if (window.updateNotificationBadges) window.updateNotificationBadges(0);
+          if (countBadge) countBadge.textContent = '0 Unread';
+          dropdown.querySelectorAll('.topbar-notif-item.unread').forEach(it => it.classList.remove('unread'));
+          markAllBtn.textContent = 'All Read ✓';
+          markAllBtn.disabled = true;
+        });
+      }
+    });
+  });
+
+  // Global dismiss listener
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.topbar-notif-dropdown') && !e.target.closest('.topbar-notification-btn')) {
+      document.querySelectorAll('.topbar-notif-dropdown').forEach(d => d.remove());
+    }
+  });
+}

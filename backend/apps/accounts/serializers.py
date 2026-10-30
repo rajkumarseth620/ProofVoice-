@@ -30,6 +30,8 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             'semester',
             'address',
             'phone',
+            'notify_in_app',
+            'notify_email',
             'is_profile_complete',
             'created_at',
             'updated_at'
@@ -408,46 +410,62 @@ class LoginSerializer(serializers.Serializer):
 class ProfileUpdateSerializer(serializers.Serializer):
     full_name = serializers.CharField(required=False, max_length=200)
     student_id = serializers.CharField(required=False, allow_blank=True, max_length=100)
-    institution_id = serializers.IntegerField(required=False, allow_null=True)
+    institution_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     department = serializers.CharField(required=False, allow_blank=True, max_length=150)
     course = serializers.CharField(required=False, allow_blank=True, max_length=150)
     semester = serializers.CharField(required=False, allow_blank=True, max_length=50)
     phone = serializers.CharField(required=False, allow_blank=True, max_length=25)
     address = serializers.CharField(required=False, allow_blank=True)
     designation = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    notify_in_app = serializers.BooleanField(required=False)
+    notify_email = serializers.BooleanField(required=False)
 
     def update(self, instance, validated_data):
-        if 'full_name' in validated_data:
-            instance.full_name = validated_data['full_name']
+        if 'full_name' in validated_data and validated_data['full_name']:
+            instance.full_name = validated_data['full_name'].strip()
             instance.save(update_fields=['full_name', 'updated_at'])
 
-        if instance.role == User.Role.STUDENT and hasattr(instance, 'student_profile'):
-            profile = instance.student_profile
+        if instance.role == User.Role.STUDENT:
+            profile, _ = StudentProfile.objects.get_or_create(user=instance)
             if 'institution_id' in validated_data:
-                inst_id = validated_data['institution_id']
-                if inst_id:
-                    profile.institution = Institution.objects.filter(id=inst_id).first()
-                else:
-                    profile.institution = None
+                inst_raw = validated_data['institution_id']
+                if inst_raw and str(inst_raw).isdigit():
+                    from apps.institutions.models import Institution
+                    inst_obj = Institution.objects.filter(id=int(inst_raw)).first()
+                    if inst_obj:
+                        profile.institution = inst_obj
+
             if 'student_id' in validated_data:
-                profile.student_id = validated_data['student_id']
+                profile.student_id = validated_data['student_id'].strip()
             if 'department' in validated_data:
-                profile.department = validated_data['department']
+                profile.department = validated_data['department'].strip()
             if 'course' in validated_data:
-                profile.course = validated_data['course']
+                profile.course = validated_data['course'].strip()
+            elif 'department' in validated_data and not profile.course:
+                profile.course = validated_data['department'].strip()
             if 'semester' in validated_data:
-                profile.semester = validated_data['semester']
+                profile.semester = validated_data['semester'].strip()
             if 'phone' in validated_data:
-                profile.phone = validated_data['phone']
+                profile.phone = validated_data['phone'].strip()
             if 'address' in validated_data:
-                profile.address = validated_data['address']
+                profile.address = validated_data['address'].strip()
+            if 'notify_in_app' in validated_data:
+                profile.notify_in_app = bool(validated_data['notify_in_app'])
+            if 'notify_email' in validated_data:
+                profile.notify_email = bool(validated_data['notify_email'])
+
             profile.save()
             profile.check_completeness()
 
-        elif instance.role == User.Role.INSTITUTION_ADMIN and hasattr(instance, 'admin_profile'):
-            profile = instance.admin_profile
+        elif instance.role == User.Role.INSTITUTION_ADMIN:
+            profile, _ = AdministratorProfile.objects.get_or_create(user=instance)
             if 'designation' in validated_data:
-                profile.designation = validated_data['designation']
+                profile.designation = validated_data['designation'].strip()
+            if 'department' in validated_data:
+                profile.department_name = validated_data['department'].strip()
+            if 'phone' in validated_data:
+                profile.phone = validated_data['phone'].strip()
             profile.save()
 
+        instance.refresh_from_db()
         return instance

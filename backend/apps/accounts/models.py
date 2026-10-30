@@ -136,6 +136,8 @@ class StudentProfile(models.Model):
     semester = models.CharField(max_length=50, blank=True)
     address = models.TextField(blank=True, help_text='Correspondence / Hostel address')
     phone = models.CharField(max_length=25, blank=True)
+    notify_in_app = models.BooleanField(default=True, help_text='In-App status alerts')
+    notify_email = models.BooleanField(default=True, help_text='Email summaries')
     is_profile_complete = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
