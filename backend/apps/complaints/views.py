@@ -28,6 +28,9 @@ class ComplaintListCreateView(APIView):
     def get(self, request):
         user = request.user
         if user.role == User.Role.STUDENT:
+            profile = getattr(user, 'student_profile', None)
+            if profile and profile.institution and profile.institution.verification_status != Institution.VerificationStatus.VERIFIED:
+                return Response({'error': 'Your institution is not yet verified. Grievance records will be available once verified.'}, status=status.HTTP_403_FORBIDDEN)
             complaints = Complaint.objects.filter(student=user).order_by('-created_at')
         elif user.role == User.Role.INSTITUTION_ADMIN and hasattr(user, 'admin_profile'):
             inst = user.admin_profile.institution
@@ -60,6 +63,11 @@ class ComplaintListCreateView(APIView):
             return Response({
                 'error': 'Institutional membership required. Please select your college/university in your profile before lodging a complaint.'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+        if profile.institution.verification_status != Institution.VerificationStatus.VERIFIED:
+            return Response({
+                'error': 'Your institution is not yet verified. Grievance submissions will be unlocked once institutional verification is approved.'
+            }, status=status.HTTP_403_FORBIDDEN)
 
         serializer = ComplaintCreateSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():

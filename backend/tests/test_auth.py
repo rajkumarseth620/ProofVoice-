@@ -232,3 +232,120 @@ class AuthenticationAndProfileTests(TestCase):
         # Attempt to access protected endpoint using the old token
         me_after_logout = self.client.get('/api/v1/auth/me/')
         self.assertEqual(me_after_logout.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_student_registration_unlisted_institution_pending(self):
+        """Unlisted institution registration creates PENDING institution, unverified user, and requires approval."""
+        payload = {
+            'email': 'unlistedstudent@sjec.ac.in',
+            'password': 'SecurePassword123',
+            'full_name': 'Rohan Shenoy',
+            'institution_id': 'OTHER',
+            'custom_institution_name': 'St. Joseph Engineering College',
+            'institution_type': 'College',
+            'city': 'Mangalore',
+            'state': 'Karnataka',
+            'country': 'India',
+            'official_domain': 'sjec.ac.in',
+            'student_id': 'SJEC/2026/042',
+            'department': 'Mechanical Engineering',
+            'course': 'B.Tech ME',
+            'semester': '4th Semester'
+        }
+        response = self.client.post('/api/v1/auth/register/student/', payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data.get('requires_approval'))
+        self.assertEqual(response.data.get('institution_status'), 'PENDING')
+        self.assertNotIn('token', response.data)
+
+        # Verify institution created with PENDING status
+        inst = Institution.objects.get(name='St. Joseph Engineering College')
+        self.assertEqual(inst.verification_status, Institution.VerificationStatus.PENDING)
+
+        # Verify student account created with is_verified=False
+        user = User.objects.get(email='unlistedstudent@sjec.ac.in')
+        self.assertFalse(user.is_verified)
+        self.assertEqual(user.student_profile.institution, inst)
+
+        # Verify login is rejected before verification
+        login_res = self.client.post('/api/v1/auth/login/', {
+            'email': 'unlistedstudent@sjec.ac.in',
+            'password': 'SecurePassword123'
+        }, format='json')
+        self.assertEqual(login_res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('Your institution is not yet verified', str(login_res.data))
+
+    def test_duplicate_unlisted_institution_prevention(self):
+        """Multiple students registering from the same unlisted college are grouped under the same pending institution."""
+        payload1 = {
+            'email': 'student1@sjec.ac.in',
+            'password': 'SecurePassword123',
+            'full_name': 'Student One',
+            'institution_id': 'OTHER',
+            'custom_institution_name': 'City Polytechnic Institute',
+            'city': 'Pune',
+            'state': 'Maharashtra'
+        }
+        res1 = self.client.post('/api/v1/auth/register/student/', payload1, format='json')
+        self.assertEqual(res1.status_code, status.HTTP_201_CREATED)
+
+        initial_count = Institution.objects.filter(name__iexact='City Polytechnic Institute').count()
+        self.assertEqual(initial_count, 1)
+
+        # Second student registers with case-different name
+        payload2 = {
+            'email': 'student2@sjec.ac.in',
+            'password': 'SecurePassword123',
+            'full_name': 'Student Two',
+            'institution_id': 'OTHER',
+            'custom_institution_name': 'city polytechnic institute',
+            'city': 'Pune',
+            'state': 'Maharashtra'
+        }
+        res2 = self.client.post('/api/v1/auth/register/student/', payload2, format='json')
+        self.assertEqual(res2.status_code, status.HTTP_201_CREATED)
+
+        # Must not create a duplicate institution
+        final_count = Institution.objects.filter(name__iexact='City Polytechnic Institute').count()
+        self.assertEqual(final_count, 1)
+
+        # Both students linked to the same institution
+        u1 = User.objects.get(email='student1@sjec.ac.in')
+        u2 = User.objects.get(email='student2@sjec.ac.in')
+        self.assertEqual(u1.student_profile.institution_id, u2.student_profile.institution_id)
+
+    def test_unlisted_institution_approved_allows_login(self):
+        """Once platform administrator approves and verifies the institution, student can log in successfully."""
+        inst = Institution.objects.create(
+            name='Apex Global University',
+            code='apex-global',
+            verification_status=Institution.VerificationStatus.PENDING
+        )
+        user = User.objects.create_user(
+            email='apexstudent@apexglobal.edu',
+            password='Password123',
+            full_name='Apex Student',
+            role=User.Role.STUDENT,
+            is_verified=False
+        )
+        StudentProfile.objects.create(user=user, institution=inst)
+
+        # Login blocked while PENDING
+        res_blocked = self.client.post('/api/v1/auth/login/', {
+            'email': 'apexstudent@apexglobal.edu',
+            'password': 'Password123'
+        }, format='json')
+        self.assertEqual(res_blocked.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Admin approves institution
+        inst.verification_status = Institution.VerificationStatus.VERIFIED
+        inst.save()
+        user.is_verified = True
+        user.save()
+
+        # Login allowed after verification
+        res_allowed = self.client.post('/api/v1/auth/login/', {
+            'email': 'apexstudent@apexglobal.edu',
+            'password': 'Password123'
+        }, format='json')
+        self.assertEqual(res_allowed.status_code, status.HTTP_200_OK)
+        self.assertIn('token', res_allowed.data)

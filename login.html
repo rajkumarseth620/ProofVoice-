@@ -164,7 +164,14 @@
 
       // Check if arriving after registration
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('registered') === 'true') {
+      if (urlParams.get('pending') === 'true') {
+        showToast('info', 'Institution Verification Pending', 'Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval.', 7000);
+        const registeredEmail = urlParams.get('email');
+        if (registeredEmail) {
+          emailInput.value = registeredEmail;
+          pwdInput.focus();
+        }
+      } else if (urlParams.get('registered') === 'true') {
         showToast('success', 'Registration Successful', 'Your account has been registered. Please sign in with your credentials.');
         const registeredEmail = urlParams.get('email');
         if (registeredEmail) {

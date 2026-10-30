@@ -111,6 +111,10 @@ function initialsFromName(fullName) {
 class ProofVoiceApiClient {
   constructor() {
     this.config = API_CONFIG;
+    this.getToken = this.getToken.bind(this);
+    this.uploadProfilePhoto = this.uploadProfilePhoto.bind(this);
+    this.removeProfilePhoto = this.removeProfilePhoto.bind(this);
+    this.getHeaders = this.getHeaders.bind(this);
   }
 
   isLiveSession() {
@@ -315,11 +319,18 @@ class ProofVoiceApiClient {
     if (!password) {
       throw new Error('Password is required.');
     }
+    const isOther = payload.institutionId === 'OTHER' || !payload.institutionId || Boolean(payload.customInstitutionName);
     const backendPayload = {
       email: payload.email,
       password,
       full_name: payload.fullName,
-      institution_id: payload.institutionId ? parseInt(payload.institutionId, 10) : null,
+      institution_id: isOther ? 'OTHER' : (parseInt(payload.institutionId, 10) || payload.institutionId),
+      custom_institution_name: payload.customInstitutionName || payload.custom_institution_name || '',
+      institution_type: payload.institutionType || payload.institution_type || '',
+      state: payload.state || '',
+      city: payload.city || '',
+      country: payload.country || 'India',
+      official_domain: payload.officialDomain || payload.official_domain || '',
       student_id: payload.studentIdentifier || '',
       department: payload.department || '',
       course: payload.course || payload.department || '',
@@ -336,6 +347,9 @@ class ProofVoiceApiClient {
       });
       const data = await this.handleResponse(res);
       const user = this.normalizeUser(data);
+      if (data.token && !data.requires_approval) {
+        this.persistSession(data.token, user, data.institution);
+      }
       return { ...data, user, success: true };
     } catch (err) {
       const isNetworkErr = !err.status && (
@@ -436,7 +450,9 @@ class ProofVoiceApiClient {
       try {
         const formData = new FormData();
         formData.append('photo', file);
-        const token = this.getToken();
+        const token = (this && typeof this.getToken === 'function') 
+          ? this.getToken() 
+          : localStorage.getItem(SESSION_TOKEN_KEY);
         const headers = {};
         if (token && !String(token).startsWith('demo_token_')) {
           headers.Authorization = `Token ${token}`;
@@ -447,6 +463,10 @@ class ProofVoiceApiClient {
           body: formData
         });
         const data = await this.handleResponse(res);
+        if (data.profile_image_url && typeof data.profile_image_url === 'string' && data.profile_image_url.startsWith('/')) {
+          const backendOrigin = String(this.config.BASE_URL).replace(/\/api\/v1\/?$/, '');
+          data.profile_image_url = `${backendOrigin}${data.profile_image_url}`;
+        }
         const currentUser = this.getStoredUser() || (window.proofVoiceDb ? window.proofVoiceDb.getCurrentUser() : null);
         if (currentUser && data.profile_image_url) {
           currentUser.profileImage = data.profile_image_url;
@@ -1004,6 +1024,11 @@ class ProofVoiceApiClient {
 }
 
 window.proofVoiceApi = new ProofVoiceApiClient();
+if (!window.proofVoiceApi.getToken) {
+  window.proofVoiceApi.getToken = function() {
+    return localStorage.getItem('proofvoice_auth_token');
+  };
+}
 window.formatApiErrorPayload = formatApiErrorPayload;
 window.mapBackendRole = mapBackendRole;
 window.titleCaseStatus = titleCaseStatus;

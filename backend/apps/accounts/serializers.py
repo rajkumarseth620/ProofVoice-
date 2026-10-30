@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.db import transaction
+from django.utils.text import slugify
 from rest_framework.authtoken.models import Token
 from .models import User, StudentProfile, AdministratorProfile
-from apps.institutions.models import Institution, AdminAccessRequest
+from apps.institutions.models import Institution, AdminAccessRequest, InstitutionRegistrationRequest
 
 class StudentProfileSerializer(serializers.ModelSerializer):
     institution_name = serializers.CharField(source='institution.name', read_only=True)
@@ -90,7 +91,13 @@ class StudentRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8, required=True, allow_blank=False, trim_whitespace=False)
     full_name = serializers.CharField(max_length=200)
-    institution_id = serializers.CharField(required=True)
+    institution_id = serializers.CharField(required=False, allow_blank=True, default='')
+    custom_institution_name = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    institution_type = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    state = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    city = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    country = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    official_domain = serializers.CharField(required=False, allow_blank=True, max_length=255)
     student_id = serializers.CharField(max_length=100, required=False, allow_blank=True)
     department = serializers.CharField(max_length=150, required=False, allow_blank=True)
     course = serializers.CharField(max_length=150, required=False, allow_blank=True)
@@ -104,53 +111,105 @@ class StudentRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError("An account with this email already exists.")
         return normalized
 
-    def validate_institution_id(self, value):
-        val_str = str(value).strip()
-        institution = None
-        if val_str.isdigit():
-            institution = Institution.objects.filter(
-                id=int(val_str),
-                is_active=True,
-                verification_status=Institution.VerificationStatus.VERIFIED
-            ).first()
-        else:
-            clean_code = val_str.replace('inst_', '').replace('_01', '').replace('_02', '').replace('_03', '').replace('_', '-')
-            institution = Institution.objects.filter(
-                code__icontains=clean_code,
-                is_active=True,
-                verification_status=Institution.VerificationStatus.VERIFIED
-            ).first()
-            if not institution:
-                institution = Institution.objects.filter(
-                    name__icontains=clean_code,
-                    is_active=True,
-                    verification_status=Institution.VerificationStatus.VERIFIED
-                ).first()
-
-        if not institution:
-            raise serializers.ValidationError("Please select a verified, active institution.")
-        return institution.id
-
     def validate_password(self, value):
         if not value or not str(value).strip():
             raise serializers.ValidationError("This field is required.")
         return value
+
+    def validate(self, attrs):
+        raw_inst = str(attrs.get('institution_id', '')).strip()
+        custom_name = attrs.get('custom_institution_name', '').strip()
+        is_other = (raw_inst.upper() == 'OTHER' or not raw_inst or custom_name)
+
+        if is_other:
+            if not custom_name:
+                raise serializers.ValidationError({
+                    "custom_institution_name": "Please enter your institution name."
+                })
+            # Check for existing institution by case-insensitive name to prevent duplicates
+            existing = Institution.objects.filter(name__iexact=custom_name).first()
+            if existing:
+                attrs['resolved_institution'] = existing
+                attrs['is_unlisted_pending'] = (existing.verification_status != Institution.VerificationStatus.VERIFIED)
+            else:
+                attrs['resolved_institution'] = None
+                attrs['is_unlisted_pending'] = True
+        else:
+            # Look up verified institution
+            institution = None
+            if raw_inst.isdigit():
+                institution = Institution.objects.filter(
+                    id=int(raw_inst),
+                    is_active=True,
+                    verification_status=Institution.VerificationStatus.VERIFIED
+                ).first()
+            else:
+                clean_code = raw_inst.replace('inst_', '').replace('_01', '').replace('_02', '').replace('_03', '').replace('_', '-')
+                institution = Institution.objects.filter(
+                    code__icontains=clean_code,
+                    is_active=True,
+                    verification_status=Institution.VerificationStatus.VERIFIED
+                ).first()
+                if not institution:
+                    institution = Institution.objects.filter(
+                        name__icontains=clean_code,
+                        is_active=True,
+                        verification_status=Institution.VerificationStatus.VERIFIED
+                    ).first()
+
+            if not institution:
+                raise serializers.ValidationError({
+                    "institution_id": "Please select a verified, active institution or specify an unlisted institution."
+                })
+            attrs['resolved_institution'] = institution
+            attrs['is_unlisted_pending'] = False
+
+        return attrs
 
     @transaction.atomic
     def create(self, validated_data):
         email = validated_data['email']
         password = validated_data['password']
         full_name = validated_data['full_name']
-        institution = Institution.objects.get(id=validated_data['institution_id'])
         department = validated_data.get('department', '')
         course = validated_data.get('course') or department
+        is_unlisted_pending = validated_data.get('is_unlisted_pending', False)
+        institution = validated_data.get('resolved_institution')
+
+        if not institution:
+            # Create a new Institution record with PENDING verification status
+            custom_name = validated_data.get('custom_institution_name', '').strip()
+            inst_type_raw = (validated_data.get('institution_type') or 'College').strip().upper()
+            valid_types = dict(Institution.InstitutionType.choices)
+            inst_type = inst_type_raw if inst_type_raw in valid_types else Institution.InstitutionType.COLLEGE
+
+            base_code = slugify(custom_name)[:80] or 'inst'
+            code = base_code
+            counter = 1
+            while Institution.objects.filter(code=code).exists():
+                code = f"{base_code}-{counter}"
+                counter += 1
+
+            institution = Institution.objects.create(
+                name=custom_name,
+                code=code,
+                institution_type=inst_type,
+                official_email=validated_data.get('official_domain', '').strip() or email,
+                official_address=f"{validated_data.get('city', '')}, {validated_data.get('state', '')}, {validated_data.get('country', '')}".strip(', '),
+                state=validated_data.get('state', '').strip(),
+                city=validated_data.get('city', '').strip(),
+                country=validated_data.get('country', '').strip() or 'India',
+                website=validated_data.get('official_domain', '').strip(),
+                verification_status=Institution.VerificationStatus.PENDING,
+                is_active=True
+            )
 
         user = User.objects.create_user(
             email=email,
             password=password,
             full_name=full_name,
             role=User.Role.STUDENT,
-            is_verified=True
+            is_verified=not is_unlisted_pending
         )
 
         profile = StudentProfile.objects.create(
@@ -165,7 +224,25 @@ class StudentRegistrationSerializer(serializers.Serializer):
         )
         profile.check_completeness()
 
+        if is_unlisted_pending:
+            InstitutionRegistrationRequest.objects.get_or_create(
+                created_institution=institution,
+                defaults={
+                    'institution_name': institution.name,
+                    'institution_type': institution.institution_type,
+                    'official_email': validated_data.get('official_domain', '').strip() or email,
+                    'official_address': institution.official_address or f"{institution.city}, {institution.state}".strip(', '),
+                    'state': institution.state,
+                    'city': institution.city,
+                    'website': institution.website,
+                    'applicant_user': user,
+                    'applicant_designation': 'Student Applicant',
+                    'status': InstitutionRegistrationRequest.Status.PENDING
+                }
+            )
+
         token, _ = Token.objects.get_or_create(user=user)
+        user.is_unlisted_pending = is_unlisted_pending
         return user, token
 
 
@@ -264,6 +341,22 @@ class LoginSerializer(serializers.Serializer):
         elif requested_role in ['superadmin', 'platform_superadmin']:
             if user.role != User.Role.PLATFORM_SUPERADMIN:
                 raise serializers.ValidationError("Access denied. This account does not have platform superadmin privileges.")
+
+        # Enforce institution verification for student accounts
+        if user.role == User.Role.STUDENT and hasattr(user, 'student_profile'):
+            inst = user.student_profile.institution
+            if inst and inst.verification_status != Institution.VerificationStatus.VERIFIED:
+                raise serializers.ValidationError(
+                    "Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval."
+                )
+
+        # Enforce institution verification for administrator accounts
+        if user.role == User.Role.INSTITUTION_ADMIN and hasattr(user, 'admin_profile'):
+            inst = user.admin_profile.institution
+            if inst and inst.verification_status != Institution.VerificationStatus.VERIFIED:
+                raise serializers.ValidationError(
+                    "Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval."
+                )
 
         attrs['user'] = user
         return attrs

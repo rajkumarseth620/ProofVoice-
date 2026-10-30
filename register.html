@@ -405,25 +405,47 @@
         submitBtn.innerHTML = `<span class="spinner"></span> Creating Account...`;
 
         try {
-          let finalInstId = instId;
-          if (instId === 'OTHER') {
-            showToast('error', 'Institution Not Verified', 'Unlisted institutions must be verified by a platform administrator before student accounts can be created. Please select a verified institution from the list.');
+          const isOther = (instId === 'OTHER');
+          const customName = isOther ? document.getElementById('regCustomInstName').value.trim() : '';
+          const regInstType = document.getElementById('regInstType') ? document.getElementById('regInstType').value : 'College';
+          const regInstDomain = document.getElementById('regInstDomain') ? document.getElementById('regInstDomain').value.trim() : '';
+          const regCountry = document.getElementById('regCountry') ? document.getElementById('regCountry').value.trim() : 'India';
+          const regState = document.getElementById('regState') ? document.getElementById('regState').value.trim() : '';
+          const regCity = document.getElementById('regCity') ? document.getElementById('regCity').value.trim() : '';
+
+          if (isOther && !customName) {
+            showToast('error', 'Institution Name Required', 'Please enter your institution name.');
+            document.getElementById('regCustomInstName').focus();
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Create Verified Student Account';
             return;
           }
 
-          await window.proofVoiceApi.registerStudent({
+          const res = await window.proofVoiceApi.registerStudent({
             fullName,
             email,
             password: pwd,
-            institutionId: finalInstId,
+            institutionId: isOther ? 'OTHER' : instId,
+            customInstitutionName: customName,
+            institutionType: regInstType,
+            officialDomain: regInstDomain,
+            country: regCountry,
+            state: regState,
+            city: regCity,
             studentIdentifier: studentId,
             department,
             yearSemester: yearSem,
             residentialAddress: address,
             phone
           });
+
+          if (res && (res.requires_approval || res.institution_status === 'PENDING')) {
+            showToast('info', 'Registration Submitted', 'Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval.', 6000);
+            setTimeout(() => {
+              window.location.replace(`login.html?pending=true&email=${encodeURIComponent(email)}`);
+            }, 1800);
+            return;
+          }
 
           showToast('success', 'Registration Successful', 'Your account has been created. Redirecting to sign in...');
           setTimeout(() => {

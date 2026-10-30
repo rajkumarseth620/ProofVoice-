@@ -446,6 +446,7 @@
           const res = await window.proofVoiceApi.uploadProfilePhoto(selectedPhotoFile);
           currentPhotoUrl = res.profile_image_url || null;
           user.profileImage = currentPhotoUrl;
+          localStorage.setItem('proofvoice_auth_user', JSON.stringify(user));
 
           // Re-render display
           renderProfilePhoto(currentPhotoUrl);
@@ -485,6 +486,7 @@
           await window.proofVoiceApi.removeProfilePhoto();
           currentPhotoUrl = null;
           user.profileImage = null;
+          localStorage.setItem('proofvoice_auth_user', JSON.stringify(user));
 
           renderProfilePhoto(null);
           btnSavePhoto.style.display = 'none';
