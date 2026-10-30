@@ -272,7 +272,7 @@ class AuthenticationAndProfileTests(TestCase):
             'password': 'SecurePassword123'
         }, format='json')
         self.assertEqual(login_res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('Your institution is not yet verified', str(login_res.data))
+        self.assertIn('Your institution registration request has been submitted successfully', str(login_res.data))
 
     def test_duplicate_unlisted_institution_prevention(self):
         """Multiple students registering from the same unlisted college are grouped under the same pending institution."""

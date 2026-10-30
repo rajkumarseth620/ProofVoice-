@@ -165,7 +165,7 @@
       // Check if arriving after registration
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('pending') === 'true') {
-        showToast('info', 'Institution Verification Pending', 'Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval.', 7000);
+        showToast('info', 'Institution Verification Pending', 'Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval.', 8000);
         const registeredEmail = urlParams.get('email');
         if (registeredEmail) {
           emailInput.value = registeredEmail;

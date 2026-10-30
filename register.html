@@ -440,7 +440,7 @@
           });
 
           if (res && (res.requires_approval || res.institution_status === 'PENDING')) {
-            showToast('info', 'Registration Submitted', 'Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval.', 6000);
+            showToast('info', 'Registration Submitted', 'Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval.', 7000);
             setTimeout(() => {
               window.location.replace(`login.html?pending=true&email=${encodeURIComponent(email)}`);
             }, 1800);

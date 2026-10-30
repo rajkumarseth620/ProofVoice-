@@ -31,7 +31,7 @@ class StudentRegisterView(APIView):
             user, token = serializer.save()
             if getattr(user, 'is_unlisted_pending', False):
                 return Response({
-                    'message': 'Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval.',
+                    'message': 'Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval.',
                     'requires_approval': True,
                     'institution_status': 'PENDING',
                     'user': UserSerializer(user).data

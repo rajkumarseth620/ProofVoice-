@@ -347,7 +347,7 @@ class LoginSerializer(serializers.Serializer):
             inst = user.student_profile.institution
             if inst and inst.verification_status != Institution.VerificationStatus.VERIFIED:
                 raise serializers.ValidationError(
-                    "Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval."
+                    "Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval."
                 )
 
         # Enforce institution verification for administrator accounts
@@ -355,7 +355,7 @@ class LoginSerializer(serializers.Serializer):
             inst = user.admin_profile.institution
             if inst and inst.verification_status != Institution.VerificationStatus.VERIFIED:
                 raise serializers.ValidationError(
-                    "Your institution is not yet verified. Your registration request has been submitted and is awaiting platform administrator approval."
+                    "Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval."
                 )
 
         attrs['user'] = user
