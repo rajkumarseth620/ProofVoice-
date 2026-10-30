@@ -270,7 +270,7 @@ class ProofVoiceApiClient {
     if (!email || !String(email).trim() || !password) {
       throw new Error('Please enter your email and password.');
     }
-    const cleanEmail = String(email).trim();
+    const cleanEmail = String(email).trim().toLowerCase();
     try {
       const res = await fetch(`${this.config.BASE_URL}/auth/login/`, {
         method: 'POST',
@@ -289,7 +289,68 @@ class ProofVoiceApiClient {
         (err.message && /failed to fetch|networkerror|load failed|fetch failed|refused|abort|connection refused/i.test(err.message))
       );
       if (isNetworkErr) {
-        throw new Error('Server temporarily unavailable. Please try again later.');
+        // Fallback for static hosting when backend server is offline or unreachable
+        const db = window.proofVoiceDb;
+        if (db) {
+          const dbData = db.getDb();
+          const target = (dbData.users || []).find(
+            u => String(u.email || '').trim().toLowerCase() === cleanEmail
+          );
+          if (target) {
+            const isMatch = target.passwordHash
+              ? (target.passwordHash === password || target.passwordHash === btoa(password))
+              : Boolean(password && String(password).trim().length >= 4);
+            if (!isMatch) {
+              throw new Error('Invalid email or password.');
+            }
+            if (!target.passwordHash) {
+              target.passwordHash = btoa(password);
+              db.saveDb(dbData);
+            }
+            if (roleHint && roleHint.toLowerCase() === 'admin' && target.role !== 'admin' && target.role !== 'superadmin') {
+              throw new Error('Access denied. This account does not have administrator privileges.');
+            }
+            if (roleHint && roleHint.toLowerCase() === 'student' && target.role !== 'student') {
+              throw new Error('Access denied. Please sign in via the Administrator portal.');
+            }
+            const token = 'pv_auth_' + Date.now();
+            const inst = (typeof db.getInstitution === 'function')
+              ? db.getInstitution(target.institutionId)
+              : (dbData.institutions || []).find(i => String(i.id) === String(target.institutionId));
+            const user = {
+              id: target.id,
+              email: target.email,
+              fullName: target.fullName,
+              role: target.role || 'student',
+              backendRole: (target.role || 'student').toUpperCase(),
+              institutionId: inst ? inst.id : null,
+              institutionName: inst ? inst.name : (target.institutionName || ''),
+              institutionCode: inst ? inst.code : (target.institutionCode || 'INST'),
+              studentIdentifier: target.studentIdentifier || target.studentId || '',
+              department: target.department || '',
+              course: target.course || target.department || '',
+              yearSemester: target.yearSemester || target.semester || '',
+              residentialAddress: target.residentialAddress || target.address || '',
+              phone: target.phone || '',
+              avatar: target.avatar || initialsFromName(target.fullName),
+              profileComplete: true,
+              isApproved: true
+            };
+            this.persistSession(token, user, inst);
+            return {
+              token,
+              user,
+              role: user.role,
+              institution: inst,
+              is_approved: true,
+              message: 'Login successful.',
+              success: true
+            };
+          } else {
+            throw new Error('Invalid email or password.');
+          }
+        }
+        throw new Error('Invalid email or password.');
       }
       throw err;
     }
@@ -357,6 +418,120 @@ class ProofVoiceApiClient {
         (err.message && /failed to fetch|networkerror|load failed|fetch failed|refused|abort|connection refused/i.test(err.message))
       );
       if (isNetworkErr) {
+        // Fallback for static hosting when backend server is offline or unreachable
+        const db = window.proofVoiceDb;
+        if (db) {
+          const dbData = db.getDb();
+          const cleanEmail = String(payload.email).trim().toLowerCase();
+          const exists = (dbData.users || []).some(
+            u => String(u.email || '').trim().toLowerCase() === cleanEmail
+          );
+          if (exists) {
+            throw new Error('An account with this email already exists.');
+          }
+
+          let inst = null;
+          if (isOther && backendPayload.custom_institution_name) {
+            const instName = backendPayload.custom_institution_name.trim();
+            inst = (dbData.institutions || []).find(
+              i => String(i.name || '').trim().toLowerCase() === instName.toLowerCase()
+            );
+            if (!inst) {
+              if (typeof db.addInstitution === 'function') {
+                inst = db.addInstitution({
+                  name: instName,
+                  type: backendPayload.institution_type || 'College',
+                  officialEmail: backendPayload.official_domain || cleanEmail,
+                  city: backendPayload.city,
+                  state: backendPayload.state,
+                  country: backendPayload.country || 'India',
+                  officialAddress: `${backendPayload.city || ''}, ${backendPayload.state || ''}`.trim(', ') || instName,
+                  status: 'UNVERIFIED',
+                  verificationStatus: 'UNVERIFIED'
+                });
+              } else {
+                const code = instName.split(/\s+/).map(w => w[0]).join('').slice(0, 5).toUpperCase() || 'INST';
+                inst = {
+                  id: 'inst_' + Date.now(),
+                  code,
+                  name: instName,
+                  type: backendPayload.institution_type || 'College',
+                  officialEmail: backendPayload.official_domain || cleanEmail,
+                  city: backendPayload.city || '',
+                  state: backendPayload.state || '',
+                  country: backendPayload.country || 'India',
+                  officialAddress: `${backendPayload.city || ''}, ${backendPayload.state || ''}`.trim(', ') || instName,
+                  status: 'UNVERIFIED',
+                  verificationStatus: 'UNVERIFIED'
+                };
+                if (!dbData.institutions) dbData.institutions = [];
+                dbData.institutions.push(inst);
+              }
+            }
+          } else if (payload.institutionId && payload.institutionId !== 'OTHER') {
+            inst = (typeof db.getInstitution === 'function')
+              ? db.getInstitution(payload.institutionId)
+              : (dbData.institutions || []).find(i => String(i.id) === String(payload.institutionId));
+          }
+
+          const newStudentUser = {
+            id: 'usr_' + Date.now(),
+            role: 'student',
+            fullName: payload.fullName,
+            email: cleanEmail,
+            passwordHash: btoa(password),
+            institutionId: inst ? inst.id : 'inst_apex_01',
+            institutionName: inst ? inst.name : (backendPayload.custom_institution_name || 'My Institution'),
+            institutionCode: inst ? inst.code : 'INST',
+            studentIdentifier: payload.studentIdentifier || '',
+            department: payload.department || '',
+            course: payload.course || payload.department || '',
+            yearSemester: payload.yearSemester || '',
+            residentialAddress: payload.residentialAddress || '',
+            phone: payload.phone || '',
+            avatar: initialsFromName(payload.fullName),
+            isApproved: true,
+            profileComplete: Boolean(payload.residentialAddress && payload.studentIdentifier),
+            registeredAt: new Date().toISOString()
+          };
+
+          dbData.users.push(newStudentUser);
+          db.saveDb(dbData);
+
+          const token = 'pv_auth_' + Date.now();
+          const normalized = {
+            id: newStudentUser.id,
+            email: newStudentUser.email,
+            fullName: newStudentUser.fullName,
+            role: 'student',
+            backendRole: 'STUDENT',
+            institutionId: inst ? inst.id : null,
+            institutionName: inst ? inst.name : '',
+            institutionCode: inst ? inst.code : '',
+            studentIdentifier: newStudentUser.studentIdentifier,
+            department: newStudentUser.department,
+            course: newStudentUser.course,
+            yearSemester: newStudentUser.yearSemester,
+            residentialAddress: newStudentUser.residentialAddress,
+            phone: newStudentUser.phone,
+            avatar: newStudentUser.avatar,
+            profileComplete: newStudentUser.profileComplete,
+            isApproved: true
+          };
+
+          this.persistSession(token, normalized, inst);
+
+          return {
+            token,
+            user: normalized,
+            institution: inst,
+            is_unlisted_institution: isOther,
+            message: isOther
+              ? 'Registration successful! Your institution has been added to ProofVoice. Welcome to your Student Dashboard.'
+              : 'Registration successful! Welcome to your Student Dashboard.',
+            success: true
+          };
+        }
         throw new Error('Server temporarily unavailable. Please try again later.');
       }
       throw err;
@@ -596,32 +771,50 @@ class ProofVoiceApiClient {
 
   async getInstitutions() {
     if (this.config.USE_REAL_BACKEND) {
-      const res = await fetch(`${this.config.BASE_URL}/institutions/`, {
-        headers: { 'Accept': 'application/json' }
-      });
-      const data = await this.handleResponse(res);
-      return this.unwrapList(data);
+      try {
+        const res = await fetch(`${this.config.BASE_URL}/institutions/`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        const data = await this.handleResponse(res);
+        return this.unwrapList(data);
+      } catch (err) {
+        if (window.proofVoiceDb) {
+          return typeof window.proofVoiceDb.getInstitutions === 'function'
+            ? window.proofVoiceDb.getInstitutions()
+            : (window.proofVoiceDb.getAllInstitutions ? window.proofVoiceDb.getAllInstitutions() : (window.proofVoiceDb.getDb().institutions || []));
+        }
+        return [];
+      }
     }
-    return window.proofVoiceDb.getInstitutions();
+    if (window.proofVoiceDb) {
+      return typeof window.proofVoiceDb.getInstitutions === 'function'
+        ? window.proofVoiceDb.getInstitutions()
+        : (window.proofVoiceDb.getAllInstitutions ? window.proofVoiceDb.getAllInstitutions() : (window.proofVoiceDb.getDb().institutions || []));
+    }
+    return [];
   }
 
   async requestInstitution(payload) {
     if (this.config.USE_REAL_BACKEND) {
-      const res = await fetch(`${this.config.BASE_URL}/institutions/registration-requests/`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({
-          institution_name: payload.name || payload.institution_name,
-          institution_type: (payload.type || payload.institution_type || 'UNIVERSITY').toUpperCase(),
-          official_email: payload.officialEmail || payload.official_email,
-          official_address: payload.officialAddress || payload.official_address,
-          state: payload.state || '',
-          city: payload.city || '',
-          website: payload.website || '',
-          applicant_designation: payload.contactDesignation || payload.applicant_designation || 'Administrator'
-        })
-      });
-      return this.handleResponse(res);
+      try {
+        const res = await fetch(`${this.config.BASE_URL}/institutions/registration-requests/`, {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: JSON.stringify({
+            institution_name: payload.name || payload.institution_name,
+            institution_type: (payload.type || payload.institution_type || 'UNIVERSITY').toUpperCase(),
+            official_email: payload.officialEmail || payload.official_email,
+            official_address: payload.officialAddress || payload.official_address,
+            state: payload.state || '',
+            city: payload.city || '',
+            website: payload.website || '',
+            applicant_designation: payload.contactDesignation || payload.applicant_designation || 'Administrator'
+          })
+        });
+        return await this.handleResponse(res);
+      } catch (e) {
+        console.warn('[ProofVoice API] Live requestInstitution failed, saving locally:', e);
+      }
     }
     const inst = window.proofVoiceDb.requestInstitution(payload);
     return { success: true, institution: inst, status: 'pending_review' };
@@ -721,50 +914,54 @@ class ProofVoiceApiClient {
 
   async submitComplaint(complaintData) {
     if (this.isLiveSession()) {
-      const res = await fetch(`${this.config.BASE_URL}/complaints/`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({
-          title: complaintData.title,
-          original_description: complaintData.originalDescription || complaintData.originalTranscription || complaintData.description,
-          original_transcription: complaintData.originalTranscription || '',
-          final_submitted_application: complaintData.finalApplicationLetter || complaintData.formalApplication || complaintData.final_submitted_application || '',
-          category: complaintData.category || complaintData.categoryName || '',
-          category_id: complaintData.categoryId ? parseInt(complaintData.categoryId, 10) : null,
-          priority: complaintData.priority ? String(complaintData.priority).toUpperCase() : 'MEDIUM',
-          source_type: (complaintData.sourceType || complaintData.originalInputMethod || 'TEXT').toString().toUpperCase() === 'VOICE' ? 'VOICE' : 'TEXT',
-          building: complaintData.locationBuilding || complaintData.building || '',
-          floor: complaintData.locationFloor || complaintData.floor || '',
-          room_number: complaintData.locationRoom || complaintData.room_number || '',
-          full_issue_location: complaintData.location || complaintData.full_issue_location || '',
-          submit_now: true
-        })
-      });
-      const data = await this.handleResponse(res);
-      const normalized = this.normalizeComplaint(data.complaint || data);
-      if (normalized && normalized.id) {
-        sessionStorage.setItem('proofvoice_current_complaint_id', normalized.id);
-        localStorage.setItem('proofvoice_last_viewed_complaint_id', normalized.id);
-      }
-      // Keep local store in sync for offline viewing and cross-tab viewing
       try {
-        if (window.proofVoiceDb) {
-          window.proofVoiceDb.addComplaint({
-            ...complaintData,
-            id: normalized.id,
-            complaint_id: normalized.id,
-            numericId: normalized.numericId,
-            status: normalized.status || 'Submitted',
-            title: normalized.title,
-            category: normalized.category,
-            location: normalized.location,
-            formalApplication: normalized.formalApplication || complaintData.formalApplication,
-            originalTranscription: normalized.originalTranscription || complaintData.originalTranscription,
-            submittedAt: normalized.submittedAt || new Date().toISOString()
-          });
+        const res = await fetch(`${this.config.BASE_URL}/complaints/`, {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: JSON.stringify({
+            title: complaintData.title,
+            original_description: complaintData.originalDescription || complaintData.originalTranscription || complaintData.description,
+            original_transcription: complaintData.originalTranscription || '',
+            final_submitted_application: complaintData.finalApplicationLetter || complaintData.formalApplication || complaintData.final_submitted_application || '',
+            category: complaintData.category || complaintData.categoryName || '',
+            category_id: complaintData.categoryId ? parseInt(complaintData.categoryId, 10) : null,
+            priority: complaintData.priority ? String(complaintData.priority).toUpperCase() : 'MEDIUM',
+            source_type: (complaintData.sourceType || complaintData.originalInputMethod || 'TEXT').toString().toUpperCase() === 'VOICE' ? 'VOICE' : 'TEXT',
+            building: complaintData.locationBuilding || complaintData.building || '',
+            floor: complaintData.locationFloor || complaintData.floor || '',
+            room_number: complaintData.locationRoom || complaintData.room_number || '',
+            full_issue_location: complaintData.location || complaintData.full_issue_location || '',
+            submit_now: true
+          })
+        });
+        const data = await this.handleResponse(res);
+        const normalized = this.normalizeComplaint(data.complaint || data);
+        if (normalized && normalized.id) {
+          sessionStorage.setItem('proofvoice_current_complaint_id', normalized.id);
+          localStorage.setItem('proofvoice_last_viewed_complaint_id', normalized.id);
         }
-      } catch (e) {}
-      return normalized;
+        // Keep local store in sync for offline viewing and cross-tab viewing
+        try {
+          if (window.proofVoiceDb) {
+            window.proofVoiceDb.addComplaint({
+              ...complaintData,
+              id: normalized.id,
+              complaint_id: normalized.id,
+              numericId: normalized.numericId,
+              status: normalized.status || 'Submitted',
+              title: normalized.title,
+              category: normalized.category,
+              location: normalized.location,
+              formalApplication: normalized.formalApplication || complaintData.formalApplication,
+              originalTranscription: normalized.originalTranscription || complaintData.originalTranscription,
+              submittedAt: normalized.submittedAt || new Date().toISOString()
+            });
+          }
+        } catch (e) {}
+        return normalized;
+      } catch (err) {
+        console.warn('[ProofVoice API] Live submitComplaint failed, saving to local store:', err);
+      }
     }
     return window.proofVoiceDb.addComplaint(complaintData);
   }

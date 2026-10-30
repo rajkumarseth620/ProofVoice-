@@ -616,7 +616,94 @@ class DataStore {
 
   getAllInstitutions() {
     const db = this.getDb();
-    return db.institutions;
+    return db.institutions || [];
+  }
+
+  getInstitutions() {
+    return this.getAllInstitutions();
+  }
+
+  addInstitution(data) {
+    const db = this.getDb();
+    if (!db.institutions) db.institutions = [];
+    const code = (data.code || (data.name ? data.name.split(' ').map(w => w[0]).join('').slice(0, 5).toUpperCase() : 'INST')) || 'INST';
+    const newInst = {
+      id: data.id || ('inst_' + Date.now()),
+      code,
+      name: data.name,
+      type: data.type || 'College',
+      officialEmail: data.officialEmail || '',
+      officialAddress: data.officialAddress || `${data.city || ''}, ${data.state || ''}`.trim() || data.name,
+      country: data.country || 'India',
+      state: data.state || '',
+      city: data.city || '',
+      website: data.website || '',
+      status: data.status || 'UNVERIFIED',
+      verificationStatus: data.verificationStatus || 'UNVERIFIED',
+      contactPerson: data.contactPerson || 'Platform Administrator',
+      contactDesignation: data.contactDesignation || 'Administrator',
+      defaultRecipient: {
+        designation: data.defaultRecipientDesignation || 'The Principal / Head of Institution',
+        name: data.contactPerson || 'Head of Institution',
+        address: data.officialAddress || `${data.name}, ${data.city || ''}`
+      },
+      recipientMappings: {},
+      departments: [
+        'Infrastructure & Maintenance',
+        'Information Technology Services',
+        'Academic Affairs',
+        'Hostel & Residential Life',
+        'Water Works & Sanitation'
+      ],
+      categories: [
+        'Infrastructure and Maintenance',
+        'Electricity and Lighting',
+        'Water and Sanitation',
+        'Internet and IT',
+        'Classroom and Laboratory',
+        'Library',
+        'Hostel and Accommodation',
+        'Other'
+      ],
+      settings: {
+        slaHours: 48,
+        requireStudentVerification: false,
+        notifyOnResolution: true
+      }
+    };
+    db.institutions.push(newInst);
+    this.saveDb(db);
+    return newInst;
+  }
+
+  addUser(userData) {
+    const db = this.getDb();
+    if (!db.users) db.users = [];
+    const cleanEmail = String(userData.email || '').trim().toLowerCase();
+    const newUser = {
+      id: userData.id || ('usr_' + Date.now()),
+      role: userData.role || 'student',
+      fullName: userData.fullName || '',
+      email: cleanEmail,
+      passwordHash: userData.passwordHash || '',
+      institutionId: userData.institutionId || null,
+      institutionName: userData.institutionName || '',
+      institutionCode: userData.institutionCode || 'INST',
+      studentIdentifier: userData.studentIdentifier || '',
+      department: userData.department || '',
+      course: userData.course || userData.department || '',
+      yearSemester: userData.yearSemester || '',
+      residentialAddress: userData.residentialAddress || '',
+      phone: userData.phone || '',
+      avatar: userData.avatar || (userData.fullName ? userData.fullName.slice(0, 2).toUpperCase() : 'PV'),
+      status: userData.status || 'verified',
+      isApproved: userData.isApproved !== undefined ? userData.isApproved : true,
+      profileComplete: userData.profileComplete !== undefined ? userData.profileComplete : true,
+      registeredAt: userData.registeredAt || new Date().toISOString()
+    };
+    db.users.push(newUser);
+    this.saveDb(db);
+    return newUser;
   }
 
   switchRole(role) {
