@@ -15,6 +15,7 @@ class Institution(models.Model):
 
     class VerificationStatus(models.TextChoices):
         PENDING = 'PENDING', 'Pending Verification'
+        UNVERIFIED = 'UNVERIFIED', 'Unverified / Unclaimed'
         VERIFIED = 'VERIFIED', 'Verified & Active'
         REJECTED = 'REJECTED', 'Rejected'
         SUSPENDED = 'SUSPENDED', 'Suspended'

@@ -28,9 +28,6 @@ class ComplaintListCreateView(APIView):
     def get(self, request):
         user = request.user
         if user.role == User.Role.STUDENT:
-            profile = getattr(user, 'student_profile', None)
-            if profile and profile.institution and profile.institution.verification_status != Institution.VerificationStatus.VERIFIED:
-                return Response({'error': 'Your institution is not yet verified. Grievance records will be available once verified.'}, status=status.HTTP_403_FORBIDDEN)
             complaints = Complaint.objects.filter(student=user).order_by('-created_at')
         elif user.role == User.Role.INSTITUTION_ADMIN and hasattr(user, 'admin_profile'):
             inst = user.admin_profile.institution
@@ -63,11 +60,6 @@ class ComplaintListCreateView(APIView):
             return Response({
                 'error': 'Institutional membership required. Please select your college/university in your profile before lodging a complaint.'
             }, status=status.HTTP_400_BAD_REQUEST)
-
-        if profile.institution.verification_status != Institution.VerificationStatus.VERIFIED:
-            return Response({
-                'error': 'Your institution is not yet verified. Grievance submissions will be unlocked once institutional verification is approved.'
-            }, status=status.HTTP_403_FORBIDDEN)
 
         serializer = ComplaintCreateSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -163,21 +155,30 @@ class ComplaintSubmitView(APIView):
         complaint.submission_timestamp = timezone.now()
         complaint.save()
 
+        # Check if verified administrator exists for this institution
+        admins = User.objects.filter(
+            role=User.Role.INSTITUTION_ADMIN,
+            admin_profile__institution=complaint.institution,
+            admin_profile__approval_status='APPROVED'
+        )
+        has_verified_admin = admins.exists()
+
+        public_remark = (
+            'Formal complaint submitted to institutional administration.'
+            if has_verified_admin
+            else 'Formal complaint lodged. Awaiting institutional administrator onboarding for review and resolution.'
+        )
+
         # Record timeline
         ComplaintStatusHistory.objects.create(
             complaint=complaint,
             previous_status=Complaint.Status.DRAFT,
             new_status=Complaint.Status.SUBMITTED,
             changed_by=request.user,
-            public_remark='Formal complaint submitted to institutional administration.'
+            public_remark=public_remark
         )
 
-        # Notify institution administrators
-        admins = User.objects.filter(
-            role=User.Role.INSTITUTION_ADMIN,
-            admin_profile__institution=complaint.institution,
-            admin_profile__approval_status='APPROVED'
-        )
+        # Notify institution administrators if present
         for admin_user in admins:
             Notification.objects.create(
                 recipient=admin_user,
@@ -188,8 +189,14 @@ class ComplaintSubmitView(APIView):
                 message=f"A new complaint '{complaint.title}' has been submitted by {request.user.full_name}."
             )
 
+        submit_message = (
+            'Complaint submitted successfully.'
+            if has_verified_admin
+            else 'Complaint submitted successfully. Your institution does not have a verified administrator yet; complaints are queued and will be reviewed once an administrator is onboarded.'
+        )
+
         return Response({
-            'message': 'Complaint submitted successfully.',
+            'message': submit_message,
             'complaint': ComplaintDetailSerializer(complaint, context={'request': request}).data
         }, status=status.HTTP_200_OK)
 

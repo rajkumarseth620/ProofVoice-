@@ -233,8 +233,8 @@ class AuthenticationAndProfileTests(TestCase):
         me_after_logout = self.client.get('/api/v1/auth/me/')
         self.assertEqual(me_after_logout.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_student_registration_unlisted_institution_pending(self):
-        """Unlisted institution registration creates PENDING institution, unverified user, and requires approval."""
+    def test_student_registration_unlisted_institution_open_access(self):
+        """Unlisted institution registration creates UNVERIFIED institution, verified student with token, and immediate access."""
         payload = {
             'email': 'unlistedstudent@sjec.ac.in',
             'password': 'SecurePassword123',
@@ -253,29 +253,56 @@ class AuthenticationAndProfileTests(TestCase):
         }
         response = self.client.post('/api/v1/auth/register/student/', payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(response.data.get('requires_approval'))
-        self.assertEqual(response.data.get('institution_status'), 'PENDING')
-        self.assertNotIn('token', response.data)
+        self.assertIn('token', response.data)
+        self.assertEqual(
+            response.data.get('message'),
+            'Registration successful! Your institution has been added to ProofVoice. Welcome to your Student Dashboard.'
+        )
 
-        # Verify institution created with PENDING status
+        # Verify institution created with UNVERIFIED status and seeded departments
         inst = Institution.objects.get(name='St. Joseph Engineering College')
-        self.assertEqual(inst.verification_status, Institution.VerificationStatus.PENDING)
+        self.assertEqual(inst.verification_status, Institution.VerificationStatus.UNVERIFIED)
+        self.assertTrue(inst.departments.exists())
+        self.assertTrue(inst.complaint_categories.exists())
+        self.assertTrue(inst.recipient_configurations.exists())
 
-        # Verify student account created with is_verified=False
+        # Verify student account created with is_verified=True
         user = User.objects.get(email='unlistedstudent@sjec.ac.in')
-        self.assertFalse(user.is_verified)
+        self.assertTrue(user.is_verified)
         self.assertEqual(user.student_profile.institution, inst)
 
-        # Verify login is rejected before verification
+        # Student can log in directly
         login_res = self.client.post('/api/v1/auth/login/', {
             'email': 'unlistedstudent@sjec.ac.in',
             'password': 'SecurePassword123'
         }, format='json')
-        self.assertEqual(login_res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('Your institution registration request has been submitted successfully', str(login_res.data))
+        self.assertEqual(login_res.status_code, status.HTTP_200_OK)
+        self.assertIn('token', login_res.data)
+
+        # Student can lodge a complaint immediately
+        self.client.force_authenticate(user=user)
+        complaint_resp = self.client.post('/api/v1/complaints/', {
+            'title': 'Defective Lab Projector in Room 204',
+            'original_description': 'The lab projector displays green tint and flickers during lectures.',
+            'campus': 'Main Campus',
+            'building': 'Mechanical Block',
+            'floor': '2nd Floor',
+            'room_number': '204',
+            'submit_now': True
+        }, format='json')
+        self.assertEqual(complaint_resp.status_code, status.HTTP_201_CREATED)
+        complaint_data = complaint_resp.data.get('complaint', {})
+        self.assertEqual(complaint_data.get('status'), 'SUBMITTED')
+
+        # Since no verified admin exists yet, history remark reflects pending administrator onboarding
+        history = complaint_data.get('status_history', [])
+        self.assertTrue(any(
+            'Awaiting institutional administrator onboarding' in h.get('public_remark', '')
+            for h in history
+        ))
 
     def test_duplicate_unlisted_institution_prevention(self):
-        """Multiple students registering from the same unlisted college are grouped under the same pending institution."""
+        """Multiple students registering from the same unlisted college are grouped under the same institution."""
         payload1 = {
             'email': 'student1@sjec.ac.in',
             'password': 'SecurePassword123',
@@ -313,45 +340,53 @@ class AuthenticationAndProfileTests(TestCase):
         u2 = User.objects.get(email='student2@sjec.ac.in')
         self.assertEqual(u1.student_profile.institution_id, u2.student_profile.institution_id)
 
-    def test_unlisted_institution_approved_allows_login(self):
-        """Once platform administrator approves and verifies the institution, student can log in successfully."""
+    def test_unverified_institution_admin_blocked_until_approved(self):
+        """Institutional administrators cannot log in while their institution or account is unverified."""
         inst = Institution.objects.create(
             name='Apex Global University',
             code='apex-global',
-            verification_status=Institution.VerificationStatus.PENDING
+            verification_status=Institution.VerificationStatus.UNVERIFIED
         )
-        user = User.objects.create_user(
-            email='apexstudent@apexglobal.edu',
+        admin_user = User.objects.create_user(
+            email='apexadmin@apexglobal.edu',
             password='Password123',
-            full_name='Apex Student',
-            role=User.Role.STUDENT,
+            full_name='Apex Admin',
+            role=User.Role.INSTITUTION_ADMIN,
             is_verified=False
         )
-        StudentProfile.objects.create(user=user, institution=inst)
+        profile = AdministratorProfile.objects.create(
+            user=admin_user,
+            institution=inst,
+            approval_status=AdministratorProfile.ApprovalStatus.PENDING
+        )
 
-        # Login blocked while PENDING
+        # Admin login is blocked while institution is UNVERIFIED
         res_blocked = self.client.post('/api/v1/auth/login/', {
-            'email': 'apexstudent@apexglobal.edu',
-            'password': 'Password123'
+            'email': 'apexadmin@apexglobal.edu',
+            'password': 'Password123',
+            'role': 'admin'
         }, format='json')
         self.assertEqual(res_blocked.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # Admin approves institution
+        # Platform administrator verifies institution and approves admin
         inst.verification_status = Institution.VerificationStatus.VERIFIED
         inst.save()
-        user.is_verified = True
-        user.save()
+        profile.approval_status = AdministratorProfile.ApprovalStatus.APPROVED
+        profile.save()
+        admin_user.is_verified = True
+        admin_user.save()
 
-        # Login allowed after verification
+        # Admin login is now allowed
         res_allowed = self.client.post('/api/v1/auth/login/', {
-            'email': 'apexstudent@apexglobal.edu',
-            'password': 'Password123'
+            'email': 'apexadmin@apexglobal.edu',
+            'password': 'Password123',
+            'role': 'admin'
         }, format='json')
         self.assertEqual(res_allowed.status_code, status.HTTP_200_OK)
         self.assertIn('token', res_allowed.data)
 
     def test_superadmin_approval_endpoint_verifies_institution_and_students(self):
-        """Platform superadmin approves unlisted institution request via API, unlocking student logins and verified dropdown."""
+        """Platform superadmin approves unlisted institution request via API, unlocking verified dropdown."""
         # Create platform superadmin
         superadmin = User.objects.create_user(
             email='superadmin@proofvoice.org',
@@ -366,7 +401,7 @@ class AuthenticationAndProfileTests(TestCase):
         student_payload = {
             'email': 'student_approv@globaluniv.edu',
             'password': 'SecurePassword123',
-            'full_name': 'Pending Student',
+            'full_name': 'Student GTU',
             'institution_id': 'OTHER',
             'custom_institution_name': 'Global Technical University',
             'institution_type': 'University',
@@ -377,8 +412,6 @@ class AuthenticationAndProfileTests(TestCase):
         self.assertEqual(reg_resp.status_code, status.HTTP_201_CREATED)
 
         inst = Institution.objects.get(name='Global Technical University')
-        self.assertEqual(inst.verification_status, Institution.VerificationStatus.PENDING)
-
         req = inst.originating_request.first()
         self.assertIsNotNone(req)
         self.assertEqual(req.status, 'PENDING')
@@ -393,19 +426,6 @@ class AuthenticationAndProfileTests(TestCase):
         # Institution is now VERIFIED
         inst.refresh_from_db()
         self.assertEqual(inst.verification_status, Institution.VerificationStatus.VERIFIED)
-
-        # Student is now verified and can log in
-        student_user = User.objects.get(email='student_approv@globaluniv.edu')
-        self.assertTrue(student_user.is_verified)
-        self.assertEqual(student_user.role, User.Role.STUDENT)
-
-        self.client.force_authenticate(user=None)
-        login_resp = self.client.post('/api/v1/auth/login/', {
-            'email': 'student_approv@globaluniv.edu',
-            'password': 'SecurePassword123'
-        }, format='json')
-        self.assertEqual(login_resp.status_code, status.HTTP_200_OK)
-        self.assertIn('token', login_resp.data)
 
         # Institution appears in verified dropdown list
         inst_list_resp = self.client.get('/api/v1/institutions/')
@@ -447,11 +467,3 @@ class AuthenticationAndProfileTests(TestCase):
 
         inst.refresh_from_db()
         self.assertEqual(inst.verification_status, Institution.VerificationStatus.REJECTED)
-
-        # Student login still blocked
-        self.client.force_authenticate(user=None)
-        login_resp = self.client.post('/api/v1/auth/login/', {
-            'email': 'student_reject@fakecollege.edu',
-            'password': 'SecurePassword123'
-        }, format='json')
-        self.assertEqual(login_resp.status_code, status.HTTP_400_BAD_REQUEST)

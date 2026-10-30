@@ -21,7 +21,8 @@ from .serializers import (
 class StudentRegisterView(APIView):
     """
     Public registration endpoint for students.
-    Enforces STUDENT role and sets up initial StudentProfile.
+    Enforces STUDENT role, sets up initial StudentProfile, auto-provisions unlisted institutions,
+    and returns auth token for immediate dashboard access.
     """
     permission_classes = [permissions.AllowAny]
 
@@ -29,18 +30,22 @@ class StudentRegisterView(APIView):
         serializer = StudentRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user, token = serializer.save()
-            if getattr(user, 'is_unlisted_pending', False):
-                return Response({
-                    'message': 'Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval.',
-                    'requires_approval': True,
-                    'institution_status': 'PENDING',
-                    'user': UserSerializer(user).data
-                }, status=status.HTTP_201_CREATED)
+            institution = getattr(getattr(user, 'student_profile', None), 'institution', None)
+            from apps.institutions.serializers import InstitutionSerializer
+            inst_data = InstitutionSerializer(institution).data if institution else None
+
+            is_unlisted = getattr(user, 'is_unlisted_institution', False)
+            if is_unlisted:
+                message = "Registration successful! Your institution has been added to ProofVoice. Welcome to your Student Dashboard."
+            else:
+                message = "Registration successful! Welcome to your Student Dashboard."
 
             return Response({
-                'message': 'Student account registered successfully.',
+                'message': message,
                 'token': token.key,
-                'user': UserSerializer(user).data
+                'user': UserSerializer(user, context={'request': request}).data,
+                'institution': inst_data,
+                'is_unlisted_institution': is_unlisted
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

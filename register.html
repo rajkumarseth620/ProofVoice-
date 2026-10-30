@@ -131,7 +131,7 @@
             </h3>
 
             <div class="alert alert-info" style="font-size:12px; margin-bottom:var(--space-4);">
-              <strong>Verification Requirement:</strong> Joining an institution requires institutional verification or an approval workflow. If your institution is not yet registered, it must be verified before student workspaces are activated.
+              <strong>Institutional Affiliation:</strong> Select your verified institution or choose <em>+ My Institution is Not Listed</em>. Students from all institutions can register immediately and lodge formal grievances.
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
@@ -147,7 +147,7 @@
               <div class="form-group" id="customInstWrapper" style="grid-column: span 2; display:none;">
                 <label for="regCustomInstName" class="form-label">Enter Institution Name <span class="required">*</span></label>
                 <input type="text" id="regCustomInstName" class="form-control" placeholder="e.g. National Institute of Technology">
-                <span class="form-hint">Unlisted institutions require platform administrator verification before official membership is activated.</span>
+                <span class="form-hint">If your institution is not listed, enter its name above. It will be added to ProofVoice and you can start lodging grievances immediately.</span>
               </div>
 
               <div class="form-group">
@@ -438,6 +438,20 @@
             residentialAddress: address,
             phone
           });
+
+          if (res && res.token) {
+            if (window.proofVoiceApi && window.proofVoiceApi.persistSession) {
+              window.proofVoiceApi.persistSession(res.token, res.user, res.institution);
+            }
+            const successMsg = (isOther || res.is_unlisted_institution)
+              ? 'Registration successful! Your institution has been added to ProofVoice. Welcome to your Student Dashboard.'
+              : 'Registration successful! Welcome to your Student Dashboard.';
+            showToast('success', 'Registration Successful', successMsg, 6000);
+            setTimeout(() => {
+              window.location.replace('student-dashboard.html');
+            }, 1200);
+            return;
+          }
 
           if (res && (res.requires_approval || res.institution_status === 'PENDING')) {
             showToast('info', 'Registration Submitted', 'Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval.', 7000);

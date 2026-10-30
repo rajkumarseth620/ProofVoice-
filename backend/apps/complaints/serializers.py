@@ -203,16 +203,30 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
 
         if submit_now:
             from django.utils import timezone
+            from apps.accounts.models import User
             complaint.status = Complaint.Status.SUBMITTED
             complaint.submission_timestamp = timezone.now()
             complaint.save()
+
+            admins = User.objects.filter(
+                role=User.Role.INSTITUTION_ADMIN,
+                admin_profile__institution=complaint.institution,
+                admin_profile__approval_status='APPROVED'
+            )
+            has_verified_admin = admins.exists()
+
+            public_remark = (
+                'Formal complaint submitted to institutional administration.'
+                if has_verified_admin
+                else 'Formal complaint lodged. Awaiting institutional administrator onboarding for review and resolution.'
+            )
 
             ComplaintStatusHistory.objects.create(
                 complaint=complaint,
                 previous_status=Complaint.Status.DRAFT,
                 new_status=Complaint.Status.SUBMITTED,
                 changed_by=student,
-                public_remark='Formal complaint submitted to institutional administration.'
+                public_remark=public_remark
             )
         else:
             ComplaintStatusHistory.objects.create(
