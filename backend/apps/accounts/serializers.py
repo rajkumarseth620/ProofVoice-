@@ -238,10 +238,12 @@ class AdminRegistrationSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+    role = serializers.CharField(required=False, allow_blank=True, default='')
 
     def validate(self, attrs):
         email = attrs.get('email', '').strip().lower()
         password = attrs.get('password')
+        requested_role = attrs.get('role', '').strip().lower()
 
         if not email or not password:
             raise serializers.ValidationError("Email and password are required.")
@@ -251,6 +253,17 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid email or password.")
         if not user.is_active:
             raise serializers.ValidationError("This account has been deactivated.")
+
+        # Enforce role matching when a specific role portal is targeted
+        if requested_role in ['admin', 'institution_admin']:
+            if user.role not in [User.Role.INSTITUTION_ADMIN, User.Role.PLATFORM_SUPERADMIN]:
+                raise serializers.ValidationError("Access denied. This account does not have administrator privileges.")
+        elif requested_role in ['student']:
+            if user.role != User.Role.STUDENT:
+                raise serializers.ValidationError("Access denied. Please sign in via the Administrator portal.")
+        elif requested_role in ['superadmin', 'platform_superadmin']:
+            if user.role != User.Role.PLATFORM_SUPERADMIN:
+                raise serializers.ValidationError("Access denied. This account does not have platform superadmin privileges.")
 
         attrs['user'] = user
         return attrs

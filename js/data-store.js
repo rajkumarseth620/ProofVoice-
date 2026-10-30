@@ -558,9 +558,7 @@ class DataStore {
         return liveUser;
       }
     }
-    const db = this.getDb();
-    const session = db.currentSession;
-    return db.users.find(u => u.id === session.userId) || db.users[0];
+    return null;
   }
 
   getInstitution(institutionId) {

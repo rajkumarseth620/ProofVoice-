@@ -29,11 +29,11 @@ def get_user_institution(user):
     if user.role == User.Role.STUDENT and hasattr(user, 'student_profile') and user.student_profile:
         return user.student_profile.institution
     elif user.role == User.Role.INSTITUTION_ADMIN and hasattr(user, 'admin_profile') and user.admin_profile:
-        inst = getattr(user.admin_profile, 'institution', None)
-        if inst:
-            return inst
-    from apps.institutions.models import Institution
-    return Institution.objects.first()
+        return getattr(user.admin_profile, 'institution', None)
+    elif user.role == User.Role.PLATFORM_SUPERADMIN or user.is_superuser:
+        from apps.institutions.models import Institution
+        return Institution.objects.first()
+    return None
 
 
 class InstitutionListView(APIView):

@@ -223,139 +223,136 @@ function stopSpeaking() {
   }
 }
 
-function setupLogoutLinks() {
-  document.querySelectorAll('a[href="login.html"]').forEach((link) => {
-    const label = (link.textContent || '').toLowerCase();
-    if (!label.includes('sign out') && !label.includes('log out')) return;
-    link.addEventListener('click', async (e) => {
-      e.preventDefault();
-      if (window.proofVoiceApi && window.proofVoiceApi.logout) {
-        await window.proofVoiceApi.logout();
-      }
-      window.location.href = 'login.html';
-    });
-  });
+function getNormalizedCurrentPage() {
+  const path = window.location.pathname || '';
+  const parts = path.split('/');
+  let filename = parts[parts.length - 1] || 'index.html';
+  if (!filename.includes('.')) {
+    filename = filename ? filename + '.html' : 'index.html';
+  }
+  return filename.toLowerCase().split('?')[0].split('#')[0];
 }
 
-// Setup Multi-Tenant Demo Banner
-function setupDemoBanner() {
-  const existing = document.querySelector('.demo-banner');
-  if (existing) return;
+const PUBLIC_ROUTES = new Set([
+  '',
+  '/',
+  'index.html',
+  'login.html',
+  'register.html',
+  'institution-register.html',
+  'forgot-password.html',
+  'help.html',
+  'faq.html',
+  'terms.html',
+  'privacy.html',
+  '404.html'
+]);
 
-  const live = window.proofVoiceApi && window.proofVoiceApi.isLiveSession();
-  if (live) {
-    const sessionUser = window.proofVoiceApi.getStoredUser() || {};
-    const banner = document.createElement('div');
-    banner.className = 'demo-banner';
-    banner.innerHTML = `
-      <div class="demo-banner-content">
-        <span class="demo-tag">Live Backend Mode</span>
-        <span>Django + MySQL authenticated session</span>
-        <span style="opacity: 0.6;">|</span>
-        <span>User: <strong>${escapeHtml(sessionUser.fullName || sessionUser.email || 'Signed in')}</strong> (${escapeHtml((sessionUser.role || '').toUpperCase())})</span>
-        <span style="opacity: 0.6;">|</span>
-        <span>Tenant: <strong>${escapeHtml(sessionUser.institutionName || 'Assigned on server')}</strong></span>
-      </div>
-      <div class="demo-banner-actions">
-        <button id="switchToDemoBtn" class="demo-reset-btn" type="button">Use demonstration mode</button>
-      </div>
-    `;
-    document.body.insertBefore(banner, document.body.firstChild);
-    document.getElementById('switchToDemoBtn').addEventListener('click', async () => {
-      localStorage.setItem('proofvoice_prefer_demo', 'true');
-      if (window.proofVoiceApi) await window.proofVoiceApi.logout();
-      showToast('info', 'Demonstration Mode', 'Local sample data will be used. MySQL records are not deleted.');
-      setTimeout(() => window.location.reload(), 400);
-    });
+const STUDENT_ROUTES = new Set([
+  'student-dashboard.html',
+  'new-complaint.html',
+  'review-complaint.html',
+  'my-complaints.html',
+  'complaint-details.html',
+  'student-profile.html',
+  'student-profile-complete.html',
+  'student-notifications.html'
+]);
+
+const ADMIN_ROUTES = new Set([
+  'admin-dashboard.html',
+  'admin-complaints.html',
+  'admin-complaint-details.html',
+  'departments.html',
+  'users.html',
+  'analytics.html',
+  'institution-settings.html',
+  'admin-profile.html',
+  'admin-notifications.html'
+]);
+
+const SUPERADMIN_ROUTES = new Set([
+  'super-admin.html'
+]);
+
+function enforceRouteGuard() {
+  const page = getNormalizedCurrentPage();
+  if (PUBLIC_ROUTES.has(page)) {
     return;
   }
 
-  const db = window.proofVoiceDb;
-  if (!db) return;
+  const token = localStorage.getItem('proofvoice_auth_token');
+  const isAuth = Boolean(token && !String(token).startsWith('demo_token_'));
 
-  const user = db.getCurrentUser();
-  const inst = user.institutionId ? db.getInstitution(user.institutionId) : null;
-  const currentUserId = user ? user.id : 'usr_student_01';
-
-  const banner = document.createElement('div');
-  banner.className = 'demo-banner';
-  banner.innerHTML = `
-    <div class="demo-banner-content">
-      <span class="demo-tag">Demonstration Mode</span>
-      <span>ProofVoice Multi-Tenant Architecture</span>
-      <span style="opacity: 0.6;">|</span>
-      <span>Active Tenant: <strong>${inst ? escapeHtml(inst.name) : 'Platform Root'}</strong></span>
-      <span style="opacity: 0.6;">|</span>
-      <span>User: <strong>${escapeHtml(user.fullName)}</strong> (${user.role.toUpperCase()})</span>
-    </div>
-    <div class="demo-banner-actions">
-      <label for="demoTenantUserSelect" style="font-size: 11px; opacity: 0.85;">Switch Demo Account:</label>
-      <select id="demoTenantUserSelect" class="demo-role-select">
-        <optgroup label="Apex Institute of Technology (Tenant 1)">
-          <option value="usr_student_01" ${currentUserId === 'usr_student_01' ? 'selected' : ''}>Student: Maya Sharma (Verified)</option>
-          <option value="usr_student_new" ${currentUserId === 'usr_student_new' ? 'selected' : ''}>Student: Aditya Verma (Profile Incomplete)</option>
-          <option value="usr_admin_01" ${currentUserId === 'usr_admin_01' ? 'selected' : ''}>Admin: Dr. Vikram Roy (Dean)</option>
-        </optgroup>
-        <optgroup label="Horizon State University (Tenant 2)">
-          <option value="usr_student_02" ${currentUserId === 'usr_student_02' ? 'selected' : ''}>Student: Rohan Kulkarni (Verified)</option>
-          <option value="usr_admin_02" ${currentUserId === 'usr_admin_02' ? 'selected' : ''}>Admin: Prof. Ananya Sen (Registrar)</option>
-        </optgroup>
-        <optgroup label="Platform Root">
-          <option value="usr_superadmin_01" ${currentUserId === 'usr_superadmin_01' ? 'selected' : ''}>Super-Admin: Platform Root</option>
-        </optgroup>
-      </select>
-      <button id="useLiveBackendBtn" class="demo-reset-btn" type="button">Use live backend</button>
-      <button id="demoResetBtn" class="demo-reset-btn" title="Reset sample records to default">Reset Demo Data</button>
-    </div>
-  `;
-
-  document.body.insertBefore(banner, document.body.firstChild);
-
-  // Tenant/User switch listener
-  document.getElementById('demoTenantUserSelect').addEventListener('change', (e) => {
-    const selectedUserId = e.target.value;
-    const switchedUser = window.proofVoiceDb.switchTenantUser(selectedUserId);
-    if (!switchedUser) return;
-
-    showToast('info', 'Tenant User Switched', `Logged in as ${switchedUser.fullName} (${switchedUser.role.toUpperCase()})`);
-
-    setTimeout(() => {
-      const currentPath = window.location.pathname;
-      if (switchedUser.role === 'student' && (currentPath.includes('admin') || currentPath.includes('departments') || currentPath.includes('analytics') || currentPath.includes('super-admin'))) {
-        window.location.href = 'student-dashboard.html';
-      } else if (switchedUser.role === 'admin' && (currentPath.includes('student') || currentPath.includes('new-complaint') || currentPath.includes('my-complaints') || currentPath.includes('super-admin'))) {
-        window.location.href = 'admin-dashboard.html';
-      } else if (switchedUser.role === 'superadmin' && !currentPath.includes('super-admin')) {
-        window.location.href = 'super-admin.html';
-      } else {
-        window.location.reload();
-      }
-    }, 400);
-  });
-
-  // Reset button listener
-  const liveBtn = document.getElementById('useLiveBackendBtn');
-  if (liveBtn) {
-    liveBtn.addEventListener('click', () => {
-      localStorage.removeItem('proofvoice_prefer_demo');
-      showToast('info', 'Live Backend', 'The next requests will use Django and MySQL when the server is running.');
-      setTimeout(() => window.location.href = 'login.html', 400);
-    });
+  if (!isAuth) {
+    // Unauthenticated user attempting to access protected page
+    window.location.replace('login.html');
+    return;
   }
 
-  document.getElementById('demoResetBtn').addEventListener('click', () => {
-    if (confirm('Reset the local demonstration database only? This does not delete MySQL records.')) {
-      window.proofVoiceDb.reset();
-      showToast('success', 'Demo Reset', 'Local sample records were refreshed. MySQL data was not changed.');
-      setTimeout(() => window.location.reload(), 500);
+  const rawRole = (localStorage.getItem('proofvoice_active_role') || '').toLowerCase();
+  const isAdmin = rawRole === 'admin' || rawRole === 'institution_admin';
+  const isSuperAdmin = rawRole === 'superadmin' || rawRole === 'platform_superadmin';
+  const isStudent = !isAdmin && !isSuperAdmin;
+
+  if (STUDENT_ROUTES.has(page)) {
+    if (isAdmin) {
+      window.location.replace('admin-dashboard.html');
+      return;
     }
+    if (isSuperAdmin) {
+      window.location.replace('super-admin.html');
+      return;
+    }
+  }
+
+  if (ADMIN_ROUTES.has(page)) {
+    if (isStudent) {
+      window.location.replace('student-dashboard.html');
+      return;
+    }
+  }
+
+  if (SUPERADMIN_ROUTES.has(page)) {
+    if (!isSuperAdmin) {
+      window.location.replace(isAdmin ? 'admin-dashboard.html' : 'student-dashboard.html');
+      return;
+    }
+  }
+}
+
+// Enforce route guard immediately
+enforceRouteGuard();
+
+// Also guard on back-forward cache restoration
+window.addEventListener('pageshow', () => {
+  enforceRouteGuard();
+});
+
+function setupLogoutLinks() {
+  document.querySelectorAll('a[href="login.html"], button[data-action="logout"], .logout-btn, #logoutBtn, #adminLogoutBtn').forEach((link) => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        if (window.proofVoiceApi && window.proofVoiceApi.logout) {
+          await window.proofVoiceApi.logout();
+        }
+      } catch (err) {}
+      localStorage.removeItem('proofvoice_auth_token');
+      localStorage.removeItem('proofvoice_session_user');
+      localStorage.removeItem('proofvoice_active_role');
+      localStorage.removeItem('proofvoice_active_tenant');
+      localStorage.removeItem('proofvoice_unread_count');
+      localStorage.removeItem('proofvoice_active_complaint_id');
+      try { sessionStorage.clear(); } catch (e) {}
+      window.location.replace('login.html');
+    });
   });
 }
 
 // Global UI setup
 document.addEventListener('DOMContentLoaded', () => {
   setupLogoutLinks();
-  setupDemoBanner();
 
   // Highlight active nav links
   const currentPath = window.location.pathname.split('/').pop() || 'index.html';

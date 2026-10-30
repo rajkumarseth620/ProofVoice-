@@ -68,32 +68,11 @@ function initialsFromName(fullName) {
 class ProofVoiceApiClient {
   constructor() {
     this.config = API_CONFIG;
-    if (localStorage.getItem(PREFER_DEMO_KEY) === 'true') {
-      this.config.USE_REAL_BACKEND = false;
-    } else {
-      this.checkBackendHealth();
-    }
-  }
-
-  async checkBackendHealth() {
-    try {
-      const res = await fetch(`${this.config.BASE_URL}/institutions/`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(3000)
-      });
-      if (res.ok) {
-        this.config.USE_REAL_BACKEND = true;
-        console.log('[ProofVoice API] Connected to live Django backend at ' + this.config.BASE_URL);
-      }
-    } catch (e) {
-      console.warn('[ProofVoice API] Django backend not detected on :8000, falling back to local demo store.');
-      this.config.USE_REAL_BACKEND = false;
-    }
   }
 
   isLiveSession() {
     const token = localStorage.getItem(SESSION_TOKEN_KEY);
-    return Boolean(this.config.USE_REAL_BACKEND && token && !String(token).startsWith('demo_token_'));
+    return Boolean(token && !String(token).startsWith('demo_token_'));
   }
 
   persistSession(token, user, institution) {
@@ -114,6 +93,12 @@ class ProofVoiceApiClient {
     localStorage.removeItem(SESSION_USER_KEY);
     localStorage.removeItem(SESSION_ROLE_KEY);
     localStorage.removeItem(SESSION_TENANT_KEY);
+    localStorage.removeItem('proofvoice_unread_count');
+    localStorage.removeItem('proofvoice_active_complaint_id');
+    localStorage.removeItem(PREFER_DEMO_KEY);
+    try {
+      sessionStorage.clear();
+    } catch (e) {}
   }
 
   getStoredUser() {
@@ -234,47 +219,36 @@ class ProofVoiceApiClient {
   }
 
   async login(email, password, roleHint) {
-    if (this.config.USE_REAL_BACKEND) {
-      try {
-        const res = await fetch(`${this.config.BASE_URL}/auth/login/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await this.handleResponse(res);
-        const user = this.normalizeUser(data);
-        if (data.token) {
-          this.persistSession(data.token, user, data.institution);
-        }
-        return { ...data, user, role: user.role, success: true };
-      } catch (err) {
-        const isNetworkErr = !err.status && (
-          !err.data ||
-          (err.message && /failed to fetch|networkerror|load failed|fetch failed|refused|abort/i.test(err.message))
-        );
-        if (isNetworkErr) {
-          console.warn('[ProofVoice API] Django backend unreachable on :8000. Falling back to demonstration mode.');
-          this.config.USE_REAL_BACKEND = false;
-          return {
-            ...this.demoLogin(roleHint),
-            isOfflineFallback: true
-          };
-        }
-        throw err;
-      }
+    if (!email || !String(email).trim() || !password) {
+      throw new Error('Please enter your email and password.');
     }
-    return this.demoLogin(roleHint);
+    const cleanEmail = String(email).trim();
+    try {
+      const res = await fetch(`${this.config.BASE_URL}/auth/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password, role: roleHint || '' })
+      });
+      const data = await this.handleResponse(res);
+      const user = this.normalizeUser(data);
+      if (data.token) {
+        this.persistSession(data.token, user, data.institution);
+      }
+      return { ...data, user, role: user.role, success: true };
+    } catch (err) {
+      const isNetworkErr = !err.status && (
+        !err.data ||
+        (err.message && /failed to fetch|networkerror|load failed|fetch failed|refused|abort|connection refused/i.test(err.message))
+      );
+      if (isNetworkErr) {
+        throw new Error('Server temporarily unavailable. Please try again later.');
+      }
+      throw err;
+    }
   }
 
-  demoLogin(roleHint) {
-    const db = window.proofVoiceDb;
-    const user = db.switchRole(roleHint || 'student');
-    return {
-      success: true,
-      token: 'demo_token_' + Date.now(),
-      user,
-      role: roleHint ? roleHint.toLowerCase() : 'student'
-    };
+  demoLogin() {
+    throw new Error('Demonstration login is disabled. Real authentication is required.');
   }
 
   async logout() {
@@ -293,24 +267,24 @@ class ProofVoiceApiClient {
   }
 
   async registerStudent(payload) {
-    if (this.config.USE_REAL_BACKEND) {
-      const password = payload.password;
-      if (!password) {
-        throw new Error('Password is required.');
-      }
-      const backendPayload = {
-        email: payload.email,
-        password,
-        full_name: payload.fullName,
-        institution_id: payload.institutionId ? parseInt(payload.institutionId, 10) : null,
-        student_id: payload.studentIdentifier || '',
-        department: payload.department || '',
-        course: payload.course || payload.department || '',
-        semester: payload.yearSemester || '',
-        phone: payload.phone || '',
-        address: payload.residentialAddress || ''
-      };
+    const password = payload.password;
+    if (!password) {
+      throw new Error('Password is required.');
+    }
+    const backendPayload = {
+      email: payload.email,
+      password,
+      full_name: payload.fullName,
+      institution_id: payload.institutionId ? parseInt(payload.institutionId, 10) : null,
+      student_id: payload.studentIdentifier || '',
+      department: payload.department || '',
+      course: payload.course || payload.department || '',
+      semester: payload.yearSemester || '',
+      phone: payload.phone || '',
+      address: payload.residentialAddress || ''
+    };
 
+    try {
       const res = await fetch(`${this.config.BASE_URL}/auth/register/student/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -318,78 +292,21 @@ class ProofVoiceApiClient {
       });
       const data = await this.handleResponse(res);
       const user = this.normalizeUser(data);
-      if (data.token) {
-        this.persistSession(data.token, user, data.institution);
-      }
-      // Also register student into local store so campus users desk sees the record immediately
-      try {
-        const db = window.proofVoiceDb;
-        if (db) {
-          const dbData = db.getDb();
-          const studentEntry = {
-            id: user.id || ('usr_student_' + Date.now()),
-            role: 'student',
-            fullName: user.fullName || payload.fullName,
-            email: user.email || payload.email,
-            institutionId: user.institutionId || payload.institutionId,
-            studentIdentifier: user.studentIdentifier || payload.studentIdentifier || 'AIT-STU',
-            studentId: user.studentIdentifier || payload.studentIdentifier || 'AIT-STU',
-            identifier: user.studentIdentifier || payload.studentIdentifier || 'AIT-STU',
-            department: user.department || payload.department || 'General Campus',
-            yearSemester: payload.yearSemester || '',
-            residentialAddress: payload.residentialAddress || '',
-            phone: payload.phone || '',
-            avatar: initialsFromName(user.fullName || payload.fullName),
-            status: 'verified',
-            profileComplete: true,
-            registeredAt: new Date().toISOString()
-          };
-          const existingIdx = (dbData.users || []).findIndex(u => u.email === user.email || String(u.id) === String(user.id));
-          if (existingIdx >= 0) {
-            dbData.users[existingIdx] = studentEntry;
-          } else {
-            dbData.users.unshift(studentEntry);
-          }
-          db.saveDb(dbData);
-        }
-      } catch (e) {}
       return { ...data, user, success: true };
+    } catch (err) {
+      const isNetworkErr = !err.status && (
+        !err.data ||
+        (err.message && /failed to fetch|networkerror|load failed|fetch failed|refused|abort|connection refused/i.test(err.message))
+      );
+      if (isNetworkErr) {
+        throw new Error('Server temporarily unavailable. Please try again later.');
+      }
+      throw err;
     }
-
-    const db = window.proofVoiceDb;
-    const newStudentUser = {
-      id: 'usr_student_' + Date.now(),
-      role: 'student',
-      fullName: payload.fullName,
-      email: payload.email,
-      institutionId: payload.institutionId,
-      studentIdentifier: payload.studentIdentifier || '',
-      department: payload.department || '',
-      yearSemester: payload.yearSemester || '',
-      residentialAddress: payload.residentialAddress || '',
-      phone: payload.phone || '',
-      avatar: initialsFromName(payload.fullName),
-      status: payload.studentIdentifier ? 'verified' : 'pending_verification',
-      profileComplete: Boolean(payload.residentialAddress && payload.studentIdentifier),
-      registeredAt: new Date().toISOString()
-    };
-
-    const dbData = db.getDb();
-    dbData.users.push(newStudentUser);
-    dbData.currentSession.userId = newStudentUser.id;
-    dbData.currentSession.role = 'student';
-    dbData.currentSession.institutionId = payload.institutionId;
-    db.saveDb(dbData);
-
-    return {
-      success: true,
-      message: 'Student registered.',
-      user: newStudentUser
-    };
   }
 
   async registerAdmin(payload) {
-    if (this.config.USE_REAL_BACKEND) {
+    try {
       const res = await fetch(`${this.config.BASE_URL}/auth/register/institution-admin/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -404,54 +321,34 @@ class ProofVoiceApiClient {
       });
       const data = await this.handleResponse(res);
       const user = this.normalizeUser(data);
-      if (data.token) {
-        this.persistSession(data.token, user, data.institution);
-      }
-      // Also register administrator into local store
-      try {
-        const db = window.proofVoiceDb;
-        if (db) {
-          const dbData = db.getDb();
-          const adminEntry = {
-            id: user.id || ('usr_admin_' + Date.now()),
-            role: 'admin',
-            fullName: user.fullName || payload.fullName,
-            email: user.email || payload.email,
-            institutionId: user.institutionId || payload.institutionId,
-            studentId: 'STAFF-AUTH',
-            identifier: 'STAFF-AUTH',
-            department: payload.departmentName || payload.designation || 'Academic Administration',
-            designation: payload.designation || 'Staff Administrator',
-            avatar: initialsFromName(user.fullName || payload.fullName),
-            status: 'verified',
-            profileComplete: true,
-            registeredAt: new Date().toISOString()
-          };
-          const existingIdx = (dbData.users || []).findIndex(u => u.email === user.email || String(u.id) === String(user.id));
-          if (existingIdx >= 0) {
-            dbData.users[existingIdx] = adminEntry;
-          } else {
-            dbData.users.unshift(adminEntry);
-          }
-          db.saveDb(dbData);
-        }
-      } catch (e) {}
       return { ...data, user, success: true };
+    } catch (err) {
+      const isNetworkErr = !err.status && (
+        !err.data ||
+        (err.message && /failed to fetch|networkerror|load failed|fetch failed|refused|abort|connection refused/i.test(err.message))
+      );
+      if (isNetworkErr) {
+        throw new Error('Server temporarily unavailable. Please try again later.');
+      }
+      throw err;
     }
-    return { success: false, message: 'Administrator registration requires the Django backend.' };
   }
 
   async getCurrentUser() {
     if (this.isLiveSession()) {
-      const res = await fetch(`${this.config.BASE_URL}/auth/me/`, {
-        headers: this.getHeaders()
-      });
-      const data = await this.handleResponse(res);
-      const user = this.normalizeUser(data);
-      this.persistSession(localStorage.getItem(SESSION_TOKEN_KEY), user, null);
-      return user;
+      try {
+        const res = await fetch(`${this.config.BASE_URL}/auth/me/`, {
+          headers: this.getHeaders()
+        });
+        const data = await this.handleResponse(res);
+        const user = this.normalizeUser(data);
+        this.persistSession(localStorage.getItem(SESSION_TOKEN_KEY), user, null);
+        return user;
+      } catch (err) {
+        return this.getStoredUser();
+      }
     }
-    return window.proofVoiceDb.getCurrentUser();
+    return null;
   }
 
   async updateUserProfile(userId, profileData) {

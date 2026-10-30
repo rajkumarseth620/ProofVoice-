@@ -425,9 +425,9 @@
             phone
           });
 
-          showToast('success', 'Registration Successful', 'Welcome to ProofVoice! Account profile saved.');
+          showToast('success', 'Registration Successful', 'Your account has been created. Redirecting to sign in...');
           setTimeout(() => {
-            window.location.href = 'student-dashboard.html';
+            window.location.replace(`login.html?registered=true&email=${encodeURIComponent(email)}`);
           }, 800);
         } catch (err) {
           showToast('error', 'Registration Failed', err.message);
