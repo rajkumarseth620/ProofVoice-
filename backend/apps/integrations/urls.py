@@ -7,12 +7,18 @@ from .views import (
     AiSummarizeView,
     AiRefineView,
     AiCategorizeView,
-    AiChatbotView
+    AiChatbotView,
+    ConversationListView,
+    ConversationDetailView,
+    LanguageCapabilitiesView
 )
 
 urlpatterns = [
     # Intelligent AI Support Assistant
     path('chat/', AiChatbotView.as_view(), name='ai-chat'),
+    path('conversations/', ConversationListView.as_view(), name='ai-conversations-list'),
+    path('conversations/<uuid:conversation_id>/', ConversationDetailView.as_view(), name='ai-conversations-detail'),
+    path('languages/', LanguageCapabilitiesView.as_view(), name='ai-languages'),
 
     # Gnani AI Gateway
     path('status/', GnaniStatusView.as_view(), name='gnani-status'),

@@ -6,17 +6,52 @@ Integrates:
 2. Timbre Text-to-Speech (/api/v1/tts/inference)
 """
 
+import io
+import wave
+import base64
 import logging
 import requests
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+
+def pcm_to_wav(pcm_bytes: bytes, sample_rate: int = 16000, num_channels: int = 1, sampwidth: int = 2) -> bytes:
+    """
+    Wraps raw 16-bit linear PCM audio in a compliant RIFF WAV container
+    so HTML5 browsers and media players can decode and play it seamlessly.
+    """
+    if not pcm_bytes:
+        return b''
+    if pcm_bytes.startswith(b'RIFF'):
+        return pcm_bytes
+    wav_io = io.BytesIO()
+    with wave.open(wav_io, 'wb') as wav_file:
+        wav_file.setnchannels(num_channels)
+        wav_file.setsampwidth(sampwidth)
+        wav_file.setframerate(sample_rate)
+        wav_file.writeframes(pcm_bytes)
+    return wav_io.getvalue()
+
+
 class GnaniAiService:
     """
     Server-side client for Gnani AI APIs.
     Never exposes API credentials to frontend clients.
     """
+
+    # Verified live voices supported by Gnani AI Timbre v3.0
+    GNANI_SUPPORTED_VOICES = {
+        'Avinash', 'Shivani', 'Lakshmi', 'Kalpana', 'Shubham',
+        'Prakash', 'Devansh', 'Yashraj', 'Chetana', 'Vasudha',
+        'Harshad', 'Riyaa', 'Tarika'
+    }
+
+    # High quality regional language voice mappings
+    LANGUAGE_VOICE_MAP = {
+        'hi-IN': 'Shivani',
+        'en-IN': 'Shivani'
+    }
 
     @classmethod
     def is_configured(cls):
@@ -84,7 +119,6 @@ class GnaniAiService:
 
             if response.status_code == 200:
                 result = response.json()
-                # Gnani AI Prisma STT typically returns { "transcript": "...", "confidence": ... }
                 transcript = result.get('transcript') or result.get('text') or result.get('data', {}).get('transcript', '')
                 return {
                     'success': True,
@@ -109,14 +143,14 @@ class GnaniAiService:
                 return {
                     'success': False,
                     'is_configured': True,
-                    'error': f'Gnani AI provider error (HTTP {response.status_code}): {response.text[:200]}'
+                    'error': f'Gnani AI STT error (HTTP {response.status_code}): {response.text[:200]}'
                 }
 
         except requests.Timeout:
             return {
                 'success': False,
                 'is_configured': True,
-                'error': 'Gnani AI service timed out. Please try again or type your complaint.'
+                'error': 'Gnani AI STT service timed out.'
             }
         except Exception as e:
             logger.exception("Gnani AI STT exception: %s", str(e))
@@ -127,7 +161,7 @@ class GnaniAiService:
             }
 
     @classmethod
-    def text_to_speech(cls, text, language='en-IN', voice='Nalini'):
+    def text_to_speech(cls, text, language='en-IN', voice=None):
         """
         Converts text to spoken audio using Gnani AI Timbre TTS.
         Official Endpoint: https://api.vachana.ai/api/v1/tts/inference
@@ -143,6 +177,9 @@ class GnaniAiService:
         endpoint = getattr(settings, 'GNANI_TTS_ENDPOINT', 'https://api.vachana.ai/api/v1/tts/inference')
         api_key = settings.GNANI_API_KEY.strip()
 
+        # Select verified voice
+        target_voice = voice if (voice and voice in cls.GNANI_SUPPORTED_VOICES) else cls.LANGUAGE_VOICE_MAP.get(language, 'Shivani')
+
         headers = {
             'X-API-Key-ID': api_key,
             'Content-Type': 'application/json'
@@ -150,10 +187,11 @@ class GnaniAiService:
 
         payload = {
             'text': text[:2000],  # Limit chunk size
-            'voice': voice,
+            'voice': target_voice,
             'model': 'timbre-v3.0',
             'language': language,
-            'speed': 1.0
+            'speed': 1.0,
+            'sampling_rate': 16000
         }
 
         try:
@@ -165,22 +203,33 @@ class GnaniAiService:
             )
 
             if response.status_code == 200:
-                # Timbre TTS returns binary audio (audio/wav or audio/mpeg) or JSON with audio base64
+                # Timbre TTS returns binary 16-bit linear PCM audio
                 content_type = response.headers.get('Content-Type', '')
-                if 'audio' in content_type:
+                if 'audio' in content_type or 'octet-stream' in content_type or len(response.content) > 100:
+                    wav_bytes = pcm_to_wav(response.content, sample_rate=16000)
+                    b64 = base64.b64encode(wav_bytes).decode('utf-8')
                     return {
                         'success': True,
                         'is_configured': True,
-                        'audio_bytes': response.content,
-                        'content_type': content_type
+                        'audio_bytes': wav_bytes,
+                        'audio_base64': b64,
+                        'content_type': 'audio/wav',
+                        'voice': target_voice
                     }
                 else:
                     result = response.json()
+                    b64_str = result.get('audio_base64') or result.get('audio_content') or ''
+                    if b64_str:
+                        raw_bytes = base64.b64decode(b64_str)
+                        wav_bytes = pcm_to_wav(raw_bytes, sample_rate=16000)
+                        b64_str = base64.b64encode(wav_bytes).decode('utf-8')
                     return {
                         'success': True,
                         'is_configured': True,
                         'audio_url': result.get('audio_url'),
-                        'audio_base64': result.get('audio_base64') or result.get('audio_content')
+                        'audio_base64': b64_str,
+                        'content_type': 'audio/wav',
+                        'voice': target_voice
                     }
             else:
                 return {

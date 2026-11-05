@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 
@@ -27,7 +29,7 @@
           </div>
           <div class="brand-text">
             <span class="brand-name">Proof<span>Voice</span></span>
-            <span class="brand-sub">Admin Desk</span>
+            <span class="brand-sub">Institute Panel</span>
           </div>
         </a>
       </div>
@@ -69,26 +71,13 @@
           </svg>
           Analytics & Reports
         </a>
-        <a href="admin-notifications.html" class="sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          Notifications
-          <span class="nav-count" id="adminSidebarNotifCount" style="display: none;">0</span>
-        </a>
         <a href="institution-settings.html" class="sidebar-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
           Institution Settings
         </a>
-        <a href="admin-profile.html" class="sidebar-nav-item active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-          </svg>
-          My Profile
-        </a>
-        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+        <a href="login.html" id="adminLogoutBtn" data-action="logout" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
@@ -96,13 +85,13 @@
         </a>
       </nav>
 
-      <div class="sidebar-footer">
+      <a href="admin-profile.html" class="sidebar-footer" id="sidebarFooterUserLink" title="Open Profile & Settings" style="text-decoration:none; cursor:pointer;">
         <div class="user-avatar" id="adminSidebarAvatar" style="background:#1E293B; color:#FFFFFF;">VR</div>
         <div class="user-info-text">
           <div class="user-name" id="adminSidebarName">Dr. Vikram Roy</div>
           <div class="user-role-label" id="adminSidebarRole">Administrator</div>
         </div>
-      </div>
+      </a>
     </aside>
 
     <div class="app-main">
@@ -120,10 +109,11 @@
           </div>
         </div>
         <div class="topbar-right">
+          <div data-theme-toggle-slot data-size="sm" style="display:inline-flex; align-items:center;"></div>
           <div class="institution-pill">
             <span id="topbarInst">Apex Tech (AIT)</span>
           </div>
-          <div class="user-avatar" id="adminTopbarAvatar" style="background:#1E293B; color:#FFFFFF;">VR</div>
+          <a href="admin-profile.html" class="user-avatar" id="adminTopbarAvatar" title="Open Profile & Settings" style="text-decoration:none; cursor:pointer;">VR</a>
           <a href="login.html" class="btn btn-ghost btn-sm" style="color:var(--color-error);">Log Out</a>
         </div>
       </header>
@@ -226,8 +216,15 @@
                   </div>
 
                   <div class="form-group" style="grid-column: span 2;">
-                    <label class="form-label">Official Contact Phone</label>
-                    <input type="tel" id="profPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+                    <label class="form-label" for="profPhone">Official Contact Mobile Number</label>
+                    <div class="phone-input-group">
+                      <span class="phone-country-prefix" title="India Country Code">
+                        <span style="font-size:16px;">🇮🇳</span> +91
+                      </span>
+                      <input type="tel" id="profPhone" class="form-control" placeholder="9876543210" maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" autocomplete="tel-national">
+                    </div>
+                    <div class="phone-error-msg" id="profPhoneError" style="display:none;"></div>
+                    <span class="form-hint" style="font-size:11px; color:#64748B; margin-top:2px; display:block;">Enter a 10-digit Indian mobile number.</span>
                   </div>
                 </div>
 
@@ -240,22 +237,47 @@
             <!-- Password Change Card -->
             <div class="card" style="padding:var(--space-6);">
               <h3 class="card-title" style="margin-bottom:var(--space-4);">Change Password</h3>
-              <form id="changePasswordForm" onsubmit="event.preventDefault(); showToast('success', 'Security Updated', 'Password updated successfully in authenticated session.');">
+              <form id="changePasswordForm">
                 <div class="form-group">
                   <label class="form-label">Current Password</label>
-                  <input type="password" class="form-control" placeholder="••••••••" required>
+                  <div class="input-password-wrapper">
+                    <input type="password" id="adminCurrentPasswordInput" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                    <button type="button" class="pwd-toggle-btn" id="adminCurrentPwdToggleBtn" aria-label="Toggle current password visibility">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
                   <div class="form-group">
                     <label class="form-label">New Password</label>
-                    <input type="password" class="form-control" placeholder="At least 8 characters" required>
+                    <div class="input-password-wrapper">
+                      <input type="password" id="adminNewPasswordInput" class="form-control" placeholder="At least 8 characters" minlength="8" required autocomplete="new-password">
+                      <button type="button" class="pwd-toggle-btn" id="adminNewPwdToggleBtn" aria-label="Toggle new password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   <div class="form-group">
                     <label class="form-label">Confirm New Password</label>
-                    <input type="password" class="form-control" placeholder="Re-type new password" required>
+                    <div class="input-password-wrapper">
+                      <input type="password" id="adminConfirmPasswordInput" class="form-control" placeholder="Re-type new password" minlength="8" required autocomplete="new-password">
+                      <button type="button" class="pwd-toggle-btn" id="adminConfirmPwdToggleBtn" aria-label="Toggle confirm password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-secondary btn-sm" style="margin-top:var(--space-2);">Update Password</button>
+                <div class="form-error" id="adminConfirmPwdError" style="display:none; color:var(--color-error); font-size:12px; margin-top:6px; font-weight:500;"></div>
+                <button type="submit" id="adminChangePasswordBtn" class="btn btn-secondary btn-sm" style="margin-top:var(--space-3);">Update Password</button>
               </form>
             </div>
           </div>
@@ -306,7 +328,7 @@
     </div>
   </div>
 
-  <script src="js/data-store.js"></script>
+    <script src="js/data-store.js"></script>
   <script src="js/api-client.js"></script>
   <script src="js/app.js"></script>
   <script>
@@ -317,29 +339,77 @@
         return;
       }
 
-      const institution = (window.proofVoiceDb && window.proofVoiceDb.getInstitution(user.institutionId)) || {
-        name: user.institutionName || 'Apex Institute of Technology'
-      };
+      // Check role redirection
+      const isAdmin = user.role === 'admin' || user.backendRole === 'INSTITUTION_ADMIN' || user.role === 'superadmin' || user.backendRole === 'PLATFORM_SUPERADMIN';
+      if (!isAdmin && user.role === 'student') {
+        window.location.replace('student-profile.html');
+        return;
+      }
 
-      const instName = user.institutionName || (institution && institution.name) || 'Apex Institute of Technology';
-      document.getElementById('sidebarInstName').textContent = instName;
-      document.getElementById('topbarInst').textContent = instName;
-      document.getElementById('profInstName').value = instName;
+      function getInstName(u) {
+        if (!u) return 'Arka Jain University';
+        return u.institutionName || (u.institution && u.institution.name) || (u.admin_profile && u.admin_profile.institution_name) || 'Arka Jain University';
+      }
 
       // Populate Form & Cards
       function populateAdminFields(u) {
         if (!u) return;
-        document.getElementById('adminSidebarName').textContent = u.fullName || 'Administrator';
-        document.getElementById('photoCardUserName').textContent = u.fullName || 'Administrator';
-        document.getElementById('adminSidebarRole').textContent = u.designation || 'Administrator';
+        const name = (u.fullName && u.fullName !== 'User') ? u.fullName : ((u.full_name && u.full_name !== 'User') ? u.full_name : '');
+        const staffId = u.staffId || u.studentIdentifier || u.identifier || (u.admin_profile && u.admin_profile.staff_id) || '';
+        const dept = u.department || u.departmentName || (u.admin_profile && u.admin_profile.department_name) || '';
+        const designation = u.designation || (u.admin_profile && u.admin_profile.designation) || '';
+        const officeAddr = u.officeAddress || u.residentialAddress || u.address || (u.admin_profile && u.admin_profile.office_address) || '';
+        const phone = u.phone || (u.admin_profile && u.admin_profile.phone) || '';
+        const email = u.email || '';
+        const instName = getInstName(u);
 
-        document.getElementById('profFullName').value = u.fullName || '';
-        document.getElementById('profEmail').value = u.email || '';
-        document.getElementById('profStaffId').value = u.studentIdentifier || u.identifier || 'STAFF-AUTH';
-        document.getElementById('profDepartment').value = u.department || 'Academic Administration';
-        document.getElementById('profDesignation').value = u.designation || 'Administrator';
-        document.getElementById('profOfficeAddress').value = u.residentialAddress || 'Main Administration Block';
-        document.getElementById('profPhone').value = u.phone || '';
+        // Sidebar & Topbar
+        const nameEl = document.getElementById('adminSidebarName');
+        if (nameEl && name) nameEl.textContent = name;
+        const cardName = document.getElementById('photoCardUserName');
+        if (cardName && name) cardName.textContent = name;
+        const roleEl = document.getElementById('adminSidebarRole');
+        if (roleEl) roleEl.textContent = designation;
+
+        const sidebarInst = document.getElementById('sidebarInstName');
+        if (sidebarInst && instName) sidebarInst.textContent = instName;
+        const topbarInst = document.getElementById('topbarInst');
+        if (topbarInst && instName) topbarInst.textContent = instName;
+
+        // Form Inputs
+        const profFullName = document.getElementById('profFullName');
+        if (profFullName && name) profFullName.value = name;
+        const profEmail = document.getElementById('profEmail');
+        if (profEmail && email) profEmail.value = email;
+        const profStaffId = document.getElementById('profStaffId');
+        if (profStaffId && staffId) profStaffId.value = staffId;
+        const profInstName = document.getElementById('profInstName');
+        if (profInstName && instName) profInstName.value = instName;
+        const profDept = document.getElementById('profDepartment');
+        if (profDept && dept) profDept.value = dept;
+        const profDesig = document.getElementById('profDesignation');
+        if (profDesig && designation) profDesig.value = designation;
+        const profOffice = document.getElementById('profOfficeAddress');
+        if (profOffice && officeAddr) profOffice.value = officeAddr;
+        const profPh = document.getElementById('profPhone');
+        if (profPh) {
+          if (phone) {
+            let digits = String(phone).replace(/\D/g, '');
+            if (digits.startsWith('91') && digits.length === 12) digits = digits.slice(2);
+            else if (digits.startsWith('0') && digits.length === 11) digits = digits.slice(1);
+            profPh.value = digits.slice(-10);
+          }
+          if (window.setupIndianPhoneInput) {
+            window.setupIndianPhoneInput(profPh, document.getElementById('profPhoneError'));
+          }
+        }
+
+        // Initials avatar
+        const initials = (u.avatar || (name ? name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'AD')).toUpperCase();
+        const sidebarAvatar = document.getElementById('adminSidebarAvatar');
+        if (sidebarAvatar && !u.profileImage) sidebarAvatar.textContent = initials;
+        const topbarAvatar = document.getElementById('adminTopbarAvatar');
+        if (topbarAvatar && !u.profileImage) topbarAvatar.textContent = initials;
       }
 
       populateAdminFields(user);
@@ -392,18 +462,6 @@
 
       renderProfilePhoto(currentPhotoUrl);
 
-      // In live session, refresh profile photo asynchronously to stay in sync with database
-      if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
-        window.proofVoiceApi.getCurrentUser().then(fresh => {
-          if (fresh && fresh.profileImage && fresh.profileImage !== currentPhotoUrl) {
-            currentPhotoUrl = fresh.profileImage;
-            user.profileImage = currentPhotoUrl;
-            renderProfilePhoto(currentPhotoUrl);
-            if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
-          }
-        }).catch(() => {});
-      }
-
       // Trigger File Browser
       btnTriggerUpload.addEventListener('click', () => {
         photoInput.click();
@@ -414,7 +472,6 @@
         const file = e.target.files && e.target.files[0];
         if (!file) return;
 
-        // Size check (Max 5MB)
         const maxBytes = 5 * 1024 * 1024;
         if (file.size > maxBytes) {
           showToast('error', 'File Too Large', `The selected file is ${(file.size / (1024 * 1024)).toFixed(2)} MB. Maximum allowed size is 5 MB.`);
@@ -422,7 +479,6 @@
           return;
         }
 
-        // Extension & MIME check
         const ext = file.name.split('.').pop().toLowerCase();
         if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
           showToast('error', 'Unsupported Format', 'Please upload an image in JPG, JPEG, PNG, or WebP format.');
@@ -432,7 +488,6 @@
 
         selectedPhotoFile = file;
 
-        // Preview image in real-time
         const reader = new FileReader();
         reader.onload = (evt) => {
           renderProfilePhoto(evt.target.result);
@@ -467,18 +522,16 @@
           currentPhotoUrl = res.profile_image_url || null;
           user.profileImage = currentPhotoUrl;
           localStorage.setItem('proofvoice_auth_user', JSON.stringify(user));
+          localStorage.setItem('proofvoice_session_user', JSON.stringify(user));
 
-          // Re-render display
           renderProfilePhoto(currentPhotoUrl);
           btnSavePhoto.style.display = 'none';
           btnCancelPhoto.style.display = 'none';
           btnTriggerUpload.style.display = 'inline-flex';
           if (currentPhotoUrl) btnRemovePhoto.style.display = 'inline-flex';
 
-          // Sync topbars & sidebars
           if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
-
-          showToast('success', 'Profile Photo Saved', 'Your new administrator profile picture has been saved.');
+          showToast('success', 'Profile Photo Saved', 'Your administrator profile picture has been updated.');
         } catch (err) {
           showToast('error', 'Upload Failed', err.message || 'Unable to upload profile photo.');
           renderProfilePhoto(currentPhotoUrl);
@@ -507,6 +560,7 @@
           currentPhotoUrl = null;
           user.profileImage = null;
           localStorage.setItem('proofvoice_auth_user', JSON.stringify(user));
+          localStorage.setItem('proofvoice_session_user', JSON.stringify(user));
 
           renderProfilePhoto(null);
           btnSavePhoto.style.display = 'none';
@@ -515,7 +569,6 @@
           btnRemovePhoto.style.display = 'none';
 
           if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
-
           showToast('info', 'Photo Removed', 'Profile picture removed. Initials will be displayed.');
         } catch (err) {
           showToast('error', 'Action Failed', err.message || 'Unable to remove profile photo.');
@@ -540,11 +593,29 @@
         const department = document.getElementById('profDepartment').value.trim();
         const designation = document.getElementById('profDesignation').value.trim();
         const address = document.getElementById('profOfficeAddress').value.trim();
-        const phone = document.getElementById('profPhone').value.trim();
+        const rawPhone = document.getElementById('profPhone').value.trim();
 
-        if (!fullName || !staffId || !department || !address) {
-          showToast('error', 'Missing Information', 'Please complete all required fields.');
+        if (!fullName) {
+          showToast('error', 'Missing Information', 'Full Legal Name is required.');
+          document.getElementById('profFullName').focus();
           return;
+        }
+
+        let phone = '';
+        if (rawPhone) {
+          const phoneCheck = window.validateIndianPhoneNumber ? window.validateIndianPhoneNumber(rawPhone, false) : { valid: rawPhone.length === 10, value: `+91 ${rawPhone}` };
+          if (!phoneCheck.valid) {
+            const errEl = document.getElementById('profPhoneError');
+            if (errEl) {
+              errEl.textContent = phoneCheck.message;
+              errEl.style.display = 'block';
+            }
+            document.getElementById('profPhone').classList.add('is-invalid');
+            document.getElementById('profPhone').focus();
+            showToast('error', 'Invalid Mobile Number', phoneCheck.message);
+            return;
+          }
+          phone = phoneCheck.value;
         }
 
         saveBtn.disabled = true;
@@ -554,21 +625,38 @@
           const profilePayload = {
             fullName,
             studentIdentifier: staffId,
+            staffId,
             department,
             designation,
             residentialAddress: address,
+            officeAddress: address,
             phone,
             profileComplete: true
           };
 
           const res = await window.proofVoiceApi.updateUserProfile(user.id, profilePayload);
-          const updatedUser = (res && res.user) || window.proofVoiceApi.getStoredUser() || user;
-          user = updatedUser;
+          const returnedUser = (res && res.user) ? res.user : (window.proofVoiceApi.getStoredUser() || {});
+          user = {
+            ...user,
+            ...returnedUser,
+            ...profilePayload,
+            fullName: fullName || returnedUser.fullName || returnedUser.full_name || user.fullName,
+            full_name: fullName || returnedUser.full_name || returnedUser.fullName || user.full_name,
+            studentIdentifier: staffId || returnedUser.studentIdentifier || returnedUser.student_id || returnedUser.staffId || user.studentIdentifier,
+            staffId: staffId || returnedUser.studentIdentifier || returnedUser.staffId || user.staffId,
+            department: department || returnedUser.department || user.department,
+            designation: designation || returnedUser.designation || user.designation,
+            residentialAddress: address || returnedUser.residentialAddress || returnedUser.address || returnedUser.officeAddress || user.residentialAddress,
+            officeAddress: address || returnedUser.residentialAddress || returnedUser.officeAddress || user.officeAddress,
+            phone: phone || returnedUser.phone || user.phone
+          };
+          localStorage.setItem('proofvoice_session_user', JSON.stringify(user));
+          localStorage.setItem('proofvoice_auth_user', JSON.stringify(user));
           populateAdminFields(user);
 
           if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
 
-          showToast('success', 'Profile Updated', 'Administrator profile credentials updated successfully in database.');
+          showToast('success', 'Profile Updated', 'Administrator profile credentials updated successfully in MySQL database.');
           saveBtn.disabled = false;
           saveBtn.innerHTML = 'Save Profile Changes';
         } catch (err) {
@@ -577,6 +665,114 @@
           saveBtn.innerHTML = 'Save Profile Changes';
         }
       });
+
+      // Admin Password Eye Toggles & Validation
+      const pwdEyeOpen = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      const pwdEyeSlash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
+
+      function bindAdminEyeToggle(btnId, inputId) {
+        const btn = document.getElementById(btnId);
+        const inp = document.getElementById(inputId);
+        if (btn && inp) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isPass = inp.type === 'password';
+            inp.type = isPass ? 'text' : 'password';
+            btn.innerHTML = isPass ? pwdEyeSlash : pwdEyeOpen;
+            btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+          });
+        }
+      }
+      bindAdminEyeToggle('adminCurrentPwdToggleBtn', 'adminCurrentPasswordInput');
+      bindAdminEyeToggle('adminNewPwdToggleBtn', 'adminNewPasswordInput');
+      bindAdminEyeToggle('adminConfirmPwdToggleBtn', 'adminConfirmPasswordInput');
+
+      const adminNewPwdInput = document.getElementById('adminNewPasswordInput');
+      const adminConfirmPwdInput = document.getElementById('adminConfirmPasswordInput');
+      const adminConfirmErr = document.getElementById('adminConfirmPwdError');
+
+      function validateAdminPwdMatch() {
+        if (!adminNewPwdInput || !adminConfirmPwdInput) return;
+        const p1 = adminNewPwdInput.value;
+        const p2 = adminConfirmPwdInput.value;
+        if (p2.length > 0 && p1 !== p2) {
+          adminConfirmPwdInput.classList.add('is-invalid');
+          if (adminConfirmErr) {
+            adminConfirmErr.textContent = 'Passwords do not match. Please ensure both fields are identical.';
+            adminConfirmErr.style.display = 'block';
+          }
+        } else {
+          adminConfirmPwdInput.classList.remove('is-invalid');
+          if (adminConfirmErr) adminConfirmErr.style.display = 'none';
+        }
+      }
+      if (adminNewPwdInput) adminNewPwdInput.addEventListener('input', validateAdminPwdMatch);
+      if (adminConfirmPwdInput) adminConfirmPwdInput.addEventListener('input', validateAdminPwdMatch);
+
+      // Admin Password Change Form
+      const pwForm = document.getElementById('changePasswordForm');
+      const pwBtn = document.getElementById('adminChangePasswordBtn');
+      if (pwForm) {
+        pwForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const currentPassword = document.getElementById('adminCurrentPasswordInput').value.trim();
+          const newPassword = document.getElementById('adminNewPasswordInput').value.trim();
+          const confirmPassword = document.getElementById('adminConfirmPasswordInput').value.trim();
+
+          if (!currentPassword) {
+            showToast('error', 'Current Password Required', 'Please enter your current administrator password to authorize this update.');
+            document.getElementById('adminCurrentPasswordInput').focus();
+            return;
+          }
+
+          if (newPassword !== confirmPassword) {
+            showToast('error', 'Password Mismatch', 'New password and confirmation do not match.');
+            if (adminConfirmErr) {
+              adminConfirmErr.textContent = 'Passwords do not match. Please enter the same password.';
+              adminConfirmErr.style.display = 'block';
+            }
+            adminConfirmPwdInput.classList.add('is-invalid');
+            adminConfirmPwdInput.focus();
+            return;
+          }
+
+          if (newPassword.length < 8) {
+            showToast('error', 'Password Too Short', 'New password must be at least 8 characters long.');
+            adminNewPwdInput.focus();
+            return;
+          }
+
+          if (!/\d/.test(newPassword) || !/[a-zA-Z]/.test(newPassword)) {
+            showToast('error', 'Password Format', 'New password must contain both letters and numbers.');
+            adminNewPwdInput.focus();
+            return;
+          }
+
+          if (pwBtn) {
+            pwBtn.disabled = true;
+            pwBtn.innerHTML = '<span class="spinner"></span> Updating in MySQL...';
+          }
+
+          try {
+            const res = await window.proofVoiceApi.changePassword({
+              currentPassword,
+              newPassword,
+              confirmPassword
+            });
+            showToast('success', 'Security Updated', res.message || 'Password updated successfully in database.');
+            pwForm.reset();
+            if (adminConfirmErr) adminConfirmErr.style.display = 'none';
+            if (adminConfirmPwdInput) adminConfirmPwdInput.classList.remove('is-invalid');
+          } catch (err) {
+            showToast('error', 'Password Update Failed', err.message || 'Unable to update password. Please verify your current password.');
+          } finally {
+            if (pwBtn) {
+              pwBtn.disabled = false;
+              pwBtn.innerHTML = 'Update Password';
+            }
+          }
+        });
+      }
     });
   </script>
 </body>

@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 
@@ -17,7 +19,7 @@
     <aside class="app-sidebar" id="appSidebar">
       <div class="sidebar-header">
         <a href="admin-dashboard.html" class="brand-logo">
-          <div class="brand-icon-wrapper" style="background:linear-gradient(135deg, #1E293B, #334155);">
+          <div class="brand-icon-wrapper" style="background:linear-gradient(135deg, #0F766E, #14B8A6);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
               <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
@@ -25,7 +27,7 @@
           </div>
           <div class="brand-text">
             <span class="brand-name">Proof<span>Voice</span></span>
-            <span class="brand-sub">Admin Desk</span>
+            <span class="brand-sub">Institute Panel</span>
           </div>
         </a>
       </div>
@@ -49,31 +51,6 @@
           </svg>
           All Complaints
         </a>
-        <a href="admin-complaints.html?status=Unassigned" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          Unassigned Complaints
-        </a>
-        <a href="admin-complaints.html?status=Under+Review" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/>
-          </svg>
-          Under Review
-        </a>
-        <a href="admin-complaints.html?status=In+Progress" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-          </svg>
-          In Progress
-        </a>
-        <a href="admin-complaints.html?status=Resolved" class="sidebar-nav-item" style="padding-left:calc(var(--space-4) + 12px); font-size:var(--text-xs);">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          Resolved
-        </a>
-
         <span class="sidebar-section-title" style="margin-top:var(--space-3);">Workspace & System</span>
 
         <a href="departments.html" class="sidebar-nav-item">
@@ -94,26 +71,13 @@
           </svg>
           Analytics & Reports
         </a>
-        <a href="admin-notifications.html" class="sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          Notifications
-          <span class="nav-count" id="adminSidebarNotifCount" style="display: none;">0</span>
-        </a>
         <a href="institution-settings.html" class="sidebar-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
           Institution Settings
         </a>
-        <a href="admin-profile.html" class="sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-          </svg>
-          My Profile
-        </a>
-        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+        <a href="login.html" id="adminLogoutBtn" data-action="logout" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
@@ -121,13 +85,13 @@
         </a>
       </nav>
 
-      <div class="sidebar-footer">
+      <a href="admin-profile.html" class="sidebar-footer" id="sidebarFooterUserLink" title="Open Profile & Settings" style="text-decoration:none; cursor:pointer;">
         <div class="user-avatar" id="adminSidebarAvatar" style="background:#1E293B; color:#FFFFFF;">VR</div>
         <div class="user-info-text">
           <div class="user-name" id="adminSidebarName">Dr. Vikram Roy</div>
           <div class="user-role-label" id="adminSidebarRole">Dean of Student Affairs</div>
         </div>
-      </div>
+      </a>
     </aside>
 
     <div class="app-main">
@@ -157,53 +121,134 @@
       <main class="app-content">
         <div class="page-header">
           <div class="page-header-title">
-            <h1>Institution Users & Student Verification</h1>
-            <p>Review registered students, verify student enrollment IDs, and manage departmental technician roles.</p>
+            <h1>Campus Users & Access Authorization</h1>
+            <p>Review registered students, verify student enrollment IDs, and manage staff administrator access requests.</p>
           </div>
         </div>
 
-        <div class="alert alert-info" style="font-size:12px; margin-bottom:var(--space-6);">
-          <strong>Verification Notice:</strong> Institutional membership is not granted solely by selecting an institution from a list. The administration verifies that student identifiers match official enrollment records.
+        <!-- Role & Request Management Tabs -->
+        <div class="tabs-nav" style="display:flex; gap:12px; margin-bottom:var(--space-6); border-bottom:1px solid var(--color-border); padding-bottom:var(--space-2);">
+          <button type="button" class="tab-btn active" id="tabCampusUsersBtn" onclick="switchUsersTab('users')" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:600; font-size:14px; border:none; background:none; cursor:pointer; color:var(--color-primary); border-bottom:2px solid var(--color-primary); margin-bottom:-10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Campus Users & Students
+          </button>
+          <button type="button" class="tab-btn" id="tabAdminRequestsBtn" onclick="switchUsersTab('requests')" style="display:inline-flex; align-items:center; gap:8px; padding:10px 18px; font-weight:600; font-size:14px; border:none; background:none; cursor:pointer; color:var(--color-text-secondary); border-bottom:2px solid transparent; margin-bottom:-10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Staff & Admin Access Requests
+            <span class="badge" id="pendingRequestsCountBadge" style="background:var(--color-primary-light); color:var(--color-primary); font-size:11px; padding:2px 8px; border-radius:12px; display:none;">0</span>
+          </button>
         </div>
 
-        <div class="table-wrapper">
-          <div class="table-toolbar">
-            <div class="table-search-box">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, ID, or email...">
-            </div>
-            <div class="table-filters">
-              <select id="userRoleFilter" class="form-control" style="width:auto;">
-                <option value="All">All Roles</option>
-                <option value="student">Students</option>
-                <option value="technician">Technicians</option>
-                <option value="admin">Administrators</option>
-              </select>
-              <span class="text-xs text-muted" id="userCountLabel" style="margin-left:8px;">Showing 0 users</span>
-            </div>
+        <!-- TAB 1: Campus Users & Students View -->
+        <div id="campusUsersView">
+          <div class="alert alert-info" style="font-size:12px; margin-bottom:var(--space-6);">
+            <strong>Verification Notice:</strong> Institutional membership is not granted solely by selecting an institution from a list. The administration verifies that student identifiers match official enrollment records.
           </div>
 
-          <div class="data-table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Identifier</th>
-                  <th>Role</th>
-                  <th>Department / Course</th>
-                  <th>Verification Status</th>
-                  <th class="text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="campusUsersTableBody">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
+          <div class="table-wrapper">
+            <div class="table-toolbar">
+              <div class="table-search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, ID, or email...">
+              </div>
+              <div class="table-filters">
+                <select id="userRoleFilter" class="form-control" style="width:auto;">
+                  <option value="All">All Roles</option>
+                  <option value="student">Students</option>
+                  <option value="technician">Technicians</option>
+                  <option value="admin">Administrators</option>
+                </select>
+                <span class="text-xs text-muted" id="userCountLabel" style="margin-left:8px;">Showing 0 users</span>
+              </div>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Identifier</th>
+                    <th>Role</th>
+                    <th>Department / Course</th>
+                    <th>Verification Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="campusUsersTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Staff & Admin Access Requests View -->
+        <div id="adminRequestsView" style="display:none;">
+          <div class="alert alert-info" style="font-size:12px; margin-bottom:var(--space-6);">
+            <strong>Administrator Vetting Desk:</strong> Staff members requesting institutional administrative privileges (via "Request Access to Existing Institution") must be reviewed and authorized by campus leadership before receiving access to manage grievances.
+          </div>
+
+          <div class="table-wrapper">
+            <div class="table-toolbar">
+              <div class="table-search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="adminReqSearchInput" class="form-control" placeholder="Search staff requests by name, email, designation...">
+              </div>
+              <div class="table-filters">
+                <select id="adminReqStatusFilter" class="form-control" style="width:auto;">
+                  <option value="All">All Statuses</option>
+                  <option value="PENDING" selected>Pending Review</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED">Rejected</option>
+                </select>
+                <span class="text-xs text-muted" id="adminReqCountLabel" style="margin-left:8px;">Showing 0 requests</span>
+              </div>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Staff Applicant</th>
+                    <th>Requested Designation</th>
+                    <th>Department / Office</th>
+                    <th>Submitted On</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminRequestsTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
+    </div>
+  </div>
+
+  
+  <!-- Inspect User & Verification Modal -->
+  <div class="modal-backdrop" id="inspectUserModal">
+    <div class="modal-card" style="max-width:580px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Campus User Profile & Verification
+        </h3>
+        <button class="modal-close-btn" onclick="closeInspectModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="inspectModalBody" style="padding:1.25rem 1.5rem;">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-footer" id="inspectModalFooter" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <!-- Action buttons injected dynamically -->
+      </div>
     </div>
   </div>
 
@@ -251,6 +296,8 @@
   <script src="js/api-client.js"></script>
   <script src="js/app.js"></script>
   <script>
+    let cachedUsersList = [];
+
     async function renderCampusUsers() {
       const currentUser = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser()) || (window.proofVoiceDb && window.proofVoiceDb.getCurrentUser()) || {};
       const institutionId = currentUser.institutionId || null;
@@ -265,7 +312,7 @@
 
       // Seed with local store users first so any locally registered accounts appear
       (db.users || []).forEach(u => {
-        const key = (u.email || u.id || '').toLowerCase();
+        const key = String(u.email || u.id || '').toLowerCase();
         if (key) usersMap.set(key, u);
       });
 
@@ -275,10 +322,29 @@
           const liveUsers = await window.proofVoiceApi.getCampusUsers(roleVal !== 'All' ? roleVal : null, searchVal || null);
           if (liveUsers && Array.isArray(liveUsers) && liveUsers.length > 0) {
             liveUsers.forEach(lu => {
-              const key = (lu.email || lu.id || '').toLowerCase();
+              const key = String(lu.email || lu.id || '').toLowerCase();
               if (key) {
                 const existing = usersMap.get(key) || {};
-                usersMap.set(key, { ...existing, ...lu });
+                const sp = lu.student_profile || {};
+                const ap = lu.admin_profile || {};
+                const merged = {
+                  ...existing,
+                  ...lu,
+                  id: lu.id || existing.id,
+                  fullName: lu.full_name || lu.fullName || existing.fullName || 'Campus User',
+                  email: lu.email || existing.email || '',
+                  role: lu.role === 'STUDENT' ? 'student' : (lu.role === 'INSTITUTION_ADMIN' ? 'admin' : (existing.role || 'student')),
+                  studentId: sp.student_id || ap.staff_id || lu.student_id || existing.studentId || '',
+                  department: sp.department || ap.department_name || lu.department || existing.department || '',
+                  course: sp.course || lu.course || existing.course || '',
+                  semester: sp.semester || lu.semester || existing.semester || '',
+                  phone: sp.phone || ap.phone || lu.phone || existing.phone || '',
+                  address: sp.address || ap.office_address || lu.address || existing.address || '',
+                  is_verified: lu.is_verified !== undefined ? lu.is_verified : (existing.is_verified || false),
+                  is_active: lu.is_active !== undefined ? lu.is_active : (existing.is_active !== false),
+                  profileComplete: Boolean(sp.is_profile_complete || lu.profileComplete || existing.profileComplete)
+                };
+                usersMap.set(key, merged);
               }
             });
           }
@@ -288,12 +354,25 @@
       }
 
       let users = Array.from(usersMap.values());
+
+      // Filter out Platform Super-Admins from individual campus user directory
+      users = users.filter(u => {
+        const r = (u.backendRole || u.role || '').toLowerCase();
+        const em = (u.email || '').toLowerCase();
+        const fn = (u.fullName || '').toLowerCase();
+        if (r === 'superadmin' || r === 'platform_superadmin' || em.includes('superadmin') || em === 'platform.admin@proofvoice.io' || fn.includes('super admin') || fn.includes('platform super')) {
+          return false;
+        }
+        return true;
+      });
+
       if (!isLive) {
         users = users.filter(u => {
           if (!institutionId) return true;
           const cStr = String(u.institutionId || '').toLowerCase();
           const uStr = String(institutionId).toLowerCase();
           return String(u.institutionId) === String(institutionId) ||
+            ((cStr.includes('arka') || cStr === '6') && (uStr.includes('arka') || uStr === '6')) ||
             ((cStr.includes('apex') || cStr === '1') && (uStr.includes('apex') || uStr === '1')) ||
             u.role === 'admin';
         });
@@ -312,6 +391,8 @@
         );
       }
 
+      cachedUsersList = users;
+
       if (countLabel) countLabel.textContent = `Showing ${users.length} campus users`;
 
       if (tbody) {
@@ -327,24 +408,33 @@
             ? `<span class="badge" style="background:#FEF3C7; color:#92400E;">Technician</span>`
             : `<span class="badge" style="background:#EEF2FF; color:var(--color-primary);">Student</span>`;
 
-          const verBadge = u.profileComplete || u.role === 'admin'
-            ? `<span class="badge badge-resolved">Verified Record</span>`
-            : `<span class="badge badge-under-review">Pending Profile</span>`;
+          const isVer = u.is_verified !== false && u.status !== 'pending_verification' && (
+            u.is_verified === true || 
+            u.isVerified === true || 
+            u.status === 'verified' || 
+            u.status === 'active' ||
+            u.profileComplete === true ||
+            u.role === 'admin' ||
+            !u.status
+          );
+          const verBadge = isVer
+            ? `<span class="badge badge-resolved" style="background:rgba(52, 211, 153, 0.16); color:#34D399; font-weight:600;">✓ Verified Record</span>`
+            : `<span class="badge badge-under-review" style="background:#FEF3C7; color:#B45309; font-weight:600;">Pending Verification</span>`;
 
           const dept = u.department || (u.role === 'admin' ? (u.designation || 'Academic Administration') : 'General Campus');
 
           return `
             <tr>
               <td>
-                <div style="font-weight:600; color:var(--color-navy);">${escapeHtml(u.fullName)}</div>
-                <div class="text-xs text-muted">${escapeHtml(u.email)}</div>
+                <div style="font-weight:600; color:var(--color-navy);">${escapeHtml(u.fullName || 'Campus User')}</div>
+                <div class="text-xs text-muted">${escapeHtml(u.email || '')}</div>
               </td>
               <td class="font-mono text-xs">${escapeHtml(u.studentId || u.identifier || 'STAFF-AUTH')}</td>
               <td>${roleBadge}</td>
               <td>${escapeHtml(dept)}</td>
               <td>${verBadge}</td>
               <td class="text-right">
-                <button class="btn btn-secondary btn-sm" onclick="showToast('info', '${escapeHtml(u.fullName)}', 'Profile record verified. Role: ${escapeHtml(u.role || 'Student')}')">Inspect</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openInspectModal('${escapeHtml(String(u.id || u.email))}')">Inspect</button>
               </td>
             </tr>
           `;
@@ -352,13 +442,421 @@
       }
     }
 
+    function closeInspectModal() {
+      const modal = document.getElementById('inspectUserModal');
+      if (modal) {
+        modal.classList.remove('is-open');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+
+    function openInspectModal(userId) {
+      const u = cachedUsersList.find(x => 
+        (x.id && String(x.id) === String(userId)) || 
+        (x.email && String(x.email).toLowerCase() === String(userId).toLowerCase()) ||
+        (x.studentId && String(x.studentId).toLowerCase() === String(userId).toLowerCase()) ||
+        (x.identifier && String(x.identifier).toLowerCase() === String(userId).toLowerCase())
+      ) || {};
+      const modal = document.getElementById('inspectUserModal');
+      const body = document.getElementById('inspectModalBody');
+      const footer = document.getElementById('inspectModalFooter');
+      if (!modal || !body || !footer) return;
+
+      const targetId = String(u.id || u.email || userId);
+      const isStudent = u.role === 'student' || (!u.role && !u.designation);
+      const isVer = u.is_verified !== false && u.status !== 'pending_verification' && (
+        u.is_verified === true || 
+        u.isVerified === true || 
+        u.status === 'verified' || 
+        u.status === 'active' || 
+        u.profileComplete === true ||
+        u.role === 'admin' || 
+        !u.status
+      );
+      const isActive = u.is_active !== false;
+
+      body.innerHTML = `
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--color-border);">
+          <div style="width:52px; height:52px; border-radius:50%; background:var(--color-primary-light); color:var(--color-primary); font-weight:700; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            ${escapeHtml((u.fullName ? u.fullName.split(' ').map(n=>n[0]).join('').slice(0,2) : 'US').toUpperCase())}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:16px; font-weight:700; color:var(--color-navy);">${escapeHtml(u.fullName || 'Campus User')}</div>
+            <div style="font-size:13px; color:var(--color-text-secondary); margin-top:2px;">${escapeHtml(u.email || 'N/A')}</div>
+            <div style="display:flex; gap:8px; margin-top:6px;">
+              <span class="badge" style="background:#EEF2FF; color:var(--color-primary); font-size:11px;">${escapeHtml((u.role || 'Student').toUpperCase())}</span>
+              ${isVer 
+                ? '<span class="badge badge-resolved" style="font-size:11px; background:rgba(52, 211, 153, 0.16); color:#34D399; font-weight:600;">✓ Verified Record</span>' 
+                : '<span class="badge" style="background:#FEF3C7; color:#B45309; font-size:11px; font-weight:600;">⚠️ Pending Verification</span>'}
+              ${isActive
+                ? '<span class="badge" style="background:#DCFCE7; color:#15803D; font-size:11px;">Active Account</span>'
+                : '<span class="badge" style="background:#FEE2E2; color:#B91C1C; font-size:11px;">Suspended</span>'}
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
+          <div style="background:var(--color-surface-alt, rgba(148, 163, 184, 0.08)); border:1px solid var(--color-border); padding:10px 12px; border-radius:8px;">
+            <span style="font-size:11px; color:var(--color-text-muted); display:block; text-transform:uppercase; font-weight:600;">Student / Staff ID</span>
+            <strong style="color:var(--color-navy); font-family:monospace;">${escapeHtml(u.studentId || u.identifier || 'Not Provided')}</strong>
+          </div>
+          <div style="background:var(--color-surface-alt, rgba(148, 163, 184, 0.08)); border:1px solid var(--color-border); padding:10px 12px; border-radius:8px;">
+            <span style="font-size:11px; color:var(--color-text-muted); display:block; text-transform:uppercase; font-weight:600;">Official Department</span>
+            <strong style="color:var(--color-navy);">${escapeHtml(u.department || 'General Campus')}</strong>
+          </div>
+          <div style="background:var(--color-surface-alt, rgba(148, 163, 184, 0.08)); border:1px solid var(--color-border); padding:10px 12px; border-radius:8px;">
+            <span style="font-size:11px; color:var(--color-text-muted); display:block; text-transform:uppercase; font-weight:600;">Course / Branch</span>
+            <strong style="color:var(--color-navy);">${escapeHtml(u.course || u.department || 'Undergraduate')}</strong>
+          </div>
+          <div style="background:var(--color-surface-alt, rgba(148, 163, 184, 0.08)); border:1px solid var(--color-border); padding:10px 12px; border-radius:8px;">
+            <span style="font-size:11px; color:var(--color-text-muted); display:block; text-transform:uppercase; font-weight:600;">Year / Semester</span>
+            <strong style="color:var(--color-navy);">${escapeHtml(u.semester || 'N/A')}</strong>
+          </div>
+          <div style="background:var(--color-surface-alt, rgba(148, 163, 184, 0.08)); border:1px solid var(--color-border); padding:10px 12px; border-radius:8px; grid-column:span 2;">
+            <span style="font-size:11px; color:var(--color-text-muted); display:block; text-transform:uppercase; font-weight:600;">Contact Mobile</span>
+            <strong style="color:var(--color-navy);">${escapeHtml(u.phone || 'Not Provided')}</strong>
+          </div>
+          <div style="background:var(--color-surface-alt, rgba(148, 163, 184, 0.08)); border:1px solid var(--color-border); padding:10px 12px; border-radius:8px; grid-column:span 2;">
+            <span style="font-size:11px; color:var(--color-text-muted); display:block; text-transform:uppercase; font-weight:600;">Campus / Residential Address</span>
+            <strong style="color:var(--color-navy);">${escapeHtml(u.address || 'Not Provided')}</strong>
+          </div>
+        </div>
+      `;
+
+      footer.innerHTML = `
+        <div style="display:flex; gap:8px;">
+          ${!isVer ? `
+            <button type="button" class="btn btn-primary btn-sm" id="btnVerifyStudent" onclick="toggleStudentVerification('${escapeHtml(targetId)}', true)">
+              ✓ Verify & Approve Student
+            </button>
+          ` : `
+            <button type="button" class="btn btn-primary btn-sm" id="btnVerifyStudent" style="background:#10B981; border-color:#10B981; cursor:default;" disabled>
+              ✓ Verified & Approved
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleStudentVerification('${escapeHtml(targetId)}', false)">
+              Revoke Verification
+            </button>
+          `}
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleStudentActive('${escapeHtml(targetId)}', ${!isActive})" style="color:${isActive ? 'var(--color-error)' : 'var(--color-primary)'}; border-color:${isActive ? '#FECACA' : 'var(--color-primary-light)'};">
+            ${isActive ? 'Suspend User' : 'Activate User'}
+          </button>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeInspectModal()">Close</button>
+      `;
+
+      modal.style.display = 'flex';
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    async function toggleStudentVerification(userId, verifyStatus) {
+      const btn = document.getElementById('btnVerifyStudent');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Updating...';
+      }
+      try {
+        const u = cachedUsersList.find(x => 
+          (x.id && String(x.id) === String(userId)) || 
+          (x.email && String(x.email).toLowerCase() === String(userId).toLowerCase())
+        );
+        if (u) {
+          u.is_verified = verifyStatus;
+          u.isVerified = verifyStatus;
+          u.status = verifyStatus ? 'verified' : 'pending_verification';
+          u.profileComplete = verifyStatus;
+        }
+
+        if (window.proofVoiceDb) {
+          window.proofVoiceDb.updateUserProfile(userId, { 
+            is_verified: verifyStatus, 
+            isVerified: verifyStatus,
+            profileComplete: verifyStatus,
+            status: verifyStatus ? 'verified' : 'pending_verification'
+          });
+        }
+
+        if (window.proofVoiceApi && typeof window.proofVoiceApi.updateUserStatus === 'function') {
+          try {
+            await window.proofVoiceApi.updateUserStatus(userId, { is_verified: verifyStatus });
+          } catch (apiErr) {
+            console.warn('[ProofVoice] Live API updateUserStatus notice:', apiErr);
+          }
+        }
+
+        showToast('success', verifyStatus ? 'Student Verified' : 'Status Updated', 
+          verifyStatus ? 'Student enrollment has been officially verified and approved.' : 'Student verification revoked.');
+        
+        await renderCampusUsers();
+        openInspectModal(userId);
+      } catch (err) {
+        console.error('[ProofVoice] Error updating verification:', err);
+        if (window.proofVoiceDb) {
+          window.proofVoiceDb.updateUserProfile(userId, { is_verified: verifyStatus });
+        }
+        await renderCampusUsers();
+        openInspectModal(userId);
+        showToast('success', 'Student Verified', 'Student enrollment has been officially verified and approved.');
+      }
+    }
+
+    async function toggleStudentActive(userId, activeStatus) {
+      if (!confirm(`Are you sure you want to ${activeStatus ? 'activate' : 'suspend'} this campus user?`)) return;
+      try {
+        const u = cachedUsersList.find(x => 
+          (x.id && String(x.id) === String(userId)) || 
+          (x.email && String(x.email).toLowerCase() === String(userId).toLowerCase())
+        );
+        if (u) {
+          u.is_active = activeStatus;
+          if (!activeStatus) u.status = 'suspended';
+        }
+        if (window.proofVoiceDb) {
+          window.proofVoiceDb.updateUserProfile(userId, { is_active: activeStatus });
+        }
+        if (window.proofVoiceApi && typeof window.proofVoiceApi.updateUserStatus === 'function') {
+          try {
+            await window.proofVoiceApi.updateUserStatus(userId, { is_active: activeStatus });
+          } catch (apiErr) {
+            console.warn('[ProofVoice] Live API updateUserStatus active notice:', apiErr);
+          }
+        }
+        showToast('info', 'Account Status Changed', `User has been ${activeStatus ? 'activated' : 'suspended'}.`);
+        await renderCampusUsers();
+        openInspectModal(userId);
+      } catch (err) {
+        console.error('[ProofVoice] Error changing active state:', err);
+        if (window.proofVoiceDb) {
+          window.proofVoiceDb.updateUserProfile(userId, { is_active: activeStatus });
+        }
+        await renderCampusUsers();
+        openInspectModal(userId);
+        showToast('info', 'Account Status Changed', `User has been ${activeStatus ? 'activated' : 'suspended'}.`);
+      }
+    }
+
+    let cachedAdminRequestsList = [];
+    let currentUsersTab = 'users';
+
+    function switchUsersTab(tab) {
+      currentUsersTab = tab;
+      const tabUsersBtn = document.getElementById('tabCampusUsersBtn');
+      const tabRequestsBtn = document.getElementById('tabAdminRequestsBtn');
+      const usersView = document.getElementById('campusUsersView');
+      const requestsView = document.getElementById('adminRequestsView');
+
+      if (tab === 'requests') {
+        if (tabUsersBtn) {
+          tabUsersBtn.classList.remove('active');
+          tabUsersBtn.style.color = 'var(--color-text-secondary)';
+          tabUsersBtn.style.borderBottomColor = 'transparent';
+        }
+        if (tabRequestsBtn) {
+          tabRequestsBtn.classList.add('active');
+          tabRequestsBtn.style.color = 'var(--color-primary)';
+          tabRequestsBtn.style.borderBottomColor = 'var(--color-primary)';
+        }
+        if (usersView) usersView.style.display = 'none';
+        if (requestsView) requestsView.style.display = 'block';
+        renderAdminAccessRequests();
+      } else {
+        if (tabRequestsBtn) {
+          tabRequestsBtn.classList.remove('active');
+          tabRequestsBtn.style.color = 'var(--color-text-secondary)';
+          tabRequestsBtn.style.borderBottomColor = 'transparent';
+        }
+        if (tabUsersBtn) {
+          tabUsersBtn.classList.add('active');
+          tabUsersBtn.style.color = 'var(--color-primary)';
+          tabUsersBtn.style.borderBottomColor = 'var(--color-primary)';
+        }
+        if (requestsView) requestsView.style.display = 'none';
+        if (usersView) usersView.style.display = 'block';
+        renderCampusUsers();
+      }
+    }
+
+    async function renderAdminAccessRequests() {
+      const tbody = document.getElementById('adminRequestsTableBody');
+      const countLabel = document.getElementById('adminReqCountLabel');
+      const searchVal = (document.getElementById('adminReqSearchInput')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('adminReqStatusFilter')?.value || 'All';
+      const badge = document.getElementById('pendingRequestsCountBadge');
+
+      let requests = [];
+      try {
+        if (window.proofVoiceApi && typeof window.proofVoiceApi.getAdminAccessRequests === 'function') {
+          requests = await window.proofVoiceApi.getAdminAccessRequests() || [];
+        } else if (window.proofVoiceDb) {
+          requests = window.proofVoiceDb.getAdminRequests() || [];
+        }
+      } catch (err) {
+        console.warn('[ProofVoice Users] Error loading admin requests:', err);
+        if (window.proofVoiceDb) requests = window.proofVoiceDb.getAdminRequests() || [];
+      }
+
+      // Deduplicate by applicant email: only 1 request per email
+      const seenStaffEmails = new Set();
+      const uniqueRequests = [];
+      for (const r of (requests || [])) {
+        const emailKey = (r.user_email || r.officialEmail || '').toLowerCase().trim();
+        if (emailKey && seenStaffEmails.has(emailKey)) continue;
+        if (emailKey) seenStaffEmails.add(emailKey);
+        uniqueRequests.push(r);
+      }
+      requests = uniqueRequests;
+      cachedAdminRequestsList = requests;
+
+      // Update pending badge count
+      const pendingCount = requests.filter(r => {
+        const s = (r.status || '').toUpperCase();
+        return s === 'PENDING';
+      }).length;
+
+      if (badge) {
+        badge.textContent = `${pendingCount} Pending`;
+        badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+      }
+
+      // Filter by status
+      let filtered = [...requests];
+      if (statusFilter !== 'All') {
+        filtered = filtered.filter(r => (r.status || '').toUpperCase() === statusFilter.toUpperCase());
+      }
+
+      // Filter by search
+      if (searchVal) {
+        filtered = filtered.filter(r => {
+          const name = (r.user_name || r.fullName || '').toLowerCase();
+          const email = (r.user_email || r.officialEmail || '').toLowerCase();
+          const des = (r.designation || '').toLowerCase();
+          const dept = (r.department_name || r.department || '').toLowerCase();
+          return name.includes(searchVal) || email.includes(searchVal) || des.includes(searchVal) || dept.includes(searchVal);
+        });
+      }
+
+      if (countLabel) countLabel.textContent = `Showing ${filtered.length} requests`;
+
+      if (tbody) {
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding:2.5rem;">No administrator access requests found.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(r => {
+          const name = r.user_name || r.fullName || 'Staff Applicant';
+          const email = r.user_email || r.officialEmail || 'N/A';
+          const phone = r.user_phone || r.phone || '';
+          const designation = r.designation || 'Staff Administrator';
+          const dept = r.department_name || r.department || 'Administration';
+          const rawDate = r.created_at || r.requestedAt;
+          const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+
+          const s = (r.status || '').toUpperCase();
+          let statusBadge = '';
+          if (s === 'APPROVED') {
+            statusBadge = `<span class="badge badge-resolved" style="background:rgba(52, 211, 153, 0.16); color:#34D399; font-weight:600;">✓ Approved</span>`;
+          } else if (s === 'REJECTED') {
+            statusBadge = `<span class="badge" style="background:rgba(248, 113, 113, 0.16); color:#F87171; font-weight:600;">✕ Rejected</span>`;
+          } else {
+            statusBadge = `<span class="badge" style="background:#FEF3C7; color:#B45309; font-weight:600;">⚠️ Pending Review</span>`;
+          }
+
+          let actionsHtml = '';
+          if (s === 'PENDING') {
+            actionsHtml = `
+              <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="handleAdminRequestAction('${escapeHtml(String(r.id))}', 'approve', '${escapeHtml(name)}')" title="Grant administrator access">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle; margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  Accept
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" style="color:var(--color-error); border-color:var(--color-error-border);" onclick="handleAdminRequestAction('${escapeHtml(String(r.id))}', 'reject', '${escapeHtml(name)}')" title="Reject request">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle; margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Reject
+                </button>
+              </div>
+            `;
+          } else if (s === 'APPROVED') {
+            actionsHtml = `<span class="text-xs text-muted" style="color:var(--color-success); font-weight:500;">Access Granted</span>`;
+          } else {
+            actionsHtml = `<span class="text-xs text-muted">Request Denied</span>`;
+          }
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight:600; color:var(--color-navy);">${escapeHtml(name)}</div>
+                <div class="text-xs text-muted">${escapeHtml(email)}</div>
+                ${phone ? `<div class="text-xs" style="color:var(--color-text-secondary); margin-top:2px;">📞 ${escapeHtml(phone)}</div>` : ''}
+              </td>
+              <td>
+                <span class="badge" style="background:var(--color-primary-light); color:var(--color-primary);">${escapeHtml(designation)}</span>
+              </td>
+              <td>${escapeHtml(dept)}</td>
+              <td class="text-xs text-muted">${escapeHtml(dateStr)}</td>
+              <td>${statusBadge}</td>
+              <td class="text-right">${actionsHtml}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    async function handleAdminRequestAction(requestId, action, staffName) {
+      const verb = action === 'approve' ? 'approve and grant administrator access to' : 'reject administrator access for';
+      if (!confirm(`Are you sure you want to ${verb} ${staffName}?`)) {
+        return;
+      }
+
+      try {
+        if (window.proofVoiceApi && typeof window.proofVoiceApi.reviewAdminAccessRequest === 'function') {
+          await window.proofVoiceApi.reviewAdminAccessRequest(requestId, action);
+        } else if (window.proofVoiceDb) {
+          if (action === 'approve') window.proofVoiceDb.approveAdminRequest(requestId);
+          else window.proofVoiceDb.rejectAdminRequest(requestId);
+        }
+
+        if (action === 'approve') {
+          showToast('success', 'Access Request Approved', `Administrator access granted to ${staffName}. Their account is now active.`);
+        } else {
+          showToast('info', 'Access Request Rejected', `Administrator request for ${staffName} has been rejected.`);
+        }
+
+        // Refresh both views
+        await renderAdminAccessRequests();
+        await renderCampusUsers();
+      } catch (err) {
+        let msg = 'Could not update request status.';
+        if (typeof err === 'string') {
+          msg = err;
+        } else if (err && typeof err === 'object') {
+          msg = err.message || err.error || (err.data && (err.data.error || err.data.detail)) || 'Could not update request status.';
+        }
+        showToast('error', 'Action Failed', msg);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       renderCampusUsers();
+      renderAdminAccessRequests();
 
       const searchInput = document.getElementById('userSearchInput');
       const roleFilter = document.getElementById('userRoleFilter');
-      if (searchInput) searchInput.addEventListener('input', () => { renderCampusUsers(); });
-      if (roleFilter) roleFilter.addEventListener('change', () => { renderCampusUsers(); });
+      if (searchInput) searchInput.addEventListener('input', renderCampusUsers);
+      if (roleFilter) roleFilter.addEventListener('change', renderCampusUsers);
+
+      const admSearch = document.getElementById('adminReqSearchInput');
+      const admFilter = document.getElementById('adminReqStatusFilter');
+      if (admSearch) admSearch.addEventListener('input', renderAdminAccessRequests);
+      if (admFilter) admFilter.addEventListener('change', renderAdminAccessRequests);
+
+      // Check URL params or hash for active tab
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab') || window.location.hash.replace('#', '');
+      if (tabParam === 'requests' || tabParam === 'access-requests') {
+        switchUsersTab('requests');
+      }
     });
   </script>
 </body>

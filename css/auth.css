@@ -15,7 +15,7 @@
 
 /* Left Hero / Brand Panel */
 .auth-side-panel {
-  background: linear-gradient(135deg, var(--color-navy) 0%, #1A253C 100%);
+  background: linear-gradient(135deg, var(--color-navy) 0%, #115E59 100%);
   color: #FFFFFF;
   padding: var(--space-12) var(--space-10);
   display: flex;
@@ -59,8 +59,8 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-md);
-  background: rgba(49, 87, 213, 0.25);
-  color: #93C5FD;
+  background: rgba(15, 118, 110, 0.25);
+  color: #99F6E4;
   display: flex;
   align-items: center;
   justify-content: center;

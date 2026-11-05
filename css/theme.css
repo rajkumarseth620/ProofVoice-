@@ -1,0 +1,944 @@
+/* ==========================================================================
+   ProofVoice - Dark Mode & 3D Day/Night Switch Design System
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Dark Theme Color Tokens
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  /* Brand Teal Accents (High Contrast Luminous) */
+  --color-navy: #2DD4BF;
+  --color-primary: #14B8A6;
+  --color-primary-hover: #2DD4BF;
+  --color-primary-light: rgba(20, 184, 166, 0.22);
+  --color-primary-subtle: rgba(20, 184, 166, 0.12);
+  --color-accent-violet: #2DD4BF;
+  --color-accent-violet-light: rgba(20, 184, 166, 0.2);
+
+  /* Deep Oceanic Midnight Neutral Palette */
+  --color-bg: #0B1118;
+  --color-surface: #131E2B;
+  --color-surface-alt: #182737;
+  --color-border: #23364A;
+  --color-border-subtle: #1C2D3E;
+  --color-border-strong: #334D68;
+
+  /* Typography */
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-text-inverted: #0B1118;
+
+  /* Status Colors */
+  --color-success: #34D399;
+  --color-success-bg: rgba(52, 211, 153, 0.16);
+  --color-success-border: rgba(52, 211, 153, 0.35);
+  --color-warning: #FBBF24;
+  --color-warning-bg: rgba(251, 191, 36, 0.16);
+  --color-warning-border: rgba(251, 191, 36, 0.35);
+  --color-error: #F87171;
+  --color-error-bg: rgba(248, 113, 113, 0.16);
+  --color-error-border: rgba(248, 113, 113, 0.35);
+  --color-info: #38BDF8;
+  --color-info-bg: rgba(56, 189, 248, 0.16);
+  --color-info-border: rgba(56, 189, 248, 0.35);
+
+  /* Status Tags */
+  --status-draft-bg: #1E293B;
+  --status-draft-text: #94A3B8;
+  --status-submitted-bg: rgba(20, 184, 166, 0.2);
+  --status-submitted-text: #2DD4BF;
+  --status-under-review-bg: rgba(245, 158, 11, 0.2);
+  --status-under-review-text: #FBBF24;
+  --status-in-progress-bg: rgba(168, 85, 247, 0.2);
+  --status-in-progress-text: #C084FC;
+  --status-awaiting-bg: rgba(168, 85, 247, 0.2);
+  --status-awaiting-text: #C084FC;
+  --status-resolved-bg: rgba(52, 211, 153, 0.2);
+  --status-resolved-text: #34D399;
+  --status-rejected-bg: rgba(239, 68, 68, 0.2);
+  --status-rejected-text: #F87171;
+  --status-reopened-bg: rgba(217, 119, 6, 0.2);
+  --status-reopened-text: #FCD34D;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 16px -4px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 24px -4px rgba(0, 0, 0, 0.7), 0 8px 8px -4px rgba(0, 0, 0, 0.45);
+  --shadow-focus: 0 0 0 4px rgba(20, 184, 166, 0.35);
+}
+
+/* Smooth transition for theme switches */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease, box-shadow 0.3s ease !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. 3D Day / Night Theme Switch Toggle (Matching Reference Image)
+   -------------------------------------------------------------------------- */
+.pv-theme-toggle-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  user-select: none;
+}
+
+.pv-theme-toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .pv-theme-toggle-label {
+  color: #CBD5E1;
+}
+
+/* The clickable button */
+.pv-theme-toggle {
+  position: relative;
+  display: inline-block;
+  width: 74px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 9999px;
+  outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-sizing: border-box;
+}
+
+.pv-theme-toggle:hover {
+  transform: scale(1.05);
+}
+
+.pv-theme-toggle:active {
+  transform: scale(0.96);
+}
+
+.pv-theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.4);
+}
+
+/* Track container */
+.pv-toggle-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    inset 0 3px 6px rgba(0, 0, 0, 0.22),
+    inset 0 -2px 3px rgba(255, 255, 255, 0.35),
+    0 3px 10px rgba(0, 0, 0, 0.12);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+[data-theme="dark"] .pv-toggle-track {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    inset 0 3px 6px rgba(0, 0, 0, 0.5),
+    inset 0 -1.5px 2px rgba(255, 255, 255, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* Day Sky Background (Light Mode) */
+.pv-sky-day {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #4AA3E6 0%, #68B4F2 45%, #88C8F8 100%);
+  opacity: 1;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .pv-sky-day {
+  opacity: 0;
+}
+
+/* Floating Day Clouds in Track */
+.pv-cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 9999px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+.pv-cloud-1 {
+  width: 22px;
+  height: 8px;
+  right: 8px;
+  bottom: 6px;
+}
+.pv-cloud-1::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border-radius: 50%;
+  top: -5px;
+  left: 3px;
+}
+.pv-cloud-1::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: inherit;
+  border-radius: 50%;
+  top: -3px;
+  right: 3px;
+}
+
+.pv-cloud-2 {
+  width: 15px;
+  height: 6px;
+  right: 22px;
+  top: 7px;
+  opacity: 0.8;
+}
+.pv-cloud-2::before {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: inherit;
+  border-radius: 50%;
+  top: -4px;
+  left: 4px;
+}
+
+.pv-cloud-3 {
+  width: 12px;
+  height: 5px;
+  right: 38px;
+  bottom: 8px;
+  opacity: 0.65;
+}
+
+/* Night Sky Background (Dark Mode) */
+.pv-sky-night {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #182844 0%, #20355A 50%, #28416C 100%);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .pv-sky-night {
+  opacity: 1;
+}
+
+/* Night Stars in Track */
+.pv-star {
+  position: absolute;
+  background: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 0 3px #FFFFFF, 0 0 6px rgba(255, 255, 255, 0.8);
+  animation: pvStarTwinkle 3s infinite ease-in-out;
+}
+
+.pv-star-1 {
+  width: 2px;
+  height: 2px;
+  left: 12px;
+  top: 9px;
+  animation-delay: 0s;
+}
+
+.pv-star-2 {
+  width: 3px;
+  height: 3px;
+  left: 24px;
+  top: 14px;
+  animation-delay: 0.7s;
+}
+
+.pv-star-3 {
+  width: 2px;
+  height: 2px;
+  left: 16px;
+  bottom: 9px;
+  animation-delay: 1.4s;
+}
+
+.pv-star-4 {
+  width: 1.5px;
+  height: 1.5px;
+  left: 34px;
+  top: 8px;
+  animation-delay: 2.1s;
+}
+
+@keyframes pvStarTwinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Night Clouds in Track */
+.pv-night-cloud {
+  position: absolute;
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+  backdrop-filter: blur(1px);
+}
+
+.pv-night-cloud-1 {
+  width: 26px;
+  height: 8px;
+  left: 6px;
+  bottom: 5px;
+}
+.pv-night-cloud-1::before {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  background: inherit;
+  border-radius: 50%;
+  top: -5px;
+  left: 6px;
+}
+
+.pv-night-cloud-2 {
+  width: 18px;
+  height: 6px;
+  left: 20px;
+  top: 6px;
+  opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------------
+   The 3D Sliding Thumb / Knob
+   -------------------------------------------------------------------------- */
+.pv-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 5;
+}
+
+[data-theme="dark"] .pv-toggle-thumb {
+  transform: translateX(38px);
+}
+
+/* Sun Face (Light Mode - Realistic 3D Glowing Orb) */
+.pv-sun-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #FFF39E 28%, #F7C036 68%, #E59814 100%);
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.25),
+    0 0 12px rgba(255, 196, 38, 0.65),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 3px rgba(180, 83, 9, 0.4);
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+[data-theme="dark"] .pv-sun-face {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+  pointer-events: none;
+}
+
+/* Sun Core Corona & Wispy Sun Clouds */
+.pv-sun-cloud-puff {
+  position: absolute;
+  bottom: -4px;
+  left: -2px;
+  right: -2px;
+  height: 12px;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.85) 0%, rgba(255, 245, 180, 0.5) 50%, transparent 80%);
+  border-radius: 50%;
+}
+
+/* Moon Face (Dark Mode - Realistic 3D Lunar Orb with Craters) */
+.pv-moon-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #E6EDF5 32%, #B8C7D8 70%, #7E92A9 100%);
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.45),
+    0 0 14px rgba(203, 213, 225, 0.55),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 3px rgba(30, 41, 59, 0.5);
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+[data-theme="dark"] .pv-moon-face {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* Realistic 3D Moon Craters */
+.pv-moon-crater {
+  position: absolute;
+  background: #90A2B7;
+  border-radius: 50%;
+  box-shadow: 
+    inset 0 1px 2px rgba(30, 41, 59, 0.65),
+    0 0.5px 1px rgba(255, 255, 255, 0.4);
+}
+
+.pv-crater-1 {
+  width: 7px;
+  height: 7px;
+  top: 6px;
+  right: 5px;
+}
+
+.pv-crater-2 {
+  width: 4.5px;
+  height: 4.5px;
+  top: 15px;
+  right: 12px;
+}
+
+.pv-crater-3 {
+  width: 3.5px;
+  height: 3.5px;
+  top: 7px;
+  left: 7px;
+}
+
+/* Wispy Night Clouds over lower Moon */
+.pv-moon-cloud-puff {
+  position: absolute;
+  bottom: -3px;
+  left: -2px;
+  right: -2px;
+  height: 11px;
+  background: radial-gradient(ellipse at center, rgba(30, 41, 59, 0.75) 0%, rgba(51, 65, 85, 0.4) 60%, transparent 90%);
+  border-radius: 50%;
+}
+
+/* Compact Nav Variant for smaller spaces */
+.pv-theme-toggle.pv-toggle-sm {
+  width: 62px;
+  height: 30px;
+}
+
+.pv-theme-toggle.pv-toggle-sm .pv-toggle-thumb {
+  width: 24px;
+  height: 24px;
+  top: 2px;
+  left: 2px;
+}
+
+[data-theme="dark"] .pv-theme-toggle.pv-toggle-sm .pv-toggle-thumb {
+  transform: translateX(32px);
+}
+
+/* --------------------------------------------------------------------------
+   3. Comprehensive Dark Mode Overrides Across All Pages
+   -------------------------------------------------------------------------- */
+
+/* Body & Layout */
+[data-theme="dark"] body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+/* Headers & Navigation */
+[data-theme="dark"] .site-header,
+[data-theme="dark"] .app-topbar,
+[data-theme="dark"] .top-nav,
+[data-theme="dark"] .header {
+  background: rgba(19, 30, 43, 0.92) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .nav-link {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .nav-link:hover,
+[data-theme="dark"] .nav-link.active {
+  color: #2DD4BF;
+}
+
+[data-theme="dark"] .brand-name {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .brand-sub {
+  color: #94A3B8 !important;
+}
+
+/* Sidebar */
+[data-theme="dark"] .app-sidebar,
+[data-theme="dark"] .sidebar {
+  background-color: var(--color-surface) !important;
+  border-right-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .sidebar-header {
+  border-bottom-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .sidebar-nav-item {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .sidebar-nav-item:hover {
+  background-color: var(--color-surface-alt);
+  color: #2DD4BF;
+}
+
+[data-theme="dark"] .sidebar-nav-item.active {
+  background-color: rgba(20, 184, 166, 0.16);
+  color: #2DD4BF;
+}
+
+[data-theme="dark"] .sidebar-footer {
+  border-top-color: var(--color-border) !important;
+}
+
+/* Cards & Surfaces */
+[data-theme="dark"] .card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .chart-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .step-card,
+[data-theme="dark"] .preview-card,
+[data-theme="dark"] .preview-window,
+[data-theme="dark"] .modal-card,
+[data-theme="dark"] .faq-item {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .feature-card:hover {
+  border-color: rgba(20, 184, 166, 0.5) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px rgba(20, 184, 166, 0.15) !important;
+}
+
+[data-theme="dark"] .feature-icon,
+[data-theme="dark"] .step-num-badge,
+[data-theme="dark"] .auth-benefit-icon {
+  background-color: rgba(20, 184, 166, 0.16) !important;
+  color: #2DD4BF !important;
+}
+
+/* Hero Section */
+[data-theme="dark"] .hero-section {
+  background: 
+    radial-gradient(circle at 85% 20%, rgba(20, 184, 166, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 15% 85%, rgba(14, 116, 144, 0.1) 0%, transparent 45%),
+    #0B1118 !important;
+}
+
+[data-theme="dark"] .hero-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .hero-subtitle {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .hero-desc {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .hero-badge {
+  background: rgba(20, 184, 166, 0.15) !important;
+  border-color: rgba(20, 184, 166, 0.35) !important;
+  color: #2DD4BF !important;
+}
+
+/* Form Controls & Inputs */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: #0E1722 !important;
+  border-color: var(--color-border-strong) !important;
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  border-color: #14B8A6 !important;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.28) !important;
+  background-color: #111D2B !important;
+}
+
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #64748B !important;
+}
+
+[data-theme="dark"] .phone-country-prefix {
+  background-color: #182737 !important;
+  border-color: var(--color-border-strong) !important;
+  color: #94A3B8 !important;
+}
+
+/* Autocomplete Dropdown */
+[data-theme="dark"] .autocomplete-dropdown-list {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+[data-theme="dark"] .autocomplete-item {
+  border-bottom-color: var(--color-border-subtle) !important;
+}
+
+[data-theme="dark"] .autocomplete-item:hover {
+  background-color: var(--color-surface-alt) !important;
+}
+
+[data-theme="dark"] .autocomplete-item-title {
+  color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .autocomplete-item-meta {
+  color: #94A3B8 !important;
+}
+
+/* Tables */
+[data-theme="dark"] .table,
+[data-theme="dark"] table {
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .table th,
+[data-theme="dark"] table th {
+  background-color: var(--color-surface-alt) !important;
+  color: #CBD5E1 !important;
+  border-bottom-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .table td,
+[data-theme="dark"] table td {
+  border-bottom-color: var(--color-border-subtle) !important;
+  color: #E2E8F0;
+}
+
+[data-theme="dark"] .table tbody tr:hover td,
+[data-theme="dark"] table tbody tr:hover td {
+  background-color: var(--color-surface-alt) !important;
+}
+
+/* Buttons */
+[data-theme="dark"] .btn-secondary {
+  background-color: var(--color-surface-alt) !important;
+  border-color: var(--color-border) !important;
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background-color: var(--color-border) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-ghost {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .btn-ghost:hover {
+  background-color: var(--color-surface-alt);
+  color: #F8FAFC;
+}
+
+/* Comparison Section */
+[data-theme="dark"] .comparison-table {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .compare-col-old {
+  background-color: rgba(239, 68, 68, 0.05) !important;
+  border-right-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .compare-col-new {
+  background-color: rgba(20, 184, 166, 0.06) !important;
+}
+
+/* Auth Pages Seamless Dark Theme (Matches Page Background Perfectly) */
+[data-theme="dark"] .auth-page {
+  background-color: var(--color-bg) !important;
+}
+
+[data-theme="dark"] .auth-form-panel {
+  background-color: var(--color-bg) !important;
+}
+
+[data-theme="dark"] .auth-form-container {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .auth-side-panel {
+  background: linear-gradient(160deg, #071E1C 0%, #0F3935 50%, #051614 100%) !important;
+}
+
+[data-theme="dark"] .auth-role-tabs {
+  background: #0E1722 !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .auth-role-tab {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-role-tab:hover {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .auth-role-tab.active {
+  background: #182737 !important;
+  color: #2DD4BF !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .form-label {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .form-hint {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-header h1 {
+  color: #2DD4BF !important;
+}
+
+[data-theme="dark"] .auth-header p {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-footer-prompt {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-footer-prompt a {
+  color: #2DD4BF !important;
+}
+
+[data-theme="dark"] .auth-back-home-link {
+  color: #2DD4BF !important;
+}
+
+[data-theme="dark"] .security-notice-card {
+  background: #101B27 !important;
+  border-color: #23364A !important;
+  color: #94A3B8 !important;
+}
+
+/* Notification Trays & Popovers */
+[data-theme="dark"] .notification-item,
+[data-theme="dark"] .complaint-list-item {
+  border-bottom-color: var(--color-border-subtle) !important;
+}
+
+[data-theme="dark"] .notification-item:hover,
+[data-theme="dark"] .complaint-list-item:hover {
+  background-color: var(--color-surface-alt) !important;
+}
+
+[data-theme="dark"] .notification-item.unread {
+  background-color: rgba(20, 184, 166, 0.08) !important;
+}
+
+/* Stats & Metrics */
+[data-theme="dark"] .stat-number {
+  color: #2DD4BF !important;
+}
+
+/* Toast Container */
+[data-theme="dark"] .toast {
+  background-color: #172433 !important;
+  border-color: var(--color-border) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+  color: #F1F5F9 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Landing Page & Global Dark Mode Theme Overrides
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] .how-it-works-section,
+[data-theme="dark"] .features-section,
+[data-theme="dark"] .ai-pipeline-section,
+[data-theme="dark"] .languages-section,
+[data-theme="dark"] .institutions-section,
+[data-theme="dark"] .faq-section {
+  background: var(--color-bg) !important;
+}
+
+[data-theme="dark"] .cta-section {
+  background: radial-gradient(circle at center, rgba(45, 212, 191, 0.08) 0%, transparent 70%), var(--color-bg) !important;
+}
+
+[data-theme="dark"] .cta-box h2 {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .cta-box p {
+  color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] .step-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .institution-card,
+[data-theme="dark"] .stat-item,
+[data-theme="dark"] .trust-item {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Landing Page FAQ Accordion */
+[data-theme="dark"] .home-faq-item {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .home-faq-trigger {
+  color: var(--color-text-primary) !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .home-faq-trigger span {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .home-faq-trigger:hover span {
+  color: #2DD4BF !important;
+}
+
+[data-theme="dark"] .home-faq-content {
+  color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] .home-faq-item.is-open {
+  border-color: rgba(45, 212, 191, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .home-faq-item.is-open .home-faq-trigger span {
+  color: #2DD4BF !important;
+}
+
+/* Site Footer - Dark Obsidian Navy (Removes fluorescent cyan in dark mode) */
+[data-theme="dark"] .site-footer {
+  background-color: #060B11 !important;
+  border-top: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .footer-brand-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .footer-link {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .footer-link:hover {
+  color: #2DD4BF !important;
+}
+
+[data-theme="dark"] .footer-bottom {
+  border-top-color: #1E293B !important;
+  color: #64748B !important;
+}
+
+/* Super Admin Console Badges & Cards */
+[data-theme="dark"] .super-shield-badge {
+  background: rgba(45, 212, 191, 0.15) !important;
+  color: #2DD4BF !important;
+}
+
+/* Password Visibility Toggles & Microsoft Edge native button suppression */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+[data-theme="dark"] .pwd-toggle-btn {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .pwd-toggle-btn:hover {
+  color: #2DD4BF !important;
+}
+
+/* --------------------------------------------------------------------------
+   Formal Application Letter Document Display (Dark Mode Legibility)
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] .formal-letter-card {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .formal-letter-card pre,
+[data-theme="dark"] .formal-letter-card .formal-letter-body,
+[data-theme="dark"] .formal-letter-card .formal-letter-recipient p,
+[data-theme="dark"] .formal-letter-card .signoff-student p {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .formal-letter-card .formal-letter-header {
+  border-bottom-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .formal-letter-card .formal-letter-institution,
+[data-theme="dark"] .formal-letter-card .formal-letter-subject {
+  color: var(--color-navy) !important;
+}
+
+[data-theme="dark"] .formal-letter-card .formal-letter-ref,
+[data-theme="dark"] .formal-letter-card .formal-meta-label {
+  color: var(--color-text-muted) !important;
+}
+
+[data-theme="dark"] .formal-letter-card .formal-letter-signoff {
+  border-top-color: var(--color-border) !important;
+}
+
+

@@ -29,9 +29,6 @@ class AdminComplaintListView(APIView):
             admin_prof = getattr(user, 'admin_profile', None)
             admin_inst = getattr(admin_prof, 'institution', None) if admin_prof else None
             if not admin_inst:
-                from apps.institutions.models import Institution
-                admin_inst = Institution.objects.first()
-            if not admin_inst:
                 return Response([], status=status.HTTP_200_OK)
             complaints = Complaint.objects.filter(institution=admin_inst).exclude(status=Complaint.Status.DRAFT)
 

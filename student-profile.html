@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 
@@ -58,25 +60,13 @@
           </svg>
           My Complaints
         </a>
-        <a href="student-notifications.html" class="sidebar-nav-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          Notifications
-        </a>
-        <a href="student-profile.html" class="sidebar-nav-item active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-          </svg>
-          My Profile
-        </a>
-        <a href="help.html" class="sidebar-nav-item">
+        <a href="student-help.html" class="sidebar-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
           Help & Support
         </a>
-        <a href="login.html" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
+        <a href="login.html" id="logoutBtn" data-action="logout" class="sidebar-nav-item" style="color:var(--color-error); margin-top:auto;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
@@ -84,13 +74,13 @@
         </a>
       </nav>
 
-      <div class="sidebar-footer">
+      <a href="student-profile.html" class="sidebar-footer" id="sidebarFooterUserLink" title="Open Profile & Settings" style="text-decoration:none; cursor:pointer;">
         <div class="user-avatar" id="sidebarUserAvatar">MS</div>
         <div class="user-info-text">
           <div class="user-name" id="sidebarUserName">Maya Sharma</div>
           <div class="user-role-label" id="sidebarUserRole">Student</div>
         </div>
-      </div>
+      </a>
     </aside>
 
     <div class="app-main">
@@ -108,6 +98,7 @@
           </div>
         </div>
         <div class="topbar-right">
+          <div data-theme-toggle-slot data-size="sm" style="display:inline-flex; align-items:center;"></div>
           <div class="institution-pill">
             <span id="topbarInstName">Apex Tech (AIT)</span>
           </div>
@@ -131,7 +122,7 @@
               <h3 class="card-title" style="margin-bottom:var(--space-4);">Profile Picture</h3>
               <div style="display:flex; align-items:center; gap:var(--space-6); flex-wrap:wrap;">
                 <div style="position:relative; width:100px; height:100px; flex-shrink:0;">
-                  <div id="profilePhotoDisplay" style="width:100px; height:100px; border-radius:50%; background:#4F46E5; color:#fff; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; background-size:cover; background-position:center; border:3px solid var(--color-border); box-shadow:var(--shadow-sm); overflow:hidden;">
+                  <div id="profilePhotoDisplay" style="width:100px; height:100px; border-radius:50%; background:#0F766E; color:#fff; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; background-size:cover; background-position:center; border:3px solid var(--color-border); box-shadow:var(--shadow-sm); overflow:hidden;">
                     MS
                   </div>
                   <span id="photoRoleBadge" style="position:absolute; bottom:0; right:0; background:var(--color-navy); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; border:2px solid #fff; letter-spacing:0.5px;">STUDENT</span>
@@ -220,8 +211,15 @@
                   </div>
 
                   <div class="form-group" style="grid-column: span 2;">
-                    <label class="form-label">Contact Phone Number</label>
-                    <input type="tel" id="profPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+                    <label class="form-label" for="profPhone">Contact Mobile Number <span class="required">*</span></label>
+                    <div class="phone-input-group">
+                      <span class="phone-country-prefix" title="India Country Code">
+                        <span style="font-size:16px;">🇮🇳</span> +91
+                      </span>
+                      <input type="tel" id="profPhone" class="form-control" placeholder="9876543210" maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" required autocomplete="tel-national">
+                    </div>
+                    <div class="phone-error-msg" id="profPhoneError" style="display:none;"></div>
+                    <span class="form-hint" style="font-size:11px; color:#64748B; margin-top:2px; display:block;">Enter a 10-digit Indian mobile number (e.g. 9876543210).</span>
                   </div>
                 </div>
 
@@ -234,22 +232,47 @@
             <!-- Password Change Card -->
             <div class="card" style="padding:var(--space-6);">
               <h3 class="card-title" style="margin-bottom:var(--space-4);">Change Password</h3>
-              <form id="changePasswordForm" onsubmit="event.preventDefault(); showToast('success', 'Security Updated', 'Password updated successfully in demo session.');">
+              <form id="changePasswordForm">
                 <div class="form-group">
                   <label class="form-label">Current Password</label>
-                  <input type="password" class="form-control" placeholder="••••••••" required>
+                  <div class="input-password-wrapper">
+                    <input type="password" id="currentPasswordInput" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                    <button type="button" class="pwd-toggle-btn" id="currentPwdToggleBtn" aria-label="Toggle current password visibility">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
                   <div class="form-group">
                     <label class="form-label">New Password</label>
-                    <input type="password" class="form-control" placeholder="At least 8 characters" required>
+                    <div class="input-password-wrapper">
+                      <input type="password" id="newPasswordInput" class="form-control" placeholder="At least 8 characters" minlength="8" required autocomplete="new-password">
+                      <button type="button" class="pwd-toggle-btn" id="newPwdToggleBtn" aria-label="Toggle new password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   <div class="form-group">
                     <label class="form-label">Confirm New Password</label>
-                    <input type="password" class="form-control" placeholder="Re-type new password" required>
+                    <div class="input-password-wrapper">
+                      <input type="password" id="confirmPasswordInput" class="form-control" placeholder="Re-type new password" minlength="8" required autocomplete="new-password">
+                      <button type="button" class="pwd-toggle-btn" id="confirmPwdToggleBtn" aria-label="Toggle confirm password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-secondary btn-sm" style="margin-top:var(--space-2);">Update Password</button>
+                <div class="form-error" id="profileConfirmPwdError" style="display:none; color:var(--color-error); font-size:12px; margin-top:6px; font-weight:500;"></div>
+                <button type="submit" id="changePasswordBtn" class="btn btn-secondary btn-sm" style="margin-top:var(--space-3);">Update Password</button>
               </form>
             </div>
           </div>
@@ -322,8 +345,8 @@
   </div>
 
   <script src="js/data-store.js"></script>
-  <script src="js/api-client.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/api-client.js?v=20261104_final"></script>
+  <script src="js/app.js?v=20261104_final"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       let user = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser()) || (window.proofVoiceDb && window.proofVoiceDb.getCurrentUser());
@@ -375,7 +398,7 @@
           btnRemovePhoto.style.display = 'inline-flex';
         } else {
           photoDisplay.style.backgroundImage = 'none';
-          photoDisplay.style.backgroundColor = isAdmin ? '#1E293B' : '#4F46E5';
+          photoDisplay.style.backgroundColor = isAdmin ? '#134E4A' : '#0F766E';
           photoDisplay.textContent = initials;
           btnPhotoActionText.textContent = 'Upload Photo';
           btnRemovePhoto.style.display = 'none';
@@ -386,22 +409,65 @@
 
       function populateProfileFields(u) {
         if (!u) return;
-        document.getElementById('sidebarUserName').textContent = u.fullName || 'User';
-        document.getElementById('photoCardUserName').textContent = u.fullName || 'User';
-        document.getElementById('sidebarUserRole').textContent = `${u.department || 'Student'}${u.yearSemester ? ' • ' + u.yearSemester : ''}`;
+        const name = (u.fullName && u.fullName !== 'User') ? u.fullName : ((u.full_name && u.full_name !== 'User') ? u.full_name : '');
+        const studentId = u.studentIdentifier || u.student_id || (u.student_profile && u.student_profile.student_id) || '';
+        const dept = u.department || u.course || (u.student_profile && (u.student_profile.department || u.student_profile.course)) || '';
+        const yearSem = u.yearSemester || u.semester || (u.student_profile && u.student_profile.semester) || (isAdmin ? (u.designation || '') : '');
+        const addr = u.residentialAddress || u.address || (u.student_profile && u.student_profile.address) || '';
+        const phone = u.phone || (u.student_profile && u.student_profile.phone) || '';
+        const email = u.email || '';
 
-        document.getElementById('profFullName').value = u.fullName || '';
-        document.getElementById('profEmail').value = u.email || '';
-        document.getElementById('profStudentId').value = u.studentIdentifier || '';
-        document.getElementById('profDepartment').value = u.department || '';
-        document.getElementById('profYearSem').value = isAdmin ? (u.designation || '') : (u.yearSemester || '');
-        document.getElementById('profResidentialAddress').value = u.residentialAddress || '';
-        document.getElementById('profPhone').value = u.phone || '';
+        // Update name displays
+        const sidebarNameEl = document.getElementById('sidebarUserName');
+        if (sidebarNameEl && name) sidebarNameEl.textContent = name;
+        const cardNameEl = document.getElementById('photoCardUserName');
+        if (cardNameEl && name) cardNameEl.textContent = name;
+        const roleEl = document.getElementById('sidebarUserRole');
+        if (roleEl) roleEl.textContent = `${dept || 'Student'}${yearSem ? ' • ' + yearSem : ''}`;
+
+        // Update initials in avatar
+        const displayName = name || (cardNameEl ? cardNameEl.textContent : '') || 'ST';
+        const initials = displayName.split(' ').filter(Boolean).map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2) || 'ST';
+        const avatarEl = document.getElementById('sidebarUserAvatar');
+        if (avatarEl && !u.profileImage) avatarEl.textContent = initials;
+        const topbarAvatar = document.getElementById('topbarAvatar');
+        if (topbarAvatar && !u.profileImage) topbarAvatar.textContent = initials;
+        const photoDisplay = document.getElementById('profilePhotoDisplay');
+        if (photoDisplay && !currentPhotoUrl) photoDisplay.textContent = initials;
+
+        // Populate form inputs without blanking out user data
+        const profFullName = document.getElementById('profFullName');
+        if (profFullName && name) profFullName.value = name;
+        const profEmail = document.getElementById('profEmail');
+        if (profEmail && email) profEmail.value = email;
+        const profStudentId = document.getElementById('profStudentId');
+        if (profStudentId && studentId) profStudentId.value = studentId;
+        const profDept = document.getElementById('profDepartment');
+        if (profDept && dept) profDept.value = dept;
+        const profYearSem = document.getElementById('profYearSem');
+        if (profYearSem && yearSem) profYearSem.value = yearSem;
+        const profAddr = document.getElementById('profResidentialAddress');
+        if (profAddr && addr) profAddr.value = addr;
+        const profPhone = document.getElementById('profPhone');
+        if (profPhone) {
+          if (phone) {
+            let clean = String(phone).replace(/\D/g, '');
+            if (clean.startsWith('91') && clean.length === 12) clean = clean.slice(2);
+            else if (clean.startsWith('0') && clean.length === 11) clean = clean.slice(1);
+            profPhone.value = clean.slice(-10);
+          }
+          if (window.setupIndianPhoneInput) {
+            window.setupIndianPhoneInput(profPhone, document.getElementById('profPhoneError'));
+          }
+        }
 
         const inAppCheck = document.getElementById('prefInAppAlerts');
-        if (inAppCheck && u.notifyInApp !== undefined) inAppCheck.checked = Boolean(u.notifyInApp);
+        const notifyInApp = u.notifyInApp !== undefined ? u.notifyInApp : (u.student_profile && u.student_profile.notify_in_app !== undefined ? u.student_profile.notify_in_app : true);
+        if (inAppCheck) inAppCheck.checked = Boolean(notifyInApp);
+
         const emailCheck = document.getElementById('prefEmailSummaries');
-        if (emailCheck && u.notifyEmail !== undefined) emailCheck.checked = Boolean(u.notifyEmail);
+        const notifyEmail = u.notifyEmail !== undefined ? u.notifyEmail : (u.student_profile && u.student_profile.notify_email !== undefined ? u.student_profile.notify_email : true);
+        if (emailCheck) emailCheck.checked = Boolean(notifyEmail);
       }
 
       // Initial populate from cached session
@@ -558,12 +624,26 @@
         const department = document.getElementById('profDepartment').value.trim();
         const yearSem = document.getElementById('profYearSem').value.trim();
         const address = document.getElementById('profResidentialAddress').value.trim();
-        const phone = document.getElementById('profPhone').value.trim();
+        const rawPhone = document.getElementById('profPhone').value.trim();
 
         if (!fullName || !studentId || !department || !address) {
-          showToast('error', 'Missing Information', 'Please complete all required fields.');
+          showToast('error', 'Missing Information', 'Please complete all required personal fields.');
           return;
         }
+
+        const phoneValidation = window.validateIndianPhoneNumber ? window.validateIndianPhoneNumber(rawPhone, true) : { valid: rawPhone.length === 10, value: `+91 ${rawPhone}` };
+        if (!phoneValidation.valid) {
+          const errEl = document.getElementById('profPhoneError');
+          if (errEl) {
+            errEl.textContent = phoneValidation.message;
+            errEl.style.display = 'block';
+          }
+          document.getElementById('profPhone').classList.add('is-invalid');
+          document.getElementById('profPhone').focus();
+          showToast('error', 'Invalid Mobile Number', phoneValidation.message);
+          return;
+        }
+        const phone = phoneValidation.value;
 
         saveBtn.disabled = true;
         saveBtn.innerHTML = `<span class="spinner"></span> Saving Changes...`;
@@ -592,8 +672,25 @@
           }
 
           const res = await window.proofVoiceApi.updateUserProfile(user.id, profilePayload);
-          const updatedUser = (res && res.user) || window.proofVoiceApi.getStoredUser() || user;
-          user = updatedUser;
+          const returnedUser = (res && res.user) ? res.user : (window.proofVoiceApi.getStoredUser() || {});
+          user = {
+            ...user,
+            ...returnedUser,
+            ...profilePayload,
+            fullName: fullName || returnedUser.fullName || returnedUser.full_name || user.fullName,
+            full_name: fullName || returnedUser.full_name || returnedUser.fullName || user.full_name,
+            studentIdentifier: studentId || returnedUser.studentIdentifier || returnedUser.student_id || user.studentIdentifier,
+            student_id: studentId || returnedUser.student_id || returnedUser.studentIdentifier || user.student_id,
+            department: department || returnedUser.department || user.department,
+            course: department || returnedUser.course || user.course,
+            yearSemester: yearSem || returnedUser.yearSemester || returnedUser.semester || user.yearSemester,
+            semester: yearSem || returnedUser.semester || returnedUser.yearSemester || user.semester,
+            residentialAddress: address || returnedUser.residentialAddress || returnedUser.address || user.residentialAddress,
+            address: address || returnedUser.address || returnedUser.residentialAddress || user.address,
+            phone: phone || returnedUser.phone || user.phone
+          };
+          localStorage.setItem('proofvoice_session_user', JSON.stringify(user));
+          localStorage.setItem('proofvoice_auth_user', JSON.stringify(user));
           populateProfileFields(user);
 
           if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
@@ -607,6 +704,107 @@
           saveBtn.innerHTML = 'Save Profile Changes';
         }
       });
+
+      // Change Password Form Handling
+      const pwEyeOpen = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      const pwdEyeSlash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
+
+      function bindEyeToggle(btnId, inputId) {
+        const btn = document.getElementById(btnId);
+        const inp = document.getElementById(inputId);
+        if (btn && inp) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isPass = inp.type === 'password';
+            inp.type = isPass ? 'text' : 'password';
+            btn.innerHTML = isPass ? pwdEyeSlash : pwdEyeOpen;
+            btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+          });
+        }
+      }
+      bindEyeToggle('currentPwdToggleBtn', 'currentPasswordInput');
+      bindEyeToggle('newPwdToggleBtn', 'newPasswordInput');
+      bindEyeToggle('confirmPwdToggleBtn', 'confirmPasswordInput');
+
+      const newPwdInput = document.getElementById('newPasswordInput');
+      const confirmPwdInput = document.getElementById('confirmPasswordInput');
+      const confirmErr = document.getElementById('profileConfirmPwdError');
+
+      function validateProfilePwdMatch() {
+        if (!newPwdInput || !confirmPwdInput) return;
+        const p1 = newPwdInput.value;
+        const p2 = confirmPwdInput.value;
+        if (p2.length > 0 && p1 !== p2) {
+          confirmPwdInput.classList.add('is-invalid');
+          if (confirmErr) {
+            confirmErr.textContent = 'Passwords do not match. Please ensure both fields are identical.';
+            confirmErr.style.display = 'block';
+          }
+        } else {
+          confirmPwdInput.classList.remove('is-invalid');
+          if (confirmErr) confirmErr.style.display = 'none';
+        }
+      }
+      if (newPwdInput) newPwdInput.addEventListener('input', validateProfilePwdMatch);
+      if (confirmPwdInput) confirmPwdInput.addEventListener('input', validateProfilePwdMatch);
+
+      const pwForm = document.getElementById('changePasswordForm');
+      const pwBtn = document.getElementById('changePasswordBtn');
+      if (pwForm) {
+        pwForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const currentPassword = document.getElementById('currentPasswordInput').value;
+          const newPassword = document.getElementById('newPasswordInput').value;
+          const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+          if (!currentPassword) {
+            showToast('error', 'Current Password Required', 'Please enter your current password to authorize this change.');
+            document.getElementById('currentPasswordInput').focus();
+            return;
+          }
+
+          if (newPassword !== confirmPassword) {
+            showToast('error', 'Password Mismatch', 'New password and confirmation do not match.');
+            if (confirmErr) {
+              confirmErr.textContent = 'Passwords do not match. Please enter the same password.';
+              confirmErr.style.display = 'block';
+            }
+            confirmPwdInput.classList.add('is-invalid');
+            confirmPwdInput.focus();
+            return;
+          }
+
+          if (newPassword.length < 8) {
+            showToast('error', 'Password Too Short', 'New password must be at least 8 characters long.');
+            newPwdInput.focus();
+            return;
+          }
+
+          if (pwBtn) {
+            pwBtn.disabled = true;
+            pwBtn.innerHTML = '<span class="spinner"></span> Updating...';
+          }
+
+          try {
+            const res = await window.proofVoiceApi.changePassword({
+              currentPassword,
+              newPassword,
+              confirmPassword
+            });
+            showToast('success', 'Security Updated', res.message || 'Password updated successfully. Use your new password on next login.');
+            pwForm.reset();
+            if (confirmErr) confirmErr.style.display = 'none';
+            if (confirmPwdInput) confirmPwdInput.classList.remove('is-invalid');
+          } catch (err) {
+            showToast('error', 'Password Update Failed', err.message || 'Unable to update password. Please check your current password.');
+          } finally {
+            if (pwBtn) {
+              pwBtn.disabled = false;
+              pwBtn.innerHTML = 'Update Password';
+            }
+          }
+        });
+      }
     });
   </script>
 </body>

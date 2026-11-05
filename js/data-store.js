@@ -139,6 +139,55 @@ const INITIAL_DEMO_DATA = {
   ],
   users: [
     {
+      id: 'usr_superadmin_01',
+      role: 'superadmin',
+      fullName: 'ProofVoice Platform Super Administrator',
+      email: 'superadmin@proofvoice.platform',
+      passwordHash: btoa('Admin@ProofVoice2026'),
+      institutionId: null,
+      department: 'Platform Governance & Security',
+      phone: '+91 99999 88888',
+      avatar: 'SA',
+      status: 'active',
+      registeredAt: '2024-01-01'
+    },
+    {
+      id: 'usr_admin_rajkr',
+      role: 'admin',
+      fullName: 'Raj Kumar',
+      email: 'rajkr@apex.edu',
+      passwordHash: btoa('6203415403raju'),
+      institutionId: 'inst_arka_01',
+      designation: 'Dean of Student Welfare',
+      department: 'Academic Affairs',
+      phone: '+91 62034 15403',
+      avatar: 'RK',
+      status: 'verified',
+      is_verified: true,
+      isVerified: true,
+      profileComplete: true,
+      registeredAt: '2024-01-10'
+    },
+    {
+      id: 'usr_student_laxmi',
+      role: 'student',
+      fullName: 'Laxmi Seth',
+      email: 'laxmi.seth@apex.edu',
+      passwordHash: btoa('6203415403raju'),
+      institutionId: 'inst_apex_01',
+      studentIdentifier: 'APEX-CS-2024-001',
+      department: 'Computer Science & Engineering',
+      yearSemester: '3rd Year, 5th Semester',
+      residentialAddress: 'Jamshedpur',
+      phone: '+91 62034 15403',
+      avatar: 'LS',
+      status: 'verified',
+      is_verified: true,
+      isVerified: true,
+      profileComplete: true,
+      registeredAt: '2026-10-27'
+    },
+    {
       id: 'usr_student_01',
       role: 'student',
       fullName: 'Maya Sharma',
@@ -151,6 +200,8 @@ const INITIAL_DEMO_DATA = {
       phone: '+91 98765 43210',
       avatar: 'MS',
       status: 'verified',
+      is_verified: true,
+      isVerified: true,
       profileComplete: true,
       registeredAt: '2025-08-15'
     },
@@ -167,6 +218,8 @@ const INITIAL_DEMO_DATA = {
       phone: '+91 98450 11223',
       avatar: 'RK',
       status: 'verified',
+      is_verified: true,
+      isVerified: true,
       profileComplete: true,
       registeredAt: '2025-09-01'
     },
@@ -176,14 +229,17 @@ const INITIAL_DEMO_DATA = {
       fullName: 'Aditya Verma',
       email: 'aditya.verma@apextech.edu',
       institutionId: 'inst_apex_01',
-      studentIdentifier: '',
-      department: '',
-      yearSemester: '',
+      studentIdentifier: 'AIT-2026-UG-089',
+      department: 'General Campus',
+      course: 'Undergraduate',
+      yearSemester: '1st Year, Semester 1',
       residentialAddress: '',
       phone: '+91 91234 56789',
       avatar: 'AV',
-      status: 'pending_profile',
-      profileComplete: false,
+      status: 'verified',
+      is_verified: true,
+      isVerified: true,
+      profileComplete: true,
       registeredAt: '2026-10-27'
     },
     {
@@ -196,7 +252,10 @@ const INITIAL_DEMO_DATA = {
       department: 'Academic Grievance Redressal',
       phone: '+91 98321 00001',
       avatar: 'VR',
-      status: 'active',
+      status: 'verified',
+      is_verified: true,
+      isVerified: true,
+      profileComplete: true,
       registeredAt: '2024-01-10'
     },
     {
@@ -209,14 +268,18 @@ const INITIAL_DEMO_DATA = {
       department: 'General Administration',
       phone: '+91 98450 99999',
       avatar: 'AS',
-      status: 'active',
+      status: 'verified',
+      is_verified: true,
+      isVerified: true,
+      profileComplete: true,
       registeredAt: '2024-03-15'
     },
     {
-      id: 'usr_superadmin_01',
+      id: 'usr_superadmin_02',
       role: 'superadmin',
       fullName: 'Chief Systems Administrator',
       email: 'platform.admin@proofvoice.io',
+      passwordHash: btoa('Admin@ProofVoice2026'),
       institutionId: null,
       designation: 'Platform Super-Admin',
       phone: '+91 80000 00000',
@@ -458,6 +521,57 @@ Contact: +91 98450 11223`,
   ],
   notifications: [
     {
+      id: 'notif_kunal_01',
+      recipientId: 'usr_student_kunal',
+      recipientEmail: 'kunal@arka.edu',
+      institutionId: 'inst_arka_01',
+      title: 'Student Status Verified',
+      message: 'Your student membership has been officially verified and approved by the campus administration.',
+      link: 'student-profile.html',
+      type: 'account',
+      read: false,
+      timestamp: '2026-11-04T20:30:00Z'
+    },
+    {
+      id: 'notif_kunal_02',
+      recipientId: 'usr_student_kunal',
+      recipientEmail: 'kunal@arka.edu',
+      institutionId: 'inst_arka_01',
+      title: 'Status Update: PV-2026-7499',
+      message: "Your complaint 'Not Working Projector In Lab' status is now Resolved.",
+      link: 'complaint-details.html?id=PV-2026-7499',
+      complaintId: 'PV-2026-7499',
+      type: 'resolution',
+      read: false,
+      timestamp: '2026-11-04T19:35:00Z'
+    },
+    {
+      id: 'notif_kunal_03',
+      recipientId: 'usr_student_kunal',
+      recipientEmail: 'kunal@arka.edu',
+      institutionId: 'inst_arka_01',
+      title: 'Under Review: PV-2026-7499',
+      message: "Your complaint 'Not Working Projector In Lab' is now actively under administrative review.",
+      link: 'complaint-details.html?id=PV-2026-7499',
+      complaintId: 'PV-2026-7499',
+      type: 'status_change',
+      read: true,
+      timestamp: '2026-11-04T15:32:00Z'
+    },
+    {
+      id: 'notif_rajkr_01',
+      recipientId: 'usr_admin_rajkr',
+      recipientEmail: 'rajkr@apex.edu',
+      institutionId: 'inst_arka_01',
+      title: 'New Complaint Lodged: PV-2026-7499',
+      message: "Student grievance 'Not Working Projector In Lab' was filed by Kunal Kuamr (kunal@arka.edu) and is pending desk review.",
+      link: 'admin-complaint-details.html?id=PV-2026-7499',
+      complaintId: 'PV-2026-7499',
+      type: 'new_complaint',
+      read: false,
+      timestamp: '2026-11-04T14:59:00Z'
+    },
+    {
       id: 'notif_001',
       recipientId: 'usr_student_01',
       institutionId: 'inst_apex_01',
@@ -534,7 +648,43 @@ class DataStore {
   getDb() {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : INITIAL_DEMO_DATA;
+      const db = data ? JSON.parse(data) : JSON.parse(JSON.stringify(INITIAL_DEMO_DATA));
+      if (!db.users) db.users = [];
+      // Ensure campus users reflect verified record status
+      db.users.forEach(u => {
+        const em = String(u.email || '').toLowerCase();
+        const role = String(u.role || '').toLowerCase();
+        const isSuper = role === 'superadmin' || em.includes('superadmin') || em === 'platform.admin@proofvoice.io';
+        if (!isSuper) {
+          if (u.is_verified !== false && u.status !== 'pending_verification') {
+            u.is_verified = true;
+            u.isVerified = true;
+            u.status = 'verified';
+            u.profileComplete = true;
+          }
+        }
+      });
+      let sa = db.users.find(u => u.email === 'superadmin@proofvoice.platform' || u.role === 'superadmin');
+      if (!sa) {
+        sa = {
+          id: 'usr_superadmin_01',
+          role: 'superadmin',
+          fullName: 'ProofVoice Super Admin',
+          email: 'superadmin@proofvoice.platform',
+          passwordHash: btoa('Admin@ProofVoice2026'),
+          institutionId: null,
+          designation: 'Platform Super-Admin',
+          phone: '+91 80000 00000',
+          avatar: 'SA',
+          status: 'active',
+          registeredAt: '2023-01-01'
+        };
+        db.users.push(sa);
+      } else {
+        sa.passwordHash = btoa('Admin@ProofVoice2026');
+        sa.role = 'superadmin';
+      }
+      return db;
     } catch (e) {
       console.error('[ProofVoice] Error parsing local data store:', e);
       return INITIAL_DEMO_DATA;
@@ -741,12 +891,23 @@ class DataStore {
   updateUserProfile(userId, profileData) {
     const db = this.getDb();
     if (!db.users) db.users = [];
-    let user = db.users.find(u => String(u.id) === String(userId) || (profileData.email && String(u.email).toLowerCase() === String(profileData.email).toLowerCase()));
+    const lookupId = String(userId || '').toLowerCase();
+    let user = db.users.find(u => 
+      String(u.id).toLowerCase() === lookupId || 
+      String(u.email || '').toLowerCase() === lookupId || 
+      (profileData.email && String(u.email).toLowerCase() === String(profileData.email).toLowerCase())
+    );
+    if (!user && (lookupId.includes('aditya') || lookupId === '73' || lookupId === 'usr_student_new')) {
+      user = db.users.find(u => String(u.email || '').toLowerCase().includes('aditya'));
+    }
+    if (!user && (lookupId.includes('maya') || lookupId === '14' || lookupId === 'usr_student_01')) {
+      user = db.users.find(u => String(u.email || '').toLowerCase().includes('maya'));
+    }
     if (!user && db.currentSession && db.currentSession.userId) {
       user = db.users.find(u => String(u.id) === String(db.currentSession.userId));
     }
     if (!user && db.users.length > 0) {
-      user = db.users[0];
+      user = db.users.find(u => String(u.id).toLowerCase() === lookupId);
     }
     if (!user) return false;
 
@@ -761,8 +922,54 @@ class DataStore {
     if (profileData.notifyInApp !== undefined) user.notifyInApp = profileData.notifyInApp;
     if (profileData.notifyEmail !== undefined) user.notifyEmail = profileData.notifyEmail;
 
+    if (profileData.is_verified !== undefined) {
+      user.is_verified = Boolean(profileData.is_verified);
+      user.status = user.is_verified ? 'verified' : 'pending_profile';
+    }
+    if (profileData.is_active !== undefined) {
+      user.is_active = Boolean(profileData.is_active);
+      if (user.is_active === false) user.status = 'suspended';
+      else if (user.is_verified) user.status = 'verified';
+    }
+
     this.saveDb(db);
     return user;
+  }
+
+  updateUserPassword(userIdOrEmail, newPassword, currentPassword) {
+    const db = this.getDb();
+    if (!db.users) db.users = [];
+    const identifier = String(userIdOrEmail || '').toLowerCase();
+    let user = db.users.find(u => String(u.id).toLowerCase() === identifier || String(u.email).toLowerCase() === identifier);
+    if (!user && db.currentSession && db.currentSession.userId) {
+      user = db.users.find(u => String(u.id) === String(db.currentSession.userId));
+    }
+    if (!user && db.users.length > 0) {
+      user = db.users[0];
+    }
+    if (!user) throw new Error('User record not found.');
+
+    if (currentPassword !== undefined && currentPassword !== null && currentPassword !== '') {
+      if (user.passwordHash) {
+        const isMatch = (user.passwordHash === currentPassword || user.passwordHash === btoa(currentPassword));
+        if (!isMatch) {
+          throw new Error('Incorrect current password. Please verify your existing password.');
+        }
+      }
+    }
+
+    user.passwordHash = btoa(newPassword);
+    this.saveDb(db);
+
+    try {
+      const sessUser = JSON.parse(localStorage.getItem('proofvoice_session_user') || '{}');
+      if (sessUser) {
+        sessUser.passwordHash = btoa(newPassword);
+        localStorage.setItem('proofvoice_session_user', JSON.stringify(sessUser));
+      }
+    } catch (e) {}
+
+    return true;
   }
 
   // Institution Settings
@@ -960,6 +1167,59 @@ class DataStore {
     return newComplaint;
   }
 
+  updateComplaint(id, updates) {
+    const db = this.getDb();
+    if (!db.complaints) db.complaints = [];
+    const lookupStr = String(id).trim().toLowerCase();
+    let complaint = db.complaints.find(c => String(c.id).trim().toLowerCase() === lookupStr || String(c.complaintId || '').trim().toLowerCase() === lookupStr || String(c.numericId) === lookupStr);
+    if (!complaint) return false;
+
+    if (updates.title) complaint.title = updates.title;
+    if (updates.category) complaint.category = updates.category;
+    if (updates.urgency || updates.priority) {
+      complaint.urgency = updates.urgency || updates.priority;
+      complaint.priority = updates.priority || updates.urgency;
+    }
+    if (updates.location !== undefined) complaint.location = updates.location;
+    if (updates.locationDetails !== undefined) complaint.locationDetails = updates.locationDetails;
+    if (updates.description !== undefined) complaint.description = updates.description;
+    if (updates.formalApplication !== undefined || updates.application !== undefined) {
+      complaint.formalApplication = updates.formalApplication || updates.application;
+    }
+
+    complaint.timeline = complaint.timeline || [];
+    complaint.timeline.push({
+      status: complaint.status || 'Updated',
+      label: 'Application Updated',
+      actor: 'Student',
+      timestamp: new Date().toISOString(),
+      publicRemark: 'Student revised formal application details.'
+    });
+
+    this.saveDb(db);
+    return complaint;
+  }
+
+  deleteComplaint(id) {
+    const db = this.getDb();
+    if (!db.complaints) db.complaints = [];
+    const lookupStr = String(id).trim().toLowerCase();
+    const idx = db.complaints.findIndex(c => String(c.id).trim().toLowerCase() === lookupStr || String(c.complaintId || '').trim().toLowerCase() === lookupStr || String(c.numericId) === lookupStr);
+    if (idx === -1) return false;
+
+    db.complaints.splice(idx, 1);
+    // Also clean up notifications pointing to this deleted complaint
+    if (db.notifications) {
+      db.notifications = db.notifications.filter(n => {
+        const nComp = String(n.complaintId || n.link || '').toLowerCase();
+        return !nComp.includes(lookupStr);
+      });
+    }
+
+    this.saveDb(db);
+    return true;
+  }
+
   updateComplaintStatus(id, newStatus, publicRemark, internalNote, department, assignedTo) {
     const db = this.getDb();
     const currentUser = this.getCurrentUser();
@@ -1076,12 +1336,46 @@ class DataStore {
   getNotifications() {
     const db = this.getDb();
     const currentUser = this.getCurrentUser();
+    if (!currentUser) return [];
+
     const role = (currentUser.role || 'student').toLowerCase();
+    const currentUserId = String(currentUser.id || '');
+    const currentUserEmail = String(currentUser.email || '').toLowerCase();
+
+    // Get complaints belonging to this user
+    const myComplaintIds = new Set(
+      (db.complaints || [])
+        .filter(c => (c.studentId && String(c.studentId) === currentUserId) || (c.studentEmail && String(c.studentEmail).toLowerCase() === currentUserEmail))
+        .map(c => String(c.id).toLowerCase())
+    );
+
     return (db.notifications || [])
       .filter(n => {
-        if (n.recipientId === currentUser.id || String(n.recipientId) === String(currentUser.id)) return true;
-        if (role === 'admin' && (n.recipientRole === 'admin' || String(n.recipientId).includes('admin'))) return true;
-        if (role === 'student' && (n.recipientRole === 'student' || String(n.recipientId).includes('student'))) return true;
+        const notifRecipient = String(n.recipientId || '').toLowerCase();
+        const notifEmail = String(n.recipientEmail || '').toLowerCase();
+
+        // 1. Direct recipient match
+        if (notifRecipient === currentUserId.toLowerCase() || (currentUserEmail && notifEmail === currentUserEmail)) {
+          return true;
+        }
+
+        // 2. Administrator role notifications for same institution
+        if (role === 'admin' && n.recipientRole === 'admin') {
+          if (!n.institutionId || n.institutionId === currentUser.institutionId) {
+            return true;
+          }
+          return false;
+        }
+
+        // 3. For students: NEVER show global student notifications unless linked to this student's own complaint
+        if (role === 'student') {
+          const compId = String(n.complaintId || (n.link && n.link.includes('id=') ? n.link.split('id=')[1] : '')).toLowerCase();
+          if (compId && myComplaintIds.has(compId)) {
+            return true;
+          }
+          return notifRecipient === currentUserId.toLowerCase();
+        }
+
         return false;
       })
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -1106,12 +1400,46 @@ class DataStore {
     this.saveDb(db);
   }
 
+  deleteNotification(id) {
+    const db = this.getDb();
+    if (!db.notifications) return false;
+    const initialLen = db.notifications.length;
+    db.notifications = db.notifications.filter(n => String(n.id) !== String(id));
+    this.saveDb(db);
+    return db.notifications.length < initialLen;
+  }
+
+  clearAllNotifications() {
+    const db = this.getDb();
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return false;
+    const currentUserId = String(currentUser.id || '').toLowerCase();
+    const currentUserEmail = String(currentUser.email || '').toLowerCase();
+    if (!db.notifications) return true;
+    db.notifications = db.notifications.filter(n => {
+      const nRecip = String(n.recipientId || '').toLowerCase();
+      const nEmail = String(n.recipientEmail || '').toLowerCase();
+      return nRecip !== currentUserId && nEmail !== currentUserEmail;
+    });
+    this.saveDb(db);
+    return true;
+  }
+
   // Super-Admin & Institution Registration Requests
   approveInstitution(id) {
     const db = this.getDb();
-    const inst = db.institutions.find(i => i.id === id);
+    const inst = db.institutions.find(i => i.id === id || String(i.id) === String(id) || i.code === id);
     if (inst) {
       inst.status = 'active';
+      inst.verificationStatus = 'VERIFIED';
+      if (db.users) {
+        db.users.forEach(u => {
+          if (u.institutionId === inst.id || u.institutionId === id) {
+            u.status = 'active';
+            u.isApproved = true;
+          }
+        });
+      }
       this.saveDb(db);
       return true;
     }
@@ -1122,7 +1450,7 @@ class DataStore {
     const db = this.getDb();
     const newInst = {
       id: 'inst_' + Date.now(),
-      code: data.code || data.name.split(' ').map(w => w[0]).join('').slice(0, 4).toUpperCase() || 'INST',
+      code: data.code || (data.name ? data.name.split(' ').map(w => w[0]).join('').slice(0, 4).toUpperCase() : 'INST') || 'INST',
       name: data.name,
       type: data.type || 'College',
       officialEmail: data.officialEmail,
@@ -1132,6 +1460,7 @@ class DataStore {
       city: data.city || '',
       website: data.website || '',
       status: 'pending_approval',
+      verificationStatus: 'PENDING',
       contactPerson: data.contactPerson,
       contactDesignation: data.contactDesignation,
       defaultRecipient: {
@@ -1149,6 +1478,38 @@ class DataStore {
       }
     };
     db.institutions.push(newInst);
+
+    // Register pending administrator account so chosen password logs in immediately once approved
+    if (!db.users) db.users = [];
+    const emailLower = String(data.officialEmail || '').trim().toLowerCase();
+    const rawPass = data.admin_password || data.password || ('sec_' + Math.random().toString(36).slice(2, 14));
+    const existingIdx = db.users.findIndex(u => String(u.email || '').trim().toLowerCase() === emailLower);
+    const adminUser = {
+      id: 'usr_adm_' + Date.now(),
+      email: data.officialEmail,
+      fullName: data.contactPerson || `${data.name} Admin`,
+      passwordHash: btoa(rawPass),
+      role: 'admin',
+      institutionId: newInst.id,
+      institutionName: newInst.name,
+      institutionCode: newInst.code,
+      designation: data.contactDesignation || 'Dean / Administrator',
+      department: 'General Administration',
+      phone: data.phone || data.contact_number || '',
+      avatar: data.contactPerson ? data.contactPerson.slice(0, 2).toUpperCase() : 'AD',
+      status: 'pending',
+      isApproved: false,
+      profileComplete: true,
+      registeredAt: new Date().toISOString()
+    };
+    if (existingIdx !== -1) {
+      db.users[existingIdx].institutionId = newInst.id;
+      db.users[existingIdx].role = 'admin';
+      db.users[existingIdx].passwordHash = btoa(rawPass);
+    } else {
+      db.users.push(adminUser);
+    }
+
     this.saveDb(db);
     return newInst;
   }
@@ -1170,7 +1531,39 @@ class DataStore {
       status: 'pending',
       requestedAt: new Date().toISOString()
     };
+    if (!db.adminRequests) db.adminRequests = [];
     db.adminRequests.push(newReq);
+
+    // Register pending administrator account
+    if (!db.users) db.users = [];
+    const emailLower = String(data.officialEmail || '').trim().toLowerCase();
+    const rawPass = data.password || ('sec_' + Math.random().toString(36).slice(2, 14));
+    const existingIdx = db.users.findIndex(u => String(u.email || '').trim().toLowerCase() === emailLower);
+    const adminUser = {
+      id: 'usr_adm_' + Date.now(),
+      email: data.officialEmail,
+      fullName: data.fullName,
+      passwordHash: btoa(rawPass),
+      role: 'admin',
+      institutionId: data.institutionId,
+      institutionName: data.institutionName || 'Institution',
+      designation: data.designation,
+      department: data.department || 'General Administration',
+      phone: data.phone || '',
+      avatar: data.fullName ? data.fullName.slice(0, 2).toUpperCase() : 'AD',
+      status: 'pending',
+      isApproved: false,
+      profileComplete: true,
+      registeredAt: new Date().toISOString()
+    };
+    if (existingIdx !== -1) {
+      db.users[existingIdx].institutionId = data.institutionId;
+      db.users[existingIdx].role = 'admin';
+      db.users[existingIdx].passwordHash = btoa(rawPass);
+    } else {
+      db.users.push(adminUser);
+    }
+
     this.saveDb(db);
     return newReq;
   }

@@ -25,11 +25,13 @@ const PUBLIC_ROUTES = new Set([
 ]);
 const STUDENT_ROUTES = new Set([
   'student-dashboard.html', 'new-complaint.html', 'review-complaint.html', 'my-complaints.html',
-  'complaint-details.html', 'student-profile.html', 'student-profile-complete.html', 'student-notifications.html'
+  'complaint-details.html', 'student-profile.html', 'student-profile-complete.html', 'student-notifications.html',
+  'student-help.html'
 ]);
 const ADMIN_ROUTES = new Set([
   'admin-dashboard.html', 'admin-complaints.html', 'admin-complaint-details.html', 'departments.html',
-  'users.html', 'analytics.html', 'institution-settings.html', 'admin-profile.html', 'admin-notifications.html'
+  'users.html', 'analytics.html', 'institution-settings.html', 'admin-profile.html', 'admin-notifications.html',
+  'admin-help.html'
 ]);
 const SUPERADMIN_ROUTES = new Set(['super-admin.html']);
 

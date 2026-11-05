@@ -204,6 +204,7 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
         if submit_now:
             from django.utils import timezone
             from apps.accounts.models import User
+            from apps.notifications.models import Notification
             complaint.status = Complaint.Status.SUBMITTED
             complaint.submission_timestamp = timezone.now()
             complaint.save()
@@ -211,7 +212,7 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
             admins = User.objects.filter(
                 role=User.Role.INSTITUTION_ADMIN,
                 admin_profile__institution=complaint.institution,
-                admin_profile__approval_status='APPROVED'
+                is_active=True
             )
             has_verified_admin = admins.exists()
 
@@ -228,6 +229,27 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
                 changed_by=student,
                 public_remark=public_remark
             )
+
+            # Notify submitting student
+            Notification.create_for_event(
+                recipient=student,
+                institution=complaint.institution,
+                complaint=complaint,
+                notification_type=Notification.NotificationType.SUBMISSION,
+                title=f"Complaint Submitted: {complaint.complaint_id}",
+                message=f"Your complaint '{complaint.title}' has been successfully logged with tracking ID {complaint.complaint_id}."
+            )
+
+            # Notify institution administrators
+            for admin_user in admins:
+                Notification.create_for_event(
+                    recipient=admin_user,
+                    institution=complaint.institution,
+                    complaint=complaint,
+                    notification_type=Notification.NotificationType.STATUS_CHANGE,
+                    title=f"New Complaint Lodged: {complaint.complaint_id}",
+                    message=f"A new student grievance '{complaint.title}' has been submitted by {student.full_name}."
+                )
         else:
             ComplaintStatusHistory.objects.create(
                 complaint=complaint,

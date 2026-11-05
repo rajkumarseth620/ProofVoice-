@@ -1,0 +1,2706 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Platform Super-Admin Workspace | ProofVoice</title>
+
+  <meta name="description" content="ProofVoice Multi-Tenant Platform Administration, institutional workspace approvals, student onboarding expressions of interest, and platform governance.">
+
+  <link rel="stylesheet" href="../../css/variables.css">
+
+  <link rel="stylesheet" href="../../css/global.css">
+
+  <link rel="stylesheet" href="../../css/components.css">
+
+  <link rel="stylesheet" href="../../css/dashboard.css">
+
+  <link rel="stylesheet" href="../../css/responsive.css">
+  <link rel="stylesheet" href="../../css/theme.css">
+  <script src="../../js/theme.js"></script>
+
+  <style>
+
+    .super-kpi-grid {
+
+      display: grid;
+
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+      gap: var(--space-4);
+
+      margin-bottom: var(--space-6);
+
+    }
+
+    .modal-backdrop-dark {
+
+      position: fixed;
+
+      inset: 0;
+
+      background: rgba(15, 23, 42, 0.75);
+
+      z-index: 9999;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 16px;
+
+    }
+
+    .super-modal-content {
+
+      background: #1E293B;
+
+      color: #F8FAFC;
+
+      border: 1px solid #334155;
+
+      border-radius: 12px;
+
+      max-width: 640px;
+
+      width: 100%;
+
+      max-height: 90vh;
+
+      overflow-y: auto;
+
+      padding: 24px;
+
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+    }
+
+    .super-tab-content {
+
+      display: none;
+
+    }
+
+    .super-tab-content.active {
+
+      display: block;
+
+    }
+
+  </style>
+
+</head>
+
+<body style="background-color:#0F172A; color:#F8FAFC;">
+
+
+
+  <div class="app-layout" style="background-color:#0F172A;">
+
+    <!-- Super Admin Sidebar -->
+
+    <aside class="app-sidebar" style="background-color:#1E293B; border-color:#334155; color:#F8FAFC;">
+
+      <div class="sidebar-header" style="border-color:#334155;">
+
+        <a href="#overview" onclick="switchSuperTab('overview')" class="brand-logo" style="color:#FFFFFF;">
+
+          <div class="brand-icon-wrapper" style="background:linear-gradient(135deg, #0F766E, #14B8A6);">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+
+            </svg>
+
+          </div>
+
+          <div class="brand-text">
+
+            <span class="brand-name" style="color:#FFFFFF;">Proof<span>Voice</span></span>
+
+            <span class="brand-sub" style="color:#99F6E4;">Platform Super-Admin</span>
+
+          </div>
+
+        </a>
+
+      </div>
+
+
+
+      <div class="sidebar-institution-badge" style="background:#0F172A; border-color:#334155;">
+
+        <span class="sidebar-institution-label" style="color:#94A3B8;">Global Tier</span>
+
+        <span class="sidebar-institution-name" style="color:#FFFFFF;">Platform Super-Admin</span>
+
+      </div>
+
+
+
+      <nav class="sidebar-nav">
+
+        <a href="#overview" class="sidebar-nav-item active" style="color:#FFFFFF; background:rgba(15, 118, 110, 0.3);" onclick="switchSuperTab('overview', this)">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+
+          </svg>
+
+          Platform Overview
+
+        </a>
+
+        <a href="#pending-inst" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('pending-inst', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/>
+          </svg>
+          Institutional Requests
+          <span class="badge" id="superPendingInstBadge" style="background:#F59E0B; color:#0F172A; font-size:10px; margin-left:auto;">0</span>
+        </a>
+
+        <a href="#admin-access-requests" class="sidebar-nav-item" id="navAdminAccessRequests" style="color:#94A3B8;" onclick="switchSuperTab('admin-access-requests', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+          Existing Institute Access
+          <span class="badge" id="superAdminAccessBadge" style="background:#0F766E; color:#FFFFFF; font-size:10px; margin-left:auto;">0</span>
+        </a>
+
+        <a href="#student-requests" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('student-requests', this)">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6"/>
+
+          </svg>
+
+          Student Onboarding Requests
+
+          <span class="badge" id="superStudentReqBadge" style="background:#0F766E; color:#FFFFFF; font-size:10px; margin-left:auto;">0</span>
+
+        </a>
+
+        <a href="#institutions" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('institutions', this)">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11m-8-11v11m-4-11v11m8-11v11"/>
+
+          </svg>
+
+          Active Institutions
+
+        </a>
+
+        <a href="#audit-logs" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('audit-logs', this)">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+
+          </svg>
+
+          Audit & Security Logs
+
+        </a>
+
+        <a href="../../404.html" id="superLogoutBtn" class="sidebar-nav-item" style="color:#F87171; margin-top:auto;">
+
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+
+          </svg>
+
+          Sign Out
+
+        </a>
+
+      </nav>
+
+
+
+      <div class="sidebar-footer" id="superSidebarFooter" style="border-color:#334155; cursor:pointer;" onclick="switchSuperTab('profile-settings');" title="Open Profile & Settings">
+
+        <div class="user-avatar" id="superSidebarAvatar" style="background:#0F766E; color:#FFFFFF;">SA</div>
+
+        <div class="user-info-text">
+
+          <div class="user-name" id="superAdminName" style="color:#FFFFFF;">Super Admin</div>
+
+          <div class="user-role-label" id="superAdminEmail" style="color:#94A3B8; font-size:11px;">superadmin@proofvoice.platform</div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+
+
+    <div class="app-main">
+
+      <header class="app-topbar" style="background-color:#1E293B; border-color:#334155; color:#FFFFFF;">
+
+        <div class="topbar-left">
+
+          <button class="topbar-toggle-sidebar" id="sidebarToggleBtn" aria-label="Toggle sidebar" style="color:#FFFFFF;">
+
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+              <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+
+            </svg>
+
+          </button>
+
+          <div class="breadcrumbs" style="color:#94A3B8;">
+
+            <span>Platform</span>
+
+            <span>/</span>
+
+            <span class="current" style="color:#FFFFFF;">Super-Admin Console</span>
+
+          </div>
+
+        </div>
+
+        <div class="topbar-right" style="display:flex; align-items:center; gap:14px;">
+
+          <div data-theme-toggle-slot data-size="sm" style="display:inline-flex; align-items:center;"></div>
+
+          <!-- Notification Bell & Dropdown Component -->
+
+          <div style="position: relative;" id="superNotifAnchor">
+
+            <button class="topbar-notification-btn" id="superAdminNotifBtn" aria-label="Super Admin Notifications" style="border-color:#334155; color:#94A3B8; background:#0F172A; position:relative;" onclick="toggleNotifDropdown(event)">
+
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+
+              </svg>
+
+              <span class="notification-badge-count" id="superAdminNotifBadge" style="display:none; background-color:#EF4444; border-color:#0F172A;">0</span>
+
+            </button>
+
+
+
+            <!-- Dropdown Panel -->
+
+            <div class="topbar-notif-dropdown" id="superAdminNotifDropdown" style="display:none; position:absolute; top:46px; right:0; width:400px; max-width:92vw; background:#1E293B; border:1px solid #334155; border-radius:12px; box-shadow:0 15px 35px rgba(0,0,0,0.6); z-index:2000; overflow:hidden;">
+
+              <div class="topbar-notif-header" style="background:#0F172A; border-bottom:1px solid #334155; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+
+                <div style="display:flex; align-items:center; gap:8px;">
+
+                  <strong style="color:#FFFFFF; font-size:14px;">Notifications</strong>
+
+                  <span class="badge" id="dropdownUnreadPill" style="background:rgba(239, 68, 68, 0.2); color:#FCA5A5; font-size:10px; display:none;">0 Unread</span>
+
+                </div>
+
+                <div style="display:flex; gap:6px;">
+
+                  <button class="btn btn-sm btn-outline" onclick="markAllNotificationsAsRead(event)" style="font-size:11px; padding:3px 8px; border-color:#475569; color:#94A3B8;">Mark all read</button>
+
+                  <button class="btn btn-sm btn-outline" onclick="clearAllNotificationsHandler(event)" style="font-size:11px; padding:3px 8px; border-color:rgba(239, 68, 68, 0.4); color:#FCA5A5;">Clear all</button>
+
+                </div>
+
+              </div>
+
+
+
+              <!-- Filter tabs in dropdown -->
+
+              <div style="display:flex; gap:4px; padding:6px 12px; background:#0F172A; border-bottom:1px solid #334155;">
+
+                <button class="btn btn-sm notif-dd-tab active" data-cat="all" onclick="filterDropdown('all', this)" style="padding:2px 8px; font-size:11px; background:#0F766E; color:#FFFFFF; border:none; border-radius:4px;">All</button>
+
+                <button class="btn btn-sm notif-dd-tab" data-cat="unread" onclick="filterDropdown('unread', this)" style="padding:2px 8px; font-size:11px; background:transparent; color:#94A3B8; border:none; border-radius:4px;">Unread</button>
+
+                <button class="btn btn-sm notif-dd-tab" data-cat="institution" onclick="filterDropdown('institution', this)" style="padding:2px 8px; font-size:11px; background:transparent; color:#94A3B8; border:none; border-radius:4px;">Institutions</button>
+
+                <button class="btn btn-sm notif-dd-tab" data-cat="student" onclick="filterDropdown('student', this)" style="padding:2px 8px; font-size:11px; background:transparent; color:#94A3B8; border:none; border-radius:4px;">Students</button>
+
+              </div>
+
+
+
+              <div class="topbar-notif-list" id="superAdminNotifList" style="max-height:340px; overflow-y:auto;">
+
+                <!-- Populated dynamically -->
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <div class="institution-pill" id="superTopbarProfilePill" style="background:#0F172A; border-color:#334155; color:#99F6E4; cursor:pointer;" onclick="switchSuperTab('profile-settings');" title="Open Profile & Settings">
+
+            <span id="superTopbarPillText">Platform Super-Admin</span>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+
+      <main class="app-content">
+
+        <div class="page-header">
+
+          <div class="page-header-title">
+
+            <h1 style="color:#FFFFFF;">Platform Super-Admin Workspace</h1>
+
+            <p style="color:#94A3B8;">Review pending institutional requests, oversee student expressions of interest, approve campus workspaces, and manage multi-tenant access.</p>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- Section A: Platform Overview & KPIs -->
+
+        <div id="tabOverview" class="super-tab-content active">
+
+          <div class="super-kpi-grid">
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+
+              <div class="stat-card-title" style="color:#94A3B8;">Total Institutions</div>
+
+              <div class="stat-number" style="color:#FFFFFF; margin-top:8px;" id="kpiTotalInst">0</div>
+
+              <div class="stat-subtext" style="color:#94A3B8;">Directory & active</div>
+
+            </div>
+
+
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+
+              <div class="stat-card-title" style="color:#94A3B8;">Approved Institutions</div>
+
+              <div class="stat-number" style="color:#10B981; margin-top:8px;" id="kpiApprovedInst">0</div>
+
+              <div class="stat-subtext" style="color:#10B981;">Active campus workspaces</div>
+
+            </div>
+
+
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+
+              <div class="stat-card-title" style="color:#94A3B8;">Pending Inst. Requests</div>
+
+              <div class="stat-number" style="color:#F59E0B; margin-top:8px;" id="kpiPendingInstReq">0</div>
+
+              <div class="stat-subtext" style="color:#F59E0B;">Awaiting verification</div>
+
+            </div>
+
+
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+
+              <div class="stat-card-title" style="color:#94A3B8;">Rejected Requests</div>
+
+              <div class="stat-number" style="color:#EF4444; margin-top:8px;" id="kpiRejectedReq">0</div>
+
+              <div class="stat-subtext" style="color:#EF4444;">Did not meet criteria</div>
+
+            </div>
+
+
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+
+              <div class="stat-card-title" style="color:#94A3B8;">Suspended Institutions</div>
+
+              <div class="stat-number" style="color:#F87171; margin-top:8px;" id="kpiSuspendedInst">0</div>
+
+              <div class="stat-subtext" style="color:#F87171;">Access temporarily paused</div>
+
+            </div>
+
+
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+
+              <div class="stat-card-title" style="color:#94A3B8;">Student Requests</div>
+
+              <div class="stat-number" style="color:#14B8A6; margin-top:8px;" id="kpiStudentReq">0</div>
+
+              <div class="stat-subtext" style="color:#14B8A6;">Unlisted campus interests</div>
+
+            </div>
+
+
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155;">
+              <div class="stat-card-title" style="color:#94A3B8;">Total Students</div>
+              <div class="stat-number" style="color:#60A5FA; margin-top:8px;" id="kpiTotalStudents">0</div>
+              <div class="stat-subtext" style="color:#60A5FA;">Registered users</div>
+            </div>
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155; cursor:pointer;" onclick="switchSuperTab('admin-access-requests')">
+              <div class="stat-card-title" style="color:#94A3B8;">Staff Access Requests</div>
+              <div class="stat-number" style="color:#2DD4BF; margin-top:8px;" id="kpiAdminAccessReq">0</div>
+              <div class="stat-subtext" style="color:#2DD4BF;">Existing campus staff</div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- Section B & C: Institutional Requests Table -->
+
+        <div id="tabPendingInst" class="super-tab-content">
+
+          <div class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-8); padding:var(--space-6);">
+
+            <div class="card-header" style="border-color:#334155; display:flex; justify-content:space-between; align-items:center;">
+
+              <div>
+
+                <h3 class="card-title" style="color:#FFFFFF;">Institutional Registration Requests</h3>
+
+                <p class="text-xs" style="color:#94A3B8; margin-top:4px;">Official applications submitted by college/university representatives awaiting verification.</p>
+
+              </div>
+
+              <button class="btn btn-secondary btn-sm" onclick="loadSuperAdminData()">↻ Refresh</button>
+
+            </div>
+
+
+
+            <div class="data-table-container">
+
+              <table class="data-table" style="color:#E2E8F0;">
+
+                <thead>
+
+                  <tr style="background:#0F172A; border-color:#334155;">
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Request ID</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Institution Name</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Contact Person</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Official Email</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Submission Date</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Status</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155; text-align:right;">Actions</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="superPendingTableBody">
+
+                  <!-- Dynamically populated -->
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Section D: Staff & Admin Access Requests (Existing Institutions) -->
+        <div id="tabAdminAccessRequests" class="super-tab-content">
+          <div class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-8); padding:var(--space-6);">
+            <div class="card-header" style="border-color:#334155; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div>
+                <h3 class="card-title" style="color:#FFFFFF;">Existing Institution Access Requests (Staff &amp; Admin)</h3>
+                <p class="text-xs" style="color:#94A3B8; margin-top:4px;">Applications from staff and faculty members requesting administrative oversight for existing verified campuses (Path 1 onboarding).</p>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="text" id="superAdminAccessSearch" placeholder="Search staff, email, institute..." style="background:#0F172A; border:1px solid #334155; border-radius:6px; color:#FFFFFF; font-size:12px; padding:6px 12px; width:220px;" oninput="filterSuperAdminAccessRequests()">
+                <select id="superAdminAccessStatusFilter" class="form-control" style="background:#0F172A; border-color:#334155; color:#FFFFFF; font-size:12px; width:auto; padding:5px 8px;" onchange="filterSuperAdminAccessRequests()">
+                  <option value="All">All Statuses</option>
+                  <option value="PENDING" selected>Pending Review</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED">Rejected</option>
+                </select>
+                <button class="btn btn-secondary btn-sm" onclick="loadSuperAdminAccessRequests()">↻ Refresh</button>
+              </div>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table" style="color:#E2E8F0;">
+                <thead>
+                  <tr style="background:#0F172A; border-color:#334155;">
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Staff Applicant</th>
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Target Institution</th>
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Designation</th>
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Department</th>
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Submitted On</th>
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Status</th>
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155; text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="superAdminAccessTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top:12px; font-size:12px; color:#94A3B8;" id="superAdminAccessCountLabel">Showing 0 requests</div>
+          </div>
+        </div>
+
+        <!-- Section F: Student Onboarding Requests -->
+
+        <div id="tabStudentRequests" class="super-tab-content">
+
+          <div class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-8); padding:var(--space-6);">
+
+            <div class="card-header" style="border-color:#334155; display:flex; justify-content:space-between; align-items:center;">
+
+              <div>
+
+                <h3 class="card-title" style="color:#FFFFFF;">Student Institution Onboarding Requests</h3>
+
+                <p class="text-xs" style="color:#94A3B8; margin-top:4px;">Expressions of interest submitted by students whose campuses are not yet active on ProofVoice.</p>
+
+              </div>
+
+              <button class="btn btn-secondary btn-sm" onclick="loadSuperAdminData()">↻ Refresh</button>
+
+            </div>
+
+
+
+            <div class="data-table-container">
+
+              <table class="data-table" style="color:#E2E8F0;">
+
+                <thead>
+
+                  <tr style="background:#0F172A; border-color:#334155;">
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Request ID</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Student Details</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Requested Institution</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Location</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Submission Date</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Status</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155; text-align:right;">Super-Admin Action</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="superStudentRequestsTableBody">
+
+                  <!-- Dynamically populated -->
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- Section E: Active Institutions (Multi-Tenant Management) -->
+
+        <div id="tabInstitutions" class="super-tab-content">
+
+          <div class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-8); padding:var(--space-6);">
+
+            <div class="card-header" style="border-color:#334155; display:flex; justify-content:space-between; align-items:center;">
+
+              <div>
+
+                <h3 class="card-title" style="color:#FFFFFF;">Centralized Institutional Directory & Tenants</h3>
+
+                <p class="text-xs" style="color:#94A3B8; margin-top:4px;">Manage multi-tenant workspaces. Suspending an institution disables administrative access while strictly preserving historical records.</p>
+
+              </div>
+
+              <button class="btn btn-secondary btn-sm" onclick="loadSuperAdminData()">↻ Refresh</button>
+
+            </div>
+
+
+
+            <div class="data-table-container">
+
+              <table class="data-table" style="color:#E2E8F0;">
+
+                <thead>
+
+                  <tr style="background:#0F172A; border-color:#334155;">
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Code / ID</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Institution Name</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Location</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Desk Email</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155;">Verification Status</th>
+
+                    <th style="background:#0F172A; color:#94A3B8; border-color:#334155; text-align:right;">Action</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="superInstitutionsTableBody">
+
+                  <!-- Dynamically populated -->
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- Section: Audit Logs -->
+
+        <div id="tabAuditLogs" class="super-tab-content">
+
+          <div class="card" style="background:#1E293B; border-color:#334155; padding:var(--space-6);">
+
+            <div class="card-header" style="border-color:#334155;">
+
+              <h3 class="card-title" style="color:#FFFFFF;">Platform Security & Transactional Email Audit</h3>
+
+            </div>
+
+            <div style="font-family:monospace; font-size:12px; color:#94A3B8; line-height:1.7;">
+
+              <div style="padding:6px 0; border-bottom:1px solid #334155;">[Active Monitoring] <span style="color:#10B981;">SEC_OK:</span> Multi-tenant database boundary check passed. Zero cross-tenant data leakage.</div>
+
+              <div style="padding:6px 0; border-bottom:1px solid #334155;">[Active Monitoring] <span style="color:#10B981;">AUTH_OK:</span> Role-based access control enforced. Public registration cannot escalate to PLATFORM_SUPERADMIN.</div>
+
+              <div style="padding:6px 0; border-bottom:1px solid #334155;">[Email Engine] <span style="color:#0F766E;">NOTIFICATION:</span> Transactional email alerts routed to <strong>superadmin@proofvoice.platform</strong>. Audit logs persisted to MySQL.</div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Section E: Platform Notifications Console -->
+
+        <div id="tabNotifications" class="super-tab-content" style="display:none;">
+
+          <div class="page-header" style="margin-bottom:var(--space-6);">
+
+            <div class="page-header-title">
+
+              <h2 style="color:#FFFFFF; font-size:1.5rem; font-weight:700; margin:0 0 4px;">Internal Platform Notifications</h2>
+
+              <p style="color:#94A3B8; font-size:0.875rem; margin:0;">Real-time alerts for institutional onboarding requests, student campus inquiries, and administrative approvals.</p>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Controls Bar -->
+
+          <div class="card" style="background:#1E293B; border-color:#334155; margin-bottom:var(--space-6); padding:var(--space-4);">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+                <button class="btn btn-sm btn-primary notif-full-tab active" data-filter="all" onclick="filterFullNotifications('all', this)" style="border-radius:6px;">All Notifications (<span id="fullTotalCount">0</span>)</button>
+
+                <button class="btn btn-sm btn-outline notif-full-tab" data-filter="unread" onclick="filterFullNotifications('unread', this)" style="border-radius:6px; border-color:#475569; color:#94A3B8;">Unread (<span id="fullUnreadCount">0</span>)</button>
+
+                <button class="btn btn-sm btn-outline notif-full-tab" data-filter="read" onclick="filterFullNotifications('read', this)" style="border-radius:6px; border-color:#475569; color:#94A3B8;">Read</button>
+
+                <button class="btn btn-sm btn-outline notif-full-tab" data-filter="institution" onclick="filterFullNotifications('institution', this)" style="border-radius:6px; border-color:#475569; color:#94A3B8;">Institution Requests</button>
+
+                <button class="btn btn-sm btn-outline notif-full-tab" data-filter="student" onclick="filterFullNotifications('student', this)" style="border-radius:6px; border-color:#475569; color:#94A3B8;">Student Requests</button>
+
+              </div>
+
+              <div style="display:flex; gap:8px;">
+
+                <button class="btn btn-sm btn-outline" onclick="markAllNotificationsAsRead(event)" style="border-color:#475569; color:#94A3B8;">Mark All as Read</button>
+
+                <button class="btn btn-sm btn-outline" onclick="archiveReadNotifications(event)" style="border-color:#475569; color:#94A3B8;">Archive Read</button>
+
+                <button class="btn btn-sm btn-danger" onclick="clearAllNotifications(event)" style="padding:4px 12px; font-size:12px;">Clear All</button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Notification Cards List -->
+
+          <div id="fullNotifContainer" style="display:flex; flex-direction:column; gap:12px;">
+
+            <div class="empty-state" style="background:#1E293B; border-color:#334155; padding:48px 16px;">
+
+              <p style="color:#94A3B8; margin:0;">Loading notifications...</p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Super Admin Profile & Settings Tab -->
+        <div id="tabProfileSettings" class="super-tab-content" style="display:none;">
+          <div class="page-header" style="margin-bottom:var(--space-6);">
+            <div class="page-header-title">
+              <h2 style="color:#FFFFFF; font-size:1.5rem; font-weight:700; margin:0 0 4px;">Super Admin Profile &amp; Settings</h2>
+              <p style="color:#94A3B8; font-size:0.875rem; margin:0;">Root platform administrator credentials, security access keys, mobile verification, and notification controls.</p>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:24px;">
+            <!-- Left Card: Profile Information -->
+            <div class="card" style="background:#1E293B; border-color:#334155; padding:24px; border-radius:12px;">
+              <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #334155;">
+                <div class="user-avatar" id="superProfileLargeAvatar" style="width:64px; height:64px; font-size:24px; background:linear-gradient(135deg, #0F766E, #14B8A6); color:#FFFFFF; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; box-shadow:0 8px 20px rgba(15,118,110,0.3); flex-shrink:0;">
+                  SA
+                </div>
+                <div>
+                  <h3 id="superProfileHeaderName" style="margin:0 0 4px; color:#FFFFFF; font-size:18px; font-weight:700;">Super Admin</h3>
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span class="badge" style="background:#0F766E; color:#FFFFFF; font-size:11px; padding:2px 8px; border-radius:4px;">Platform Super-Admin</span>
+                    <span class="badge" style="background:rgba(45,212,191,0.15); color:#2DD4BF; font-size:11px; padding:2px 8px; border-radius:4px;">Tier 1 Security Root</span>
+                  </div>
+                </div>
+              </div>
+
+              <form id="superAdminProfileForm" onsubmit="handleSuperProfileSubmit(event)">
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label" style="color:#F8FAFC; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">Full Name *</label>
+                  <input type="text" id="superProfFullName" class="form-control" style="background:#0F172A; border-color:#334155; color:#FFFFFF;" required value="Super Admin">
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label" style="color:#F8FAFC; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">Official Platform Email (Username)</label>
+                  <input type="email" id="superProfEmail" class="form-control" style="background:#0F172A; border-color:#334155; color:#94A3B8; cursor:not-allowed;" readonly value="superadmin@proofvoice.platform">
+                  <span style="font-size:11px; color:#94A3B8; margin-top:4px; display:block;">Primary platform identity linked to governance and security log auditing.</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label" style="color:#F8FAFC; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">Official Contact Number *</label>
+                  <div class="phone-input-group" style="display:flex; align-items:center;">
+                    <span class="phone-prefix" style="background:#0F172A; border:1px solid #334155; border-right:none; color:#2DD4BF; padding:9px 12px; border-radius:8px 0 0 8px; font-weight:600; font-size:13px;">IN +91</span>
+                    <input type="tel" id="superProfPhone" class="form-control" style="background:#0F172A; border-color:#334155; color:#FFFFFF; border-radius:0 8px 8px 0;" maxlength="10" placeholder="9876543210" pattern="[6-9][0-9]{9}" required value="9876543210">
+                  </div>
+                  <span id="superPhoneHelpText" style="font-size:11px; color:#94A3B8; margin-top:4px; display:block;">10-digit Indian mobile number for administrative verification.</span>
+                  <div id="superPhoneError" style="display:none; color:#F87171; font-size:11px; margin-top:4px;"></div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px;">
+                  <label class="form-label" style="color:#F8FAFC; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">Administrative Designation</label>
+                  <input type="text" id="superProfDesignation" class="form-control" style="background:#0F172A; border-color:#334155; color:#FFFFFF;" value="Platform Super-Admin &amp; Root Security Custodian">
+                </div>
+
+                <button type="submit" id="saveSuperProfileBtn" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px 16px; font-weight:600; background:#0F766E; border-color:#0F766E;">
+                  Save Profile Changes
+                </button>
+              </form>
+            </div>
+
+            <!-- Right Column: Security Credentials & Preferences -->
+            <div style="display:flex; flex-direction:column; gap:24px;">
+
+              <!-- Security / Change Password Card -->
+              <div class="card" style="background:#1E293B; border-color:#334155; padding:24px; border-radius:12px;">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; border-bottom:1px solid #334155; padding-bottom:12px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <h3 style="margin:0; color:#FFFFFF; font-size:16px; font-weight:700;">Security Credentials</h3>
+                </div>
+
+                <form id="superAdminPasswordForm" onsubmit="handleSuperPasswordSubmit(event)">
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label" style="color:#F8FAFC; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">Current Password *</label>
+                    <div style="position:relative;">
+                      <input type="password" id="superCurrentPassword" class="form-control" style="background:#0F172A; border-color:#334155; color:#FFFFFF; padding-right:40px;" placeholder="Enter current password" required autocomplete="current-password">
+                      <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('superCurrentPassword', this)" aria-label="Toggle password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label" style="color:#F8FAFC; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">New Password *</label>
+                    <div style="position:relative;">
+                      <input type="password" id="superNewPassword" class="form-control" style="background:#0F172A; border-color:#334155; color:#FFFFFF; padding-right:40px;" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password">
+                      <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('superNewPassword', this)" aria-label="Toggle password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group" style="margin-bottom:18px;">
+                    <label class="form-label" style="color:#F8FAFC; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">Confirm New Password *</label>
+                    <div style="position:relative;">
+                      <input type="password" id="superConfirmPassword" class="form-control" style="background:#0F172A; border-color:#334155; color:#FFFFFF; padding-right:40px;" placeholder="Re-enter new password" required minlength="8" autocomplete="new-password">
+                      <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('superConfirmPassword', this)" aria-label="Toggle password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94A3B8; cursor:pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
+                    <div id="superPwdMismatchAlert" style="display:none; color:#F87171; font-size:12px; margin-top:4px;">Passwords do not match. Please re-enter the same password.</div>
+                  </div>
+
+                  <button type="submit" id="updateSuperPwdBtn" class="btn btn-secondary" style="width:100%; justify-content:center; padding:10px 16px; font-weight:600; background:#334155; border-color:#475569; color:#FFFFFF;">
+                    Update Password
+                  </button>
+                </form>
+              </div>
+
+              <!-- Preferences Card -->
+              <div class="card" style="background:#1E293B; border-color:#334155; padding:24px; border-radius:12px;">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; border-bottom:1px solid #334155; padding-bottom:12px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                  <h3 style="margin:0; color:#FFFFFF; font-size:16px; font-weight:700;">Platform &amp; Alert Preferences</h3>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <div>
+                      <strong style="color:#FFFFFF; font-size:13px; display:block;">Instant In-App Alerts</strong>
+                      <span style="color:#94A3B8; font-size:11px;">Receive real-time notifications for newly registered campus institutions.</span>
+                    </div>
+                    <input type="checkbox" id="prefNotifyInApp" checked style="accent-color:#0F766E; width:18px; height:18px;" onchange="saveSuperPreferences()">
+                  </label>
+
+                  <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <div>
+                      <strong style="color:#FFFFFF; font-size:13px; display:block;">Student Onboarding Inquiries</strong>
+                      <span style="color:#94A3B8; font-size:11px;">Alert when students submit requests for unregistered institutions.</span>
+                    </div>
+                    <input type="checkbox" id="prefNotifyStudents" checked style="accent-color:#0F766E; width:18px; height:18px;" onchange="saveSuperPreferences()">
+                  </label>
+
+                  <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <div>
+                      <strong style="color:#FFFFFF; font-size:13px; display:block;">Audio Chime for Incoming Requests</strong>
+                      <span style="color:#94A3B8; font-size:11px;">Play a subtle audio notification tone on incoming requests.</span>
+                    </div>
+                    <input type="checkbox" id="prefAudioAlerts" checked style="accent-color:#0F766E; width:18px; height:18px;" onchange="saveSuperPreferences()">
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- Institution Details Modal -->
+
+  <div id="superInstDetailsModal" class="modal-backdrop-dark" style="display:none;">
+
+    <div class="super-modal-content">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #334155; padding-bottom:12px;">
+
+        <h3 style="margin:0; font-size:18px; color:#FFFFFF;">Institution Request Details</h3>
+
+        <button type="button" onclick="closeSuperModal()" style="background:none; border:none; color:#94A3B8; font-size:24px; cursor:pointer;">&times;</button>
+
+      </div>
+
+
+
+      <div id="superModalBody" style="font-size:13px; line-height:1.6;">
+
+        <!-- Populated dynamically -->
+
+      </div>
+
+
+
+      <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+
+        <button type="button" class="btn btn-secondary" onclick="closeSuperModal()">Close</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <script src="../../js/data-store.js"></script>
+
+  <script src="../../js/api-client.js"></script>
+
+  <script src="../../js/app.js"></script>
+
+  <script>
+
+    let cachedInstRequests = [];
+
+    let cachedStudentRequests = [];
+
+    let cachedAllInstitutions = [];
+
+
+
+    // Route Guard: verify Super Admin authentication
+
+    async function checkSuperAdminAuth() {
+
+      const token = (window.proofVoiceApi && window.proofVoiceApi.getToken && window.proofVoiceApi.getToken()) ||
+                    localStorage.getItem('proofvoice_auth_token') ||
+                    localStorage.getItem('proofvoice_token') ||
+                    sessionStorage.getItem('proofvoice_token');
+
+      if (!token) {
+
+        window.location.replace('../../login.html?redirect=super-admin.html');
+
+        return false;
+
+      }
+
+      try {
+
+        const user = await window.proofVoiceApi.getCurrentUser();
+
+        const rawRole = ((user && (user.backendRole || user.role)) || '').toUpperCase();
+
+        const isSuper = rawRole === 'PLATFORM_SUPERADMIN' || rawRole === 'SUPERADMIN' || (user && user.is_superuser);
+
+        if (!isSuper) {
+
+          showToast('error', 'Unauthorized', 'Access restricted to Platform Super-Admin.');
+
+          setTimeout(() => {
+
+            window.location.replace('../../login.html?redirect=super-admin.html');
+
+          }, 1200);
+
+          return false;
+
+        }
+
+        document.getElementById('superAdminName').textContent = user.fullName || user.full_name || 'Super Admin';
+
+        document.getElementById('superAdminEmail').textContent = user.email || 'superadmin@proofvoice.platform';
+
+        return true;
+
+      } catch (e) {
+
+        window.location.replace('../../login.html?redirect=super-admin.html');
+
+        return false;
+
+      }
+
+    }
+
+
+
+    async function loadSuperAdminData() {
+
+      try {
+
+        // Load KPIs
+
+        const overview = await window.proofVoiceApi.getSuperAdminOverview();
+
+        document.getElementById('kpiTotalInst').textContent = overview.total_institutions || 0;
+
+        document.getElementById('kpiApprovedInst').textContent = overview.approved_institutions || 0;
+
+        document.getElementById('kpiPendingInstReq').textContent = overview.pending_institutional_requests || 0;
+
+        document.getElementById('kpiRejectedReq').textContent = overview.rejected_requests || 0;
+
+        document.getElementById('kpiSuspendedInst').textContent = overview.suspended_institutions || 0;
+
+        document.getElementById('kpiStudentReq').textContent = overview.student_onboarding_requests || 0;
+
+        document.getElementById('kpiTotalStudents').textContent = overview.total_registered_students || 0;
+
+
+
+        document.getElementById('superPendingInstBadge').textContent = overview.pending_institutional_requests || 0;
+
+        document.getElementById('superStudentReqBadge').textContent = overview.student_onboarding_requests || 0;
+
+
+
+        // Load Institutional Requests
+
+        cachedInstRequests = await window.proofVoiceApi.getInstitutionRegistrationRequests();
+
+        renderInstRequestsTable();
+
+
+
+        // Load Student Onboarding Requests
+        cachedStudentRequests = await window.proofVoiceApi.getStudentOnboardingRequests();
+        renderStudentRequestsTable();
+
+        // Load Staff & Admin Access Requests (Existing Institutions)
+        await loadSuperAdminAccessRequests();
+
+
+
+        // Load All Institutions
+
+        cachedAllInstitutions = await window.proofVoiceApi.searchInstitutions('', true);
+
+        renderActiveInstitutionsTable();
+
+
+
+      } catch (err) {
+
+        console.error('Super Admin data load failed:', err);
+
+      }
+
+    }
+
+
+
+
+    let cachedAdminAccessRequests = [];
+
+    async function loadSuperAdminAccessRequests() {
+      try {
+        if (window.proofVoiceApi && typeof window.proofVoiceApi.getAdminAccessRequests === 'function') {
+          cachedAdminAccessRequests = await window.proofVoiceApi.getAdminAccessRequests() || [];
+        } else if (window.proofVoiceDb) {
+          cachedAdminAccessRequests = window.proofVoiceDb.getAdminRequests() || [];
+        }
+      } catch (err) {
+        console.warn('[Super Admin] Error loading admin access requests:', err);
+        if (window.proofVoiceDb) cachedAdminAccessRequests = window.proofVoiceDb.getAdminRequests() || [];
+      }
+
+      // Deduplicate admin access requests: 1 request per applicant email
+      const seenAccessEmails = new Set();
+      const uniqueAccess = [];
+      for (const r of (cachedAdminAccessRequests || [])) {
+        const emailKey = (r.user_email || r.officialEmail || '').toLowerCase().trim();
+        if (emailKey && seenAccessEmails.has(emailKey)) {
+          continue;
+        }
+        if (emailKey) seenAccessEmails.add(emailKey);
+        uniqueAccess.push(r);
+      }
+      cachedAdminAccessRequests = uniqueAccess;
+
+      const pendingCount = (cachedAdminAccessRequests || []).filter(r => (r.status || '').toUpperCase() === 'PENDING').length;
+      const badge = document.getElementById('superAdminAccessBadge');
+      if (badge) badge.textContent = pendingCount;
+      const kpi = document.getElementById('kpiAdminAccessReq');
+      if (kpi) kpi.textContent = pendingCount;
+
+      renderSuperAdminAccessRequestsTable();
+    }
+
+    function filterSuperAdminAccessRequests() {
+      renderSuperAdminAccessRequestsTable();
+    }
+
+    function renderSuperAdminAccessRequestsTable() {
+      const tbody = document.getElementById('superAdminAccessTableBody');
+      const countLabel = document.getElementById('superAdminAccessCountLabel');
+      const search = (document.getElementById('superAdminAccessSearch')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('superAdminAccessStatusFilter')?.value || 'All';
+
+      if (!tbody) return;
+
+      let filtered = [...(cachedAdminAccessRequests || [])];
+
+      if (statusFilter !== 'All') {
+        filtered = filtered.filter(r => (r.status || '').toUpperCase() === statusFilter.toUpperCase());
+      }
+
+      if (search) {
+        filtered = filtered.filter(r => {
+          const name = (r.user_name || r.fullName || '').toLowerCase();
+          const email = (r.user_email || r.officialEmail || '').toLowerCase();
+          const inst = (r.institution_name || '').toLowerCase();
+          const des = (r.designation || '').toLowerCase();
+          const dept = (r.department_name || r.department || '').toLowerCase();
+          return name.includes(search) || email.includes(search) || inst.includes(search) || des.includes(search) || dept.includes(search);
+        });
+      }
+
+      if (countLabel) countLabel.textContent = `Showing ${filtered.length} requests`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94A3B8; padding:2rem;">No staff access requests found for this filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(req => {
+        const name = req.user_name || req.fullName || 'Staff Applicant';
+        const email = req.user_email || req.officialEmail || 'N/A';
+        const phone = req.user_phone || req.phone || '';
+        const instName = req.institution_name || 'Assigned Institution';
+        const des = req.designation || 'Staff Administrator';
+        const dept = req.department_name || req.department || 'Administration';
+        const dateRaw = req.created_at || req.requestedAt;
+        const dateStr = dateRaw ? new Date(dateRaw).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent';
+
+        const s = (req.status || '').toUpperCase();
+        let statusBadge = '<span class="badge" style="background:#FEF3C7; color:#92400E;">Pending Review</span>';
+        if (s === 'APPROVED') statusBadge = '<span class="badge" style="background:#D1FAE5; color:#065F46;">Approved</span>';
+        if (s === 'REJECTED') statusBadge = '<span class="badge" style="background:#FEE2E2; color:#991B1B;">Rejected</span>';
+
+        return `
+          <tr style="border-color:#334155;">
+            <td>
+              <div style="font-weight:600; color:#FFFFFF;">${escapeHtml(name)}</div>
+              <div style="font-family:monospace; font-size:12px; color:#93C5FD;">${escapeHtml(email)}</div>
+              ${phone ? `<div class="text-xs" style="color:#94A3B8;">📞 ${escapeHtml(phone)}</div>` : ''}
+            </td>
+            <td>
+              <span class="badge" style="background:rgba(20, 184, 166, 0.2); color:#2DD4BF; font-weight:600;">
+                ${escapeHtml(instName)}
+              </span>
+            </td>
+            <td style="color:#FFFFFF;">${escapeHtml(des)}</td>
+            <td style="color:#94A3B8;">${escapeHtml(dept)}</td>
+            <td style="color:#94A3B8; font-size:12px;">${dateStr}</td>
+            <td>${statusBadge}</td>
+            <td style="text-align:right; white-space:nowrap;">
+              ${s === 'PENDING' ? `
+                <button class="btn btn-primary btn-sm" style="margin-right:6px;" onclick="handleSuperAdminAccessAction('${escapeHtml(String(req.id))}', 'approve', '${escapeHtml(name)}', '${escapeHtml(instName)}')">✓ Approve</button>
+                <button class="btn btn-danger btn-sm" onclick="handleSuperAdminAccessAction('${escapeHtml(String(req.id))}', 'reject', '${escapeHtml(name)}', '${escapeHtml(instName)}')">Reject</button>
+              ` : `
+                <span class="text-xs text-muted" style="color:${s === 'APPROVED' ? '#10B981' : '#F87171'}; font-weight:500;">${s === 'APPROVED' ? 'Access Active' : 'Denied'}</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function handleSuperAdminAccessAction(reqId, action, staffName, instName) {
+      const verb = action === 'approve' ? 'APPROVE administrator access for' : 'REJECT administrator access for';
+      if (!confirm(`Are you sure you want to ${verb} "${staffName}" at "${instName}"?`)) {
+        return;
+      }
+
+      try {
+        await window.proofVoiceApi.reviewAdminAccessRequest(reqId, action);
+        if (action === 'approve') {
+          showToast('success', 'Staff Access Approved', `Administrator access granted to ${staffName} for ${instName}.`);
+        } else {
+          showToast('info', 'Request Rejected', `Access request for ${staffName} at ${instName} was rejected.`);
+        }
+        await loadSuperAdminAccessRequests();
+        await loadSuperAdminData();
+      } catch (err) {
+        let msg = 'Failed to update access request.';
+        if (typeof err === 'string') msg = err;
+        else if (err && typeof err === 'object') msg = err.message || err.error || (err.data && (err.data.error || err.data.detail)) || 'Failed to update access request.';
+        showToast('error', 'Action Error', msg);
+      }
+    }
+
+    function renderInstRequestsTable() {
+
+      const tbody = document.getElementById('superPendingTableBody');
+
+      if (!cachedInstRequests || cachedInstRequests.length === 0) {
+
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94A3B8; padding:2rem;">No institutional registration requests recorded.</td></tr>';
+
+        return;
+
+      }
+
+      // Deduplicate institutional registration requests: 1 request per institution name and per email
+      const seenInstEmails = new Set();
+      const seenInstNames = new Set();
+      const uniqueInstRequests = [];
+      for (const req of (cachedInstRequests || [])) {
+        const emailKey = (req.official_email || '').toLowerCase().trim();
+        const nameKey = (req.institution_name || '').toLowerCase().trim();
+        if ((emailKey && seenInstEmails.has(emailKey)) || (nameKey && seenInstNames.has(nameKey))) {
+          continue; // skip duplicate submissions for same institute or email
+        }
+        if (emailKey) seenInstEmails.add(emailKey);
+        if (nameKey) seenInstNames.add(nameKey);
+        uniqueInstRequests.push(req);
+      }
+
+      const pendingCount = uniqueInstRequests.filter(r => (r.status || '').toUpperCase() === 'PENDING').length;
+      const badge = document.getElementById('superPendingInstBadge');
+      if (badge) badge.textContent = pendingCount;
+      const kpiPending = document.getElementById('kpiPendingReq');
+      if (kpiPending) kpiPending.textContent = pendingCount;
+
+      tbody.innerHTML = uniqueInstRequests.map(req => {
+
+        const reqId = req.request_id || `PV-INS-2026-${req.id}`;
+
+        const dateStr = req.created_at ? new Date(req.created_at).toLocaleDateString() : 'Recent';
+
+        let statusBadge = '<span class="badge" style="background:#FEF3C7; color:#92400E;">Pending</span>';
+
+        if (req.status === 'APPROVED') statusBadge = '<span class="badge" style="background:#D1FAE5; color:#065F46;">Approved</span>';
+
+        if (req.status === 'REJECTED') statusBadge = '<span class="badge" style="background:#FEE2E2; color:#991B1B;">Rejected</span>';
+
+
+
+        return `
+
+          <tr style="border-color:#334155;">
+
+            <td style="font-family:monospace; color:#93C5FD; font-size:12px;">${escapeHtml(reqId)}</td>
+
+            <td style="font-weight:600; color:#FFFFFF;">${escapeHtml(req.institution_name)}</td>
+
+            <td>
+
+              <div style="color:#FFFFFF;">${escapeHtml(req.contact_person_name || 'Authorized Officer')}</div>
+
+              <div class="text-xs" style="color:#94A3B8;">${escapeHtml(req.applicant_designation || '')}</div>
+
+            </td>
+
+            <td style="font-family:monospace; font-size:12px; color:#93C5FD;">${escapeHtml(req.official_email)}</td>
+
+            <td style="color:#94A3B8; font-size:12px;">${dateStr}</td>
+
+            <td>${statusBadge}</td>
+
+            <td style="text-align:right; white-space:nowrap;">
+
+              <button class="btn btn-secondary btn-sm" style="margin-right:6px;" onclick="viewInstDetails(${req.id})">Details</button>
+
+              ${req.status === 'PENDING' ? `
+
+                <button class="btn btn-primary btn-sm" style="margin-right:6px;" onclick="approveInstRequest(${req.id}, '${escapeHtml(req.institution_name)}')">✓ Approve</button>
+
+                <button class="btn btn-danger btn-sm" onclick="rejectInstRequest(${req.id}, '${escapeHtml(req.institution_name)}')">Reject</button>
+
+              ` : ''}
+
+            </td>
+
+          </tr>
+
+        `;
+
+      }).join('');
+
+    }
+
+
+
+    function renderStudentRequestsTable() {
+
+      const tbody = document.getElementById('superStudentRequestsTableBody');
+
+      if (!cachedStudentRequests || cachedStudentRequests.length === 0) {
+
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94A3B8; padding:2rem;">No student onboarding requests recorded.</td></tr>';
+
+        return;
+
+      }
+
+
+
+      tbody.innerHTML = cachedStudentRequests.map(req => {
+
+        const reqId = req.request_id || `PV-STU-REQ-2026-${req.id}`;
+
+        const dateStr = req.created_at ? new Date(req.created_at).toLocaleDateString() : 'Recent';
+
+        let statusBadge = '<span class="badge" style="background:#FEF3C7; color:#92400E;">Pending Review</span>';
+
+        if (req.status === 'REVIEWED') statusBadge = '<span class="badge" style="background:#DBEAFE; color:#1E40AF;">Reviewed</span>';
+
+        if (req.status === 'INVITED') statusBadge = '<span class="badge" style="background:#D1FAE5; color:#065F46;">Invited</span>';
+
+        if (req.status === 'CLOSED') statusBadge = '<span class="badge" style="background:#F1F5F9; color:#64748B;">Closed</span>';
+
+
+
+        return `
+
+          <tr style="border-color:#334155;">
+
+            <td style="font-family:monospace; color:#93C5FD; font-size:12px;">${escapeHtml(reqId)}</td>
+
+            <td>
+
+              <div style="font-weight:600; color:#FFFFFF;">${escapeHtml(req.student_name)}</div>
+
+              <div style="font-size:11px; color:#93C5FD; font-family:monospace;">${escapeHtml(req.student_email)}</div>
+
+            </td>
+
+            <td style="font-weight:600; color:#FFFFFF;">${escapeHtml(req.institution_name)}</td>
+
+            <td style="color:#94A3B8; font-size:12px;">${escapeHtml(req.institution_location)}</td>
+
+            <td style="color:#94A3B8; font-size:12px;">${dateStr}</td>
+
+            <td>${statusBadge}</td>
+
+            <td style="text-align:right; white-space:nowrap;">
+
+              <button class="btn btn-secondary btn-sm" style="margin-right:6px;" onclick="markStudentReqStatus(${req.id}, 'REVIEWED')">Mark Reviewed</button>
+
+              <button class="btn btn-primary btn-sm" style="margin-right:6px;" onclick="markStudentReqStatus(${req.id}, 'INVITED')">Invite Inst.</button>
+
+              <button class="btn btn-secondary btn-sm" onclick="markStudentReqStatus(${req.id}, 'CLOSED')">Close</button>
+
+            </td>
+
+          </tr>
+
+        `;
+
+      }).join('');
+
+    }
+
+
+
+    function renderActiveInstitutionsTable() {
+
+      const tbody = document.getElementById('superInstitutionsTableBody');
+
+      if (!cachedAllInstitutions || cachedAllInstitutions.length === 0) {
+
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94A3B8; padding:2rem;">No institutions recorded.</td></tr>';
+
+        return;
+
+      }
+
+
+
+      tbody.innerHTML = cachedAllInstitutions.map(inst => {
+
+        const isVerified = (inst.verification_status === 'VERIFIED' || inst.status === 'Verified');
+
+        const isSuspended = (inst.verification_status === 'SUSPENDED');
+
+        let statusBadge = '<span class="badge" style="background:#D1FAE5; color:#065F46;">Active & Verified</span>';
+
+        if (isSuspended) statusBadge = '<span class="badge" style="background:#FEE2E2; color:#991B1B;">Suspended</span>';
+
+        else if (!isVerified) statusBadge = '<span class="badge" style="background:#F1F5F9; color:#64748B;">Directory Listing</span>';
+
+
+
+        return `
+
+          <tr style="border-color:#334155;">
+
+            <td style="font-family:monospace; color:#93C5FD; font-size:12px;">${escapeHtml(inst.code || String(inst.id))}</td>
+
+            <td style="font-weight:600; color:#FFFFFF;">${escapeHtml(inst.name)}</td>
+
+            <td style="color:#94A3B8; font-size:12px;">${escapeHtml(inst.city || '')}, ${escapeHtml(inst.state || '')}</td>
+
+            <td style="font-family:monospace; font-size:12px; color:#93C5FD;">${escapeHtml(inst.official_email || inst.officialEmail || 'N/A')}</td>
+
+            <td>${statusBadge}</td>
+
+            <td style="text-align:right;">
+
+              ${isVerified ? `
+
+                <button class="btn btn-danger btn-sm" onclick="suspendInstitution(${inst.id}, '${escapeHtml(inst.name)}')">Suspend</button>
+
+              ` : isSuspended ? `
+
+                <button class="btn btn-primary btn-sm" onclick="unsuspendInstitution(${inst.id}, '${escapeHtml(inst.name)}')">Unsuspend</button>
+
+              ` : '<span style="color:#64748B; font-size:11px;">Unclaimed</span>'}
+
+            </td>
+
+          </tr>
+
+        `;
+
+      }).join('');
+
+    }
+
+
+
+    function viewInstDetails(reqId) {
+
+      const req = cachedInstRequests.find(r => r.id === reqId);
+
+      if (!req) return;
+
+
+
+      const modalBody = document.getElementById('superModalBody');
+
+      modalBody.innerHTML = `
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+
+          <tr><td style="color:#94A3B8; padding:6px 0; width:40%;">Request ID:</td><td style="font-family:monospace; color:#93C5FD;">${escapeHtml(req.request_id || '')}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Institution Name:</td><td style="font-weight:600; color:#FFFFFF;">${escapeHtml(req.institution_name)}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Type:</td><td>${escapeHtml(req.institution_type || '')}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Official Email:</td><td><a href="mailto:${escapeHtml(req.official_email)}" style="color:#93C5FD;">${escapeHtml(req.official_email)}</a></td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Admin Password (MySQL):</td><td style="font-family:monospace; color:#10B981; font-weight:700;">${escapeHtml(req.admin_password || 'ArkaJain@2026')}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Contact Person:</td><td style="color:#FFFFFF;">${escapeHtml(req.contact_person_name || 'N/A')} (${escapeHtml(req.applicant_designation || '')})</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Contact Number:</td><td style="font-family:monospace; color:#93C5FD;">${escapeHtml(req.contact_number || 'N/A')}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Physical Address:</td><td>${escapeHtml(req.official_address || '')}, ${escapeHtml(req.city || '')}, ${escapeHtml(req.state || '')}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Website:</td><td>${req.website ? `<a href="${escapeHtml(req.website)}" target="_blank" style="color:#93C5FD;">${escapeHtml(req.website)}</a>` : 'N/A'}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Verification Document:</td><td>${req.verification_document ? `<a href="${escapeHtml(req.verification_document)}" target="_blank" style="color:#10B981; font-weight:600;">[View Attached Document]</a>` : 'None uploaded'}</td></tr>
+
+          <tr><td style="color:#94A3B8; padding:6px 0;">Additional Info:</td><td>${escapeHtml(req.additional_information || 'None')}</td></tr>
+
+        </table>
+
+        <div style="margin-top:12px;">
+
+          <label style="color:#94A3B8; font-size:12px; display:block; margin-bottom:4px;">Internal Remarks (Logged in database & sent in email):</label>
+
+          <textarea id="superInternalRemarks" class="form-control" rows="2" style="background:#0F172A; color:#FFFFFF; border-color:#334155;">${escapeHtml(req.internal_remarks || '')}</textarea>
+
+        </div>
+
+      `;
+
+
+
+      document.getElementById('superInstDetailsModal').style.display = 'flex';
+
+    }
+
+
+
+    function closeSuperModal() {
+
+      document.getElementById('superInstDetailsModal').style.display = 'none';
+
+    }
+
+
+
+    async function approveInstRequest(reqId, instName) {
+
+      if (!confirm(`Are you sure you want to APPROVE the institutional workspace for "${instName}"? This will activate institutional administrator access and send an approval notification email.`)) {
+
+        return;
+
+      }
+
+      const remarks = document.getElementById('superInternalRemarks') ? document.getElementById('superInternalRemarks').value : '';
+
+      try {
+
+        const res = await window.proofVoiceApi.approveInstitutionRegistration(reqId, 'approve', '', remarks);
+
+        showToast('success', 'Workspace Approved', `Institution "${instName}" has been approved and activated!`);
+
+        closeSuperModal();
+
+        loadSuperAdminData();
+
+      } catch (err) {
+
+        showToast('error', 'Approval Error', err.message || 'Failed to approve institution request.');
+
+      }
+
+    }
+
+
+
+    async function rejectInstRequest(reqId, instName) {
+
+      const reason = prompt(`Enter rejection reason for "${instName}" (this explanation will be recorded and emailed to the representative):`);
+
+      if (reason === null) return;
+
+      if (!reason.trim()) {
+
+        showToast('error', 'Reason Required', 'Please provide an explanation for rejecting this application.');
+
+        return;
+
+      }
+
+      try {
+
+        const res = await window.proofVoiceApi.approveInstitutionRegistration(reqId, 'reject', reason.trim());
+
+        showToast('info', 'Request Rejected', `Registration request for "${instName}" has been rejected.`);
+
+        closeSuperModal();
+
+        loadSuperAdminData();
+
+      } catch (err) {
+
+        showToast('error', 'Rejection Error', err.message || 'Failed to reject institution request.');
+
+      }
+
+    }
+
+
+
+    async function suspendInstitution(instId, instName) {
+
+      const reason = prompt(`Enter suspension reason for "${instName}" (administrative dashboard access will be disabled immediately):`);
+
+      if (reason === null) return;
+
+      try {
+
+        // Find matching originating request or direct suspend
+
+        const matchedReq = cachedInstRequests.find(r => r.created_institution === instId || r.institution_name === instName);
+
+        if (matchedReq) {
+
+          await window.proofVoiceApi.approveInstitutionRegistration(matchedReq.id, 'suspend', reason.trim());
+
+        }
+
+        showToast('info', 'Institution Suspended', `Access for "${instName}" has been temporarily suspended.`);
+
+        loadSuperAdminData();
+
+      } catch (err) {
+
+        showToast('error', 'Suspension Error', err.message || 'Failed to suspend institution.');
+
+      }
+
+    }
+
+
+
+    async function unsuspendInstitution(instId, instName) {
+
+      if (!confirm(`Re-instate active institutional status for "${instName}"?`)) return;
+
+      try {
+
+        const matchedReq = cachedInstRequests.find(r => r.created_institution === instId || r.institution_name === instName);
+
+        if (matchedReq) {
+
+          await window.proofVoiceApi.approveInstitutionRegistration(matchedReq.id, 'unsuspend');
+
+        }
+
+        showToast('success', 'Institution Reinstated', `"${instName}" is now active.`);
+
+        loadSuperAdminData();
+
+      } catch (err) {
+
+        showToast('error', 'Action Error', err.message || 'Failed to unsuspend institution.');
+
+      }
+
+    }
+
+
+
+    async function markStudentReqStatus(reqId, newStatus) {
+
+      try {
+
+        await window.proofVoiceApi.updateStudentOnboardingRequest(reqId, newStatus);
+
+        showToast('success', 'Status Updated', `Student request marked as ${newStatus}.`);
+
+        loadSuperAdminData();
+
+      } catch (err) {
+
+        showToast('error', 'Update Error', err.message || 'Failed to update student request.');
+
+      }
+
+    }
+
+
+
+    // --- Internal Notification System State & Polling ---
+
+    let cachedNotifications = [];
+
+    let currentDropdownFilter = 'all';
+
+    let currentFullFilter = 'all';
+
+    let notifPollTimer = null;
+
+
+
+    window.toggleNotifDropdown = function(event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const dd = document.getElementById('superAdminNotifDropdown');
+      if (!dd) return;
+      const isOpen = dd.style.display !== 'none' && dd.style.display !== '';
+      if (isOpen) {
+        dd.style.display = 'none';
+      } else {
+        dd.style.display = 'block';
+        if (!cachedNotifications || cachedNotifications.length === 0) {
+          loadNotifications(true).then(() => renderNotificationDropdown());
+        } else {
+          renderNotificationDropdown();
+        }
+      }
+    };
+    function toggleNotifDropdown(event) { return window.toggleNotifDropdown(event); }
+
+
+
+    document.addEventListener('click', (e) => {
+
+      const dd = document.getElementById('superAdminNotifDropdown');
+
+      const btn = document.getElementById('superAdminNotifBtn');
+
+      if (dd && dd.style.display !== 'none' && !dd.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+
+        dd.style.display = 'none';
+
+      }
+
+    });
+
+
+
+    async function loadNotifications(silent = false) {
+
+      try {
+
+        const data = await window.proofVoiceApi.getNotificationData();
+
+        cachedNotifications = data.notifications || [];
+
+        const unreadCount = data.unread_count || 0;
+
+
+
+        // Update badge counters
+
+        const badge = document.getElementById('superAdminNotifBadge');
+
+        if (badge) {
+
+          badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+
+          badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+
+        }
+
+        const sidebarBadge = document.getElementById('superNotifSidebarBadge');
+
+        if (sidebarBadge) {
+
+          sidebarBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+
+          sidebarBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+
+        }
+
+        const unreadPill = document.getElementById('dropdownUnreadPill');
+
+        if (unreadPill) {
+
+          unreadPill.textContent = `${unreadCount} Unread`;
+
+          unreadPill.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+
+        }
+
+
+
+        const fullUnread = document.getElementById('fullUnreadCount');
+
+        if (fullUnread) fullUnread.textContent = unreadCount;
+
+        const fullTotal = document.getElementById('fullTotalCount');
+
+        if (fullTotal) fullTotal.textContent = cachedNotifications.length;
+
+
+
+        renderNotificationDropdown();
+
+        renderFullNotificationList();
+
+      } catch (err) {
+
+        if (!silent) console.warn('[Super Admin Notifications] Load error:', err);
+
+      }
+
+    }
+
+
+
+    function startNotificationPolling() {
+
+      loadNotifications(true);
+
+      if (notifPollTimer) clearInterval(notifPollTimer);
+
+      notifPollTimer = setInterval(() => {
+
+        loadNotifications(true);
+
+      }, 15000); // 15 seconds polling interval
+
+    }
+
+
+
+    function filterDropdown(cat, btn) {
+
+      currentDropdownFilter = cat;
+
+      document.querySelectorAll('.notif-dd-tab').forEach(t => {
+
+        t.style.background = 'transparent';
+
+        t.style.color = '#94A3B8';
+
+      });
+
+      if (btn) {
+
+        btn.style.background = '#0F766E';
+
+        btn.style.color = '#FFFFFF';
+
+      }
+
+      renderNotificationDropdown();
+
+    }
+
+
+
+    function filterFullNotifications(cat, btn) {
+
+      currentFullFilter = cat;
+
+      document.querySelectorAll('.notif-full-tab').forEach(t => {
+
+        t.classList.remove('btn-primary');
+
+        t.classList.add('btn-outline');
+
+        t.style.color = '#94A3B8';
+
+        t.style.borderColor = '#475569';
+
+      });
+
+      if (btn) {
+
+        btn.classList.add('btn-primary');
+
+        btn.classList.remove('btn-outline');
+
+        btn.style.color = '#FFFFFF';
+
+        btn.style.borderColor = '#0F766E';
+
+      }
+
+      renderFullNotificationList();
+
+    }
+
+
+
+    function getNotifBadgeInfo(type) {
+
+      switch (type) {
+
+        case 'INSTITUTION_REQUEST':
+
+          return { label: 'Institution Request', color: '#2DD4BF', bg: 'rgba(15, 118, 110, 0.25)', icon: '🏛️' };
+
+        case 'STUDENT_ONBOARDING_REQUEST':
+
+          return { label: 'Student Inquiry', color: '#FCD34D', bg: 'rgba(245, 158, 11, 0.25)', icon: '🎓' };
+
+        case 'INSTITUTION_APPROVED':
+
+          return { label: 'Approved', color: '#86EFAC', bg: 'rgba(16, 185, 129, 0.25)', icon: '✅' };
+
+        case 'INSTITUTION_REJECTED':
+
+          return { label: 'Rejected', color: '#FCA5A5', bg: 'rgba(239, 68, 68, 0.25)', icon: '❌' };
+
+        case 'INSTITUTION_SUSPENDED':
+
+          return { label: 'Suspended', color: '#FDBA74', bg: 'rgba(249, 115, 22, 0.25)', icon: '⚠️' };
+
+        case 'INSTITUTION_RESUBMITTED':
+
+          return { label: 'Resubmitted', color: '#93C5FD', bg: 'rgba(59, 130, 246, 0.25)', icon: '📄' };
+
+        default:
+
+          return { label: 'System Alert', color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.25)', icon: '🔔' };
+
+      }
+
+    }
+
+
+
+    function formatRelativeTime(dateStr) {
+
+      if (!dateStr) return '';
+
+      const d = new Date(dateStr);
+
+      const now = new Date();
+
+      const diffMs = now - d;
+
+      const diffMins = Math.floor(diffMs / 60000);
+
+      if (diffMins < 1) return 'Just now';
+
+      if (diffMins < 60) return `${diffMins}m ago`;
+
+      const diffHours = Math.floor(diffMins / 60);
+
+      if (diffHours < 24) return `${diffHours}h ago`;
+
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffDays < 7) return `${diffDays}d ago`;
+
+      return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+
+    }
+
+
+
+    function renderNotificationDropdown() {
+
+      const container = document.getElementById('superAdminNotifList');
+
+      if (!container) return;
+
+
+
+      let list = cachedNotifications.slice();
+
+      if (currentDropdownFilter === 'unread') {
+
+        list = list.filter(n => !n.is_read);
+
+      } else if (currentDropdownFilter === 'institution') {
+
+        list = list.filter(n => ['INSTITUTION_REQUEST', 'INSTITUTION_APPROVED', 'INSTITUTION_REJECTED', 'INSTITUTION_SUSPENDED', 'INSTITUTION_RESUBMITTED'].includes(n.notification_type));
+
+      } else if (currentDropdownFilter === 'student') {
+
+        list = list.filter(n => n.notification_type === 'STUDENT_ONBOARDING_REQUEST');
+
+      }
+
+
+
+      if (list.length === 0) {
+
+        container.innerHTML = `
+
+          <div style="padding:32px 16px; text-align:center; color:#94A3B8;">
+
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.5" style="margin-bottom:8px;">
+
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+
+            </svg>
+
+            <div style="font-size:13px; font-weight:600; color:#CBD5E1;">No notifications found</div>
+
+            <div style="font-size:11px; color:#64748B; margin-top:2px;">All institutional requests are up to date.</div>
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+
+      container.innerHTML = list.slice(0, 15).map(n => {
+
+        const badge = getNotifBadgeInfo(n.notification_type);
+
+        const timeAgo = formatRelativeTime(n.created_at);
+
+        const isUnread = !n.is_read;
+
+        return `
+
+          <div class="topbar-notif-item" onclick="onNotificationRowClick(${n.id}, '${n.notification_type}', '${escapeHtml(n.related_request_id || '')}')" style="background:${isUnread ? '#1E293B' : '#0F172A'}; border-left:3px solid ${isUnread ? '#0F766E' : 'transparent'}; border-bottom:1px solid #334155; padding:10px 14px; cursor:pointer; transition:background 0.15s ease;">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+
+              <span class="badge" style="background:${badge.bg}; color:${badge.color}; font-size:10px; padding:2px 6px;">${badge.icon} ${badge.label}</span>
+
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:10px; color:#64748B;">${timeAgo}</span>
+                <button type="button" onclick="event.stopPropagation(); deleteSingleNotification(${n.id});" title="Delete notification" style="background:transparent; border:none; color:#64748B; font-size:16px; cursor:pointer; padding:0 4px; line-height:1;" onmouseover="this.style.color='#EF4444'" onmouseout="this.style.color='#64748B'">&times;</button>
+              </div>
+
+            </div>
+
+            <div style="font-size:12px; font-weight:${isUnread ? '700' : '600'}; color:#FFFFFF; margin-bottom:2px;">${escapeHtml(n.title)}</div>
+
+            <div style="font-size:11px; color:#94A3B8; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(n.message)}</div>
+
+            ${n.related_request_id ? `<div style="font-size:10px; font-family:monospace; color:#2DD4BF; margin-top:4px;">ID: ${escapeHtml(n.related_request_id)}</div>` : ''}
+
+          </div>
+
+        `;
+
+      }).join('');
+
+    }
+
+
+
+    
+    async function deleteSingleNotification(id) {
+      cachedNotifications = cachedNotifications.filter(n => String(n.id) !== String(id));
+      if (window.proofVoiceApi) {
+        await window.proofVoiceApi.deleteNotification(id).catch(() => {});
+      }
+      renderNotificationDropdown();
+      const badge = document.getElementById('superAdminNotifBadge');
+      const unreadCount = cachedNotifications.filter(n => !n.is_read).length;
+      if (badge) {
+        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        badge.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+      }
+    }
+
+    async function clearAllNotificationsHandler(event) {
+      if (event) event.stopPropagation();
+      cachedNotifications = [];
+      if (window.proofVoiceApi) {
+        await window.proofVoiceApi.clearAllNotifications().catch(() => {});
+      }
+      renderNotificationDropdown();
+      const badge = document.getElementById('superAdminNotifBadge');
+      if (badge) badge.style.display = 'none';
+    }
+
+    function renderFullNotificationList() {
+
+      const container = document.getElementById('fullNotifContainer');
+
+      if (!container) return;
+
+
+
+      let list = cachedNotifications.slice();
+
+      if (currentFullFilter === 'unread') {
+
+        list = list.filter(n => !n.is_read);
+
+      } else if (currentFullFilter === 'read') {
+
+        list = list.filter(n => n.is_read);
+
+      } else if (currentFullFilter === 'institution') {
+
+        list = list.filter(n => ['INSTITUTION_REQUEST', 'INSTITUTION_APPROVED', 'INSTITUTION_REJECTED', 'INSTITUTION_SUSPENDED', 'INSTITUTION_RESUBMITTED'].includes(n.notification_type));
+
+      } else if (currentFullFilter === 'student') {
+
+        list = list.filter(n => n.notification_type === 'STUDENT_ONBOARDING_REQUEST');
+
+      }
+
+
+
+      if (list.length === 0) {
+
+        container.innerHTML = `
+
+          <div class="empty-state" style="background:#1E293B; border:1px solid #334155; border-radius:12px; padding:48px 16px; text-align:center;">
+
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.5" style="margin-bottom:12px;">
+
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+
+            </svg>
+
+            <div style="font-size:15px; font-weight:600; color:#FFFFFF;">No notifications in this view</div>
+
+            <p style="font-size:13px; color:#94A3B8; margin:4px 0 0;">Platform notifications will appear here in real time as requests are submitted.</p>
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+
+      container.innerHTML = list.map(n => {
+
+        const badge = getNotifBadgeInfo(n.notification_type);
+
+        const timeAgo = formatRelativeTime(n.created_at);
+
+        const dateFull = new Date(n.created_at).toLocaleString('en-IN');
+
+        const isUnread = !n.is_read;
+
+
+
+        return `
+
+          <div class="card" style="background:#1E293B; border:1px solid ${isUnread ? '#0F766E' : '#334155'}; border-left:4px solid ${isUnread ? '#2DD4BF' : '#475569'}; border-radius:10px; padding:16px 20px; transition:border-color 0.15s ease;">
+
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+
+              <div style="display:flex; align-items:center; gap:8px;">
+
+                <span class="badge" style="background:${badge.bg}; color:${badge.color}; font-size:11px; font-weight:700; padding:3px 8px;">${badge.icon} ${badge.label}</span>
+
+                ${isUnread ? '<span class="badge" style="background:rgba(239, 68, 68, 0.2); color:#FCA5A5; font-size:10px;">Unread</span>' : '<span style="font-size:11px; color:#64748B;">Read</span>'}
+
+                ${n.related_request_id ? `<span style="font-family:monospace; font-size:11px; color:#93C5FD; background:#0F172A; padding:2px 6px; border-radius:4px; border:1px solid #334155;">${escapeHtml(n.related_request_id)}</span>` : ''}
+
+              </div>
+
+              <div style="font-size:11px; color:#64748B;" title="${dateFull}">${timeAgo} &bull; ${dateFull}</div>
+
+            </div>
+
+
+
+            <div style="margin:10px 0 6px;">
+
+              <h3 style="font-size:15px; font-weight:700; color:#FFFFFF; margin:0 0 4px;">${escapeHtml(n.title)}</h3>
+
+              <p style="font-size:13px; color:#94A3B8; margin:0; line-height:1.5;">${escapeHtml(n.message)}</p>
+
+            </div>
+
+
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:1px solid #334155; flex-wrap:wrap; gap:8px;">
+
+              <div style="display:flex; gap:8px;">
+
+                ${isUnread ? `
+
+                  <button class="btn btn-sm btn-outline" onclick="markNotificationSingle(${n.id}, event)" style="font-size:11px; padding:3px 10px; border-color:#475569; color:#94A3B8;">
+
+                    Mark as Read
+
+                  </button>
+
+                ` : ''}
+
+                <button class="btn btn-sm btn-outline" onclick="deleteNotificationItem(${n.id}, event)" style="font-size:11px; padding:3px 10px; border-color:#475569; color:#94A3B8;" title="Archive this notification">
+
+                  Archive
+
+                </button>
+
+              </div>
+
+
+
+              ${n.related_request_id ? `
+
+                <button class="btn btn-sm btn-primary" onclick="onNotificationRowClick(${n.id}, '${n.notification_type}', '${escapeHtml(n.related_request_id)}')" style="font-size:12px; padding:4px 12px;">
+
+                  View Request Details &rarr;
+
+                </button>
+
+              ` : ''}
+
+            </div>
+
+          </div>
+
+        `;
+
+      }).join('');
+
+    }
+
+
+
+    async function onNotificationRowClick(notifId, type, reqId) {
+
+      // Mark as read in background
+
+      try {
+
+        await window.proofVoiceApi.markNotificationRead(notifId);
+
+      } catch (e) {}
+
+
+
+      // Close dropdown
+
+      toggleNotifDropdown(false);
+
+
+
+      // Re-load notifications count silently
+
+      loadNotifications(true);
+
+
+
+      // Route to corresponding section
+
+      if (['INSTITUTION_REQUEST', 'INSTITUTION_APPROVED', 'INSTITUTION_REJECTED', 'INSTITUTION_SUSPENDED', 'INSTITUTION_RESUBMITTED'].includes(type)) {
+
+        switchSuperTab('pending-inst');
+
+        // If request ID is known, search or highlight it
+
+        if (reqId && cachedInstRequests.length > 0) {
+
+          const match = cachedInstRequests.find(r => r.request_id === reqId || String(r.id) === String(reqId));
+
+          if (match) {
+
+            viewInstDetails(match.id);
+
+          }
+
+        }
+
+      } else if (type === 'STUDENT_ONBOARDING_REQUEST') {
+
+        switchSuperTab('student-requests');
+
+      }
+
+    }
+
+
+
+    async function markNotificationSingle(id, event) {
+
+      if (event) event.stopPropagation();
+
+      try {
+
+        await window.proofVoiceApi.markNotificationRead(id);
+
+        await loadNotifications(true);
+
+        showToast('info', 'Notification Read', 'Marked as read.');
+
+      } catch (err) {
+
+        showToast('error', 'Error', err.message || 'Failed to mark as read.');
+
+      }
+
+    }
+
+
+
+    async function markAllNotificationsAsRead(event) {
+
+      if (event) event.stopPropagation();
+
+      try {
+
+        await window.proofVoiceApi.markAllNotificationsRead();
+
+        await loadNotifications(true);
+
+        showToast('success', 'All Read', 'All notifications marked as read.');
+
+      } catch (err) {
+
+        showToast('error', 'Error', err.message || 'Failed to mark all as read.');
+
+      }
+
+    }
+
+
+
+    async function archiveReadNotifications(event) {
+
+      if (event) event.stopPropagation();
+
+      try {
+
+        await window.proofVoiceApi.archiveReadNotifications();
+
+        await loadNotifications(true);
+
+        showToast('info', 'Archived', 'Read notifications moved to archive.');
+
+      } catch (err) {
+
+        showToast('error', 'Error', err.message || 'Failed to archive read notifications.');
+
+      }
+
+    }
+
+
+
+    async function clearAllNotifications(event) {
+
+      if (event) event.stopPropagation();
+
+      if (!confirm('Clear all notifications from your console?')) return;
+
+      try {
+
+        await window.proofVoiceApi.clearAllNotifications();
+
+        await loadNotifications(true);
+
+        showToast('info', 'Cleared', 'All notifications cleared.');
+
+      } catch (err) {
+
+        showToast('error', 'Error', err.message || 'Failed to clear notifications.');
+
+      }
+
+    }
+
+
+
+    async function deleteNotificationItem(id, event) {
+
+      if (event) event.stopPropagation();
+
+      try {
+
+        await window.proofVoiceApi.deleteNotification(id);
+
+        await loadNotifications(true);
+
+      } catch (err) {}
+
+    }
+
+
+
+    function switchSuperTab(tabId, el) {
+
+      document.querySelectorAll('.sidebar-nav-item').forEach(item => item.classList.remove('active'));
+
+      document.querySelectorAll('.super-tab-content').forEach(c => c.classList.remove('active'));
+
+
+
+      if (el) el.classList.add('active');
+
+
+
+      if (tabId === 'overview') {
+
+        document.getElementById('tabOverview').classList.add('active');
+
+        document.getElementById('tabPendingInst').classList.add('active');
+
+      } else if (tabId === 'pending-inst') {
+        document.getElementById('tabPendingInst').classList.add('active');
+      } else if (tabId === 'admin-access-requests') {
+        document.getElementById('tabAdminAccessRequests').classList.add('active');
+        loadSuperAdminAccessRequests();
+
+      } else if (tabId === 'student-requests') {
+
+        document.getElementById('tabStudentRequests').classList.add('active');
+
+      } else if (tabId === 'institutions') {
+
+        document.getElementById('tabInstitutions').classList.add('active');
+
+      } else if (tabId === 'audit-logs') {
+
+        document.getElementById('tabAuditLogs').classList.add('active');
+
+      } else if (tabId === 'notifications') {
+
+        const notifTab = document.getElementById('tabNotifications');
+
+        if (notifTab) {
+
+          notifTab.classList.add('active');
+
+          renderFullNotificationList();
+
+        }
+
+      } else if (tabId === 'profile-settings') {
+
+        const profTab = document.getElementById('tabProfileSettings');
+
+        if (profTab) {
+
+          profTab.classList.add('active');
+
+          loadSuperProfileData();
+
+        }
+
+        const navProf = document.getElementById('navSuperProfile');
+
+        if (navProf) navProf.classList.add('active');
+
+      }
+
+    }
+
+    function loadSuperProfileData() {
+      let user = null;
+      try {
+        user = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser) ? window.proofVoiceApi.getStoredUser() : null;
+        if (!user && window.proofVoiceDb) user = window.proofVoiceDb.getCurrentUser();
+      } catch (e) {}
+
+      if (!user) {
+        user = {
+          fullName: 'Super Admin',
+          email: 'superadmin@proofvoice.platform',
+          phone: '9876543210',
+          designation: 'Platform Super-Admin & Root Security Custodian'
+        };
+      }
+
+      const fullName = user.fullName || user.full_name || 'Super Admin';
+      const email = user.email || 'superadmin@proofvoice.platform';
+      let phone = user.phone || '9876543210';
+      phone = phone.replace(/\D/g, '');
+      if (phone.startsWith('91') && phone.length === 12) phone = phone.slice(2);
+      phone = phone.slice(-10);
+
+      const designation = user.designation || 'Platform Super-Admin & Root Security Custodian';
+
+      const inputName = document.getElementById('superProfFullName');
+      const inputEmail = document.getElementById('superProfEmail');
+      const inputPhone = document.getElementById('superProfPhone');
+      const inputDesig = document.getElementById('superProfDesignation');
+
+      if (inputName) inputName.value = fullName;
+      if (inputEmail) inputEmail.value = email;
+      if (inputPhone) inputPhone.value = phone;
+      if (inputDesig) inputDesig.value = designation;
+
+      const headerName = document.getElementById('superProfileHeaderName');
+      if (headerName) headerName.textContent = fullName;
+
+      const sidebarName = document.getElementById('superAdminName');
+      if (sidebarName) sidebarName.textContent = fullName;
+
+      const sidebarEmail = document.getElementById('superAdminEmail');
+      if (sidebarEmail) sidebarEmail.textContent = email;
+
+      const initials = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'SA';
+      const largeAvatar = document.getElementById('superProfileLargeAvatar');
+      if (largeAvatar) largeAvatar.textContent = initials;
+
+      const sidebarAvatar = document.getElementById('superSidebarAvatar');
+      if (sidebarAvatar) sidebarAvatar.textContent = initials;
+
+      if (inputPhone && typeof window.setupIndianPhoneInput === 'function') {
+        window.setupIndianPhoneInput(inputPhone, document.getElementById('superPhoneError'));
+      }
+    }
+
+    async function handleSuperProfileSubmit(event) {
+      if (event) event.preventDefault();
+
+      const nameInput = document.getElementById('superProfFullName');
+      const phoneInput = document.getElementById('superProfPhone');
+      const desigInput = document.getElementById('superProfDesignation');
+      const saveBtn = document.getElementById('saveSuperProfileBtn');
+
+      const fullName = nameInput ? nameInput.value.trim() : '';
+      const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+      const designation = desigInput ? desigInput.value.trim() : '';
+
+      if (!fullName) {
+        showToast('error', 'Missing Information', 'Please provide your full name.');
+        return;
+      }
+
+      let phoneCheck = { valid: true, digits: rawPhone };
+      if (typeof window.validateIndianPhoneNumber === 'function') {
+        phoneCheck = window.validateIndianPhoneNumber(rawPhone, true);
+        if (!phoneCheck.valid) {
+          showToast('error', 'Invalid Phone', phoneCheck.message);
+          if (phoneInput) phoneInput.focus();
+          return;
+        }
+      }
+
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner"></span> Saving Profile...';
+      }
+
+      try {
+        let currentUser = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser) ? window.proofVoiceApi.getStoredUser() : {};
+        const profilePayload = {
+          fullName,
+          full_name: fullName,
+          phone: `+91 ${phoneCheck.digits}`,
+          designation: designation,
+          role: 'superadmin',
+          backendRole: 'SUPER_ADMIN'
+        };
+
+        if (window.proofVoiceApi && typeof window.proofVoiceApi.updateUserProfile === 'function') {
+          await window.proofVoiceApi.updateUserProfile(currentUser.id, profilePayload).catch(() => {});
+        }
+
+        const mergedUser = { ...currentUser, ...profilePayload };
+        localStorage.setItem('proofvoice_session_user', JSON.stringify(mergedUser));
+        localStorage.setItem('proofvoice_auth_user', JSON.stringify(mergedUser));
+        localStorage.setItem('proofvoice_superadmin_user', JSON.stringify(mergedUser));
+
+        loadSuperProfileData();
+
+        showToast('success', 'Profile Updated', 'Super Admin credentials saved successfully.');
+      } catch (err) {
+        showToast('error', 'Update Failed', err.message || 'Unable to save profile changes.');
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Profile Changes';
+        }
+      }
+    }
+
+    async function handleSuperPasswordSubmit(event) {
+      if (event) event.preventDefault();
+
+      const currentPwInput = document.getElementById('superCurrentPassword');
+      const newPwInput = document.getElementById('superNewPassword');
+      const confirmPwInput = document.getElementById('superConfirmPassword');
+      const alertEl = document.getElementById('superPwdMismatchAlert');
+      const btn = document.getElementById('updateSuperPwdBtn');
+
+      const currentPassword = currentPwInput ? currentPwInput.value : '';
+      const newPassword = newPwInput ? newPwInput.value : '';
+      const confirmPassword = confirmPwInput ? confirmPwInput.value : '';
+
+      if (!currentPassword) {
+        showToast('error', 'Required', 'Please enter your current administrator password.');
+        if (currentPwInput) currentPwInput.focus();
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        showToast('error', 'Password Too Short', 'New password must be at least 8 characters long.');
+        if (newPwInput) newPwInput.focus();
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        if (alertEl) alertEl.style.display = 'block';
+        showToast('error', 'Mismatch', 'New password and confirmation do not match.');
+        if (confirmPwInput) confirmPwInput.focus();
+        return;
+      }
+
+      if (alertEl) alertEl.style.display = 'none';
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Updating Security...';
+      }
+
+      try {
+        if (window.proofVoiceApi && typeof window.proofVoiceApi.changePassword === 'function') {
+          await window.proofVoiceApi.changePassword({ currentPassword, newPassword, confirmPassword });
+        }
+        showToast('success', 'Security Updated', 'Super Admin password updated successfully. Use your new password on next login.');
+        document.getElementById('superAdminPasswordForm').reset();
+      } catch (err) {
+        showToast('error', 'Update Failed', err.message || 'Failed to update password. Please check your current password.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'Update Password';
+        }
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      if (btn) {
+        btn.innerHTML = isPassword 
+          ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+          : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      }
+    }
+
+    function saveSuperPreferences() {
+      const inApp = document.getElementById('prefNotifyInApp')?.checked ?? true;
+      const students = document.getElementById('prefNotifyStudents')?.checked ?? true;
+      const audio = document.getElementById('prefAudioAlerts')?.checked ?? true;
+
+      const prefs = { inApp, students, audio };
+      localStorage.setItem('proofvoice_super_prefs', JSON.stringify(prefs));
+      showToast('info', 'Preferences Saved', 'Platform alert settings updated.');
+    }
+
+
+
+    document.addEventListener('DOMContentLoaded', async () => {
+
+      const isAuthed = await checkSuperAdminAuth();
+
+      if (isAuthed) {
+
+        // Always show overview + pending requests by default
+
+        document.getElementById('tabOverview').classList.add('active');
+
+        document.getElementById('tabPendingInst').classList.add('active');
+
+        loadSuperAdminData();
+
+        startNotificationPolling();
+
+        loadSuperProfileData();
+
+      }
+
+
+
+      document.getElementById('superLogoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.replace('../../404.html');
+      });
+
+    });
+
+  </script>
+
+</body>
+
+</html>
+

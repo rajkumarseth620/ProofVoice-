@@ -3,39 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Not Found (404) | ProofVoice</title>
-  <meta name="description" content="The page you requested could not be found on ProofVoice.">
+  <title>Platform Super Admin Gateway | ProofVoice</title>
+  <meta name="description" content="Centralized Platform Super-Admin Authorization & Access Hub for ProofVoice.">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <script src="js/theme.js"></script>
+  <style>
+    :root {
+      --color-primary: #0F766E;
+      --color-primary-dark: #0D655E;
+      --color-primary-light: #CCFBF1;
+      --color-navy: #0F172A;
+      --color-bg: #F8FAFC;
+      --color-card: #FFFFFF;
+      --color-border: #E2E8F0;
+      --color-text-secondary: #64748B;
+      --radius-2xl: 20px;
+    }
+    [data-theme="dark"] {
+      --color-primary: #14B8A6;
+      --color-primary-dark: #0F766E;
+      --color-primary-light: rgba(20, 184, 166, 0.15);
+      --color-navy: #F8FAFC;
+      --color-bg: #0F172A;
+      --color-card: #1E293B;
+      --color-border: #334155;
+      --color-text-secondary: #94A3B8;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--color-bg);
+      color: var(--color-navy);
+      padding: 24px;
+      text-align: center;
+      position: relative;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .top-controls {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+    }
+    .card-gateway {
+      background: var(--color-card);
+      max-width: 520px;
+      width: 100%;
+      padding: 44px 36px;
+      border-radius: var(--radius-2xl);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+      border: 1px solid var(--color-border);
+      position: relative;
+      overflow: hidden;
+    }
+    .badge-super-admin {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--color-primary-light);
+      border: 1px solid rgba(15, 118, 110, 0.3);
+      border-radius: 999px;
+      margin-bottom: 20px;
+      color: var(--color-primary);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 1.65rem;
+      color: var(--color-navy);
+      margin: 0 0 12px 0;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    p {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      margin: 0 auto 28px auto;
+      line-height: 1.6;
+      max-width: 440px;
+    }
+    .actions-gateway {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .btn-portal {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+      width: 100%;
+    }
+    .btn-portal-primary {
+      background: var(--color-primary);
+      color: #FFFFFF !important;
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+    }
+    .btn-portal-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-portal-secondary {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--color-navy) !important;
+      border-color: var(--color-border);
+    }
+    .btn-portal-secondary:hover {
+      background: rgba(148, 163, 184, 0.2);
+      transform: translateY(-1px);
+    }
+    .portal-divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 18px 0;
+    }
+    .btn-portal-signout {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #EF4444 !important;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-portal-signout:hover {
+      background: rgba(239, 68, 68, 0.16);
+      transform: translateY(-1px);
+    }
+  </style>
 </head>
-<body style="min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background-color:var(--color-bg); padding:var(--space-6); text-align:center;">
+<body>
 
-  <div class="card" style="max-width:540px; padding:var(--space-10); border-radius:var(--radius-2xl);">
-    <div style="font-size:4.5rem; font-weight:800; color:var(--color-primary); line-height:1; margin-bottom:var(--space-4);">
-      404
-    </div>
-    <h1 style="font-size:var(--text-2xl); color:var(--color-navy); margin-bottom:var(--space-2);">
-      Resource or Page Not Found
-    </h1>
-    <p style="font-size:var(--text-base); color:var(--color-text-secondary); margin-bottom:var(--space-8); line-height:1.6;">
-      The page you were looking for doesn't exist, has been moved, or requires higher institutional authorization privileges.
-    </p>
-
-    <div style="display:flex; justify-content:center; gap:var(--space-3); flex-wrap:wrap;">
-      <a href="index.html" class="btn btn-primary">
-        Back to Home
-      </a>
-      <a href="student-dashboard.html" class="btn btn-secondary">
-        Student Dashboard
-      </a>
-      <a href="admin-dashboard.html" class="btn btn-secondary">
-        Admin Desk
-      </a>
-    </div>
+  <!-- Top Right Theme Switcher -->
+  <div class="top-controls">
+    <div data-theme-toggle-slot data-size="sm" style="display:inline-flex; align-items:center;"></div>
   </div>
 
+  <div class="card card-gateway">
+    <!-- Super Admin Security Badge -->
+    <div class="badge-super-admin">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Platform Super Admin Gateway
+    </div>
+
+    <h1>Super Admin Command &amp; Access Hub</h1>
+    <p>
+      Centralized authorization and access gateway. Platform Super Admins can manage all campus resolution workspaces, inspect institutional consoles, and oversee global system operations.
+    </p>
+
+    <!-- Master Access Navigation Buttons -->
+    <div class="actions-gateway">
+      <!-- Super Admin Console (Primary) -->
+      <a href="super-admin/dashboard/index.html" class="btn-portal btn-portal-primary" id="linkSuperAdmin">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+        </svg>
+        Open Super Admin Console
+      </a>
+
+      <!-- Institute Panel -->
+      <a href="admin-dashboard.html" class="btn-portal btn-portal-secondary" id="linkAdminDesk">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Open Institute Panel (Campus Complaints)
+      </a>
+    </div>
+
+    <div class="portal-divider"></div>
+
+    <!-- Sign Out to Main Login / Register Dashboard -->
+    <button type="button" class="btn-portal-signout" id="portalSignOutBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Sign Out to Main Login &amp; Register
+    </button>
+  </div>
+
+  <script>
+    // Dynamically adjust root prefix for nested path resolution
+    (function() {
+      const path = (window.location.pathname || '').replace(/\\/g, '/');
+      let prefix = '';
+      if (path.includes('/super-admin/dashboard/') || path.includes('/super-admin/login/')) {
+        prefix = '../../';
+      } else if (path.includes('/super-admin/')) {
+        prefix = '../';
+      }
+
+      const linkAdmin = document.getElementById('linkAdminDesk');
+      const linkSuper = document.getElementById('linkSuperAdmin');
+      const signOutBtn = document.getElementById('portalSignOutBtn');
+
+      if (linkAdmin) linkAdmin.href = `${prefix}admin-dashboard.html`;
+      if (linkSuper) linkSuper.href = `${prefix}super-admin/dashboard/index.html`;
+
+      if (signOutBtn) {
+        signOutBtn.addEventListener('click', async function(e) {
+          e.preventDefault();
+          try {
+            if (window.proofVoiceApi && typeof window.proofVoiceApi.logout === 'function') {
+              await window.proofVoiceApi.logout();
+            }
+          } catch (err) {}
+          try {
+            localStorage.clear();
+            sessionStorage.clear();
+          } catch (e) {}
+          window.location.replace(`${prefix}login.html`);
+        });
+      }
+    })();
+  </script>
   <script src="js/data-store.js"></script>
   <script src="js/api-client.js"></script>
   <script src="js/app.js"></script>

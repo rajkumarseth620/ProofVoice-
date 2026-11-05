@@ -24,13 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function resolveAdminContext(filter) {
   if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
-    const user = window.proofVoiceApi.getStoredUser() || await window.proofVoiceApi.getCurrentUser();
-    const instObj = window.proofVoiceDb.getInstitution(user.institutionId) || {};
-    const complaints = await window.proofVoiceApi.getComplaints(filter || {}, 'admin');
+    let user = window.proofVoiceApi.getStoredUser();
+    if (!user && typeof window.proofVoiceApi.getCurrentUser === 'function') {
+      try {
+        user = await window.proofVoiceApi.getCurrentUser();
+      } catch (e) {}
+    }
+    user = user || {};
+    const instObj = (window.proofVoiceDb && user.institutionId) ? (window.proofVoiceDb.getInstitution(user.institutionId) || {}) : {};
+    let complaints = [];
+    try {
+      complaints = await window.proofVoiceApi.getComplaints(filter || {}, 'admin');
+    } catch (e) {
+      console.warn('Failed to fetch admin complaints:', e);
+    }
+    if (!Array.isArray(complaints)) complaints = [];
     return {
       user,
       institution: {
-        name: user.institutionName || instObj.name || 'Apex Institute of Technology',
+        name: user.institutionName || instObj.name || 'Campus Administration Workspace',
         departments: (instObj.departments && instObj.departments.length > 0) ? instObj.departments : [
           'Estate & Maintenance',
           'Hostel Administration',
@@ -52,10 +64,10 @@ async function resolveAdminContext(filter) {
       complaints
     };
   }
-  const user = window.proofVoiceDb.getCurrentUser();
-  const institution = window.proofVoiceDb.getInstitution(user.institutionId);
-  const complaints = window.proofVoiceDb.getComplaints(filter || {}, 'admin');
-  return { user, institution, complaints };
+  const user = (window.proofVoiceDb ? window.proofVoiceDb.getCurrentUser() : null) || {};
+  const institution = (window.proofVoiceDb && user.institutionId) ? (window.proofVoiceDb.getInstitution(user.institutionId) || {}) : { name: 'Campus Administration Workspace' };
+  const complaints = (window.proofVoiceDb ? window.proofVoiceDb.getComplaints(filter || {}, 'admin') : []) || [];
+  return { user, institution, complaints: Array.isArray(complaints) ? complaints : [] };
 }
 
 async function loadAdminDashboard() {
@@ -95,6 +107,65 @@ async function loadAdminDashboard() {
   document.getElementById('adminStatReview').textContent = underReview;
   document.getElementById('adminStatProgress').textContent = inProgress;
   document.getElementById('adminStatResolved').textContent = resolved;
+
+  // Check for pending staff/administrator access requests
+  try {
+    let adminReqs = [];
+    if (window.proofVoiceApi && typeof window.proofVoiceApi.getAdminAccessRequests === 'function') {
+      adminReqs = await window.proofVoiceApi.getAdminAccessRequests() || [];
+    } else if (window.proofVoiceDb) {
+      adminReqs = window.proofVoiceDb.getAdminRequests() || [];
+    }
+    const pendingReqs = (adminReqs || []).filter(r => (r.status || '').toUpperCase() === 'PENDING');
+    const existingBanner = document.getElementById('pendingAdminReqsAlert');
+    if (pendingReqs.length > 0) {
+      if (!existingBanner) {
+        const banner = document.createElement('div');
+        banner.id = 'pendingAdminReqsAlert';
+        banner.className = 'alert alert-info';
+        banner.style.cssText = 'margin-bottom:var(--space-6); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-left:4px solid var(--color-primary);';
+        banner.innerHTML = `
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:var(--color-primary-light); color:var(--color-primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px;">
+              👥
+            </div>
+            <div>
+              <strong style="color:var(--color-navy); font-size:14px;">Staff Administrator Requests Pending:</strong>
+              <div class="text-xs text-muted" style="margin-top:2px;">
+                ${pendingReqs.length} staff member(s) have requested administrator access to your institution. Review their credentials to approve or reject.
+              </div>
+            </div>
+          </div>
+          <a href="users.html?tab=requests" class="btn btn-primary btn-sm" style="white-space:nowrap;">
+            Review Access Requests (${pendingReqs.length}) →
+          </a>
+        `;
+        const statsGrid = document.getElementById('adminStatsGrid');
+        if (statsGrid && statsGrid.parentNode) {
+          statsGrid.parentNode.insertBefore(banner, statsGrid);
+        }
+      }
+    } else if (existingBanner) {
+      existingBanner.remove();
+    }
+
+    // Update sidebar link with pending badge if applicable
+    const usersSidebarLinks = document.querySelectorAll('a[href="users.html"]');
+    usersSidebarLinks.forEach(link => {
+      if (pendingReqs.length > 0) {
+        let b = link.querySelector('.sidebar-badge-requests');
+        if (!b) {
+          b = document.createElement('span');
+          b.className = 'badge sidebar-badge-requests';
+          b.style.cssText = 'margin-left:auto; background:var(--color-primary-light); color:var(--color-primary); font-size:10px; padding:2px 6px; border-radius:10px; font-weight:700;';
+          link.appendChild(b);
+        }
+        b.textContent = pendingReqs.length;
+      }
+    });
+  } catch (err) {
+    console.warn('[ProofVoice Dashboard] Failed to check pending admin requests:', err);
+  }
 
   // Render Charts with Chart.js
   if (typeof Chart !== 'undefined') {

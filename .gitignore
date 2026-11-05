@@ -52,6 +52,7 @@ htmlcov/
 staticfiles/
 media/
 _audit_backup/
+scratch/
 
 # Security Keys & Certificates
 *.pem

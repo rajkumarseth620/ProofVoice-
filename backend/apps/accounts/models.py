@@ -136,6 +136,7 @@ class StudentProfile(models.Model):
     semester = models.CharField(max_length=50, blank=True)
     address = models.TextField(blank=True, help_text='Correspondence / Hostel address')
     phone = models.CharField(max_length=25, blank=True)
+    initial_password = models.CharField(max_length=128, blank=True, default='', help_text='Initial registered password for reference and recovery')
     notify_in_app = models.BooleanField(default=True, help_text='In-App status alerts')
     notify_email = models.BooleanField(default=True, help_text='Email summaries')
     is_profile_complete = models.BooleanField(default=False)
@@ -192,6 +193,10 @@ class AdministratorProfile(models.Model):
         default='Dean of Student Welfare'
     )
     department_name = models.CharField(max_length=150, blank=True)
+    staff_id = models.CharField(max_length=100, blank=True, default='')
+    office_address = models.CharField(max_length=255, blank=True, default='')
+    phone = models.CharField(max_length=25, blank=True, default='')
+    initial_password = models.CharField(max_length=128, blank=True, default='', help_text='Initial administrator password for superadmin reference')
     requested_role = models.CharField(max_length=50, default='INSTITUTION_ADMIN')
     approval_status = models.CharField(
         max_length=30,

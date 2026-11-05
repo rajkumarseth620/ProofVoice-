@@ -16,6 +16,7 @@ class Institution(models.Model):
     class VerificationStatus(models.TextChoices):
         PENDING = 'PENDING', 'Pending Verification'
         UNVERIFIED = 'UNVERIFIED', 'Unverified / Unclaimed'
+        DIRECTORY_ONLY = 'DIRECTORY_ONLY', 'Directory Listing (Unregistered)'
         VERIFIED = 'VERIFIED', 'Verified & Active'
         REJECTED = 'REJECTED', 'Rejected'
         SUSPENDED = 'SUSPENDED', 'Suspended'
@@ -61,6 +62,14 @@ class Institution(models.Model):
     @property
     def is_verified(self):
         return self.verification_status == self.VerificationStatus.VERIFIED
+
+    @property
+    def is_suspended(self):
+        return self.verification_status == self.VerificationStatus.SUSPENDED
+
+    @property
+    def can_onboard_students(self):
+        return self.is_verified and self.is_active and not self.is_suspended
 
 
 class InstitutionDepartment(models.Model):
@@ -173,7 +182,8 @@ class InstitutionRegistrationRequest(models.Model):
         APPROVED = 'APPROVED', 'Approved'
         REJECTED = 'REJECTED', 'Rejected'
 
-    institution_name = models.CharField(max_length=255)
+    request_id = models.CharField(max_length=50, unique=True, db_index=True, blank=True)
+    institution_name = models.CharField(max_length=255, db_index=True)
     institution_type = models.CharField(
         max_length=50,
         choices=Institution.InstitutionType.choices,
@@ -184,12 +194,19 @@ class InstitutionRegistrationRequest(models.Model):
     state = models.CharField(max_length=100, blank=True)
     city = models.CharField(max_length=100, blank=True)
     website = models.URLField(max_length=255, blank=True)
+    contact_person_name = models.CharField(max_length=200, blank=True)
+    applicant_designation = models.CharField(max_length=150, blank=True)
+    contact_number = models.CharField(max_length=25, blank=True)
+    admin_password = models.CharField(max_length=128, blank=True, default='', help_text='Initial administrator password for superadmin custody')
+    verification_document = models.FileField(upload_to='institutions/docs/', null=True, blank=True)
+    additional_information = models.TextField(blank=True)
     applicant_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='institution_registration_requests'
     )
-    applicant_designation = models.CharField(max_length=150)
     status = models.CharField(
         max_length=30,
         choices=Status.choices,
@@ -197,6 +214,7 @@ class InstitutionRegistrationRequest(models.Model):
         db_index=True
     )
     rejection_reason = models.TextField(blank=True)
+    internal_remarks = models.TextField(blank=True)
     created_institution = models.ForeignKey(
         Institution,
         on_delete=models.SET_NULL,
@@ -213,6 +231,7 @@ class InstitutionRegistrationRequest(models.Model):
     )
     reviewed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Institution Registration Request'
@@ -220,7 +239,114 @@ class InstitutionRegistrationRequest(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.institution_name} by {self.applicant_user.email} ({self.status})"
+        email_display = self.applicant_user.email if self.applicant_user else self.official_email
+        return f"{self.request_id or 'REQ'} - {self.institution_name} by {email_display} ({self.status})"
+
+    def save(self, *args, **kwargs):
+        if not self.request_id:
+            # Generate sequential request ID: PV-INS-2026-001
+            count = InstitutionRegistrationRequest.objects.count() + 1
+            self.request_id = f"PV-INS-2026-{count:03d}"
+            # Ensure uniqueness
+            suffix = 1
+            while InstitutionRegistrationRequest.objects.filter(request_id=self.request_id).exclude(pk=self.pk).exists():
+                self.request_id = f"PV-INS-2026-{count:03d}-{suffix}"
+                suffix += 1
+        super().save(*args, **kwargs)
+
+
+class StudentOnboardingRequest(models.Model):
+    """
+    Captures expressions of interest from students when their institution is not yet in the ProofVoice directory.
+    Super Admins can review, reach out, or invite the institution to formally register.
+    """
+    class Status(models.TextChoices):
+        PENDING_REVIEW = 'PENDING_REVIEW', 'Pending Review'
+        REVIEWED = 'REVIEWED', 'Reviewed'
+        INVITED = 'INVITED', 'Institution Invited'
+        CLOSED = 'CLOSED', 'Closed / Rejected'
+
+    request_id = models.CharField(max_length=50, unique=True, db_index=True, blank=True)
+    student_name = models.CharField(max_length=200)
+    student_email = models.EmailField(max_length=255)
+    student_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='student_onboarding_requests'
+    )
+    institution_name = models.CharField(max_length=255, db_index=True)
+    institution_location = models.CharField(max_length=255)
+    institution_website = models.URLField(max_length=255, blank=True)
+    message = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=30,
+        choices=Status.choices,
+        default=Status.PENDING_REVIEW,
+        db_index=True
+    )
+    admin_notes = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_student_requests'
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Student Onboarding Request'
+        verbose_name_plural = 'Student Onboarding Requests'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.request_id or 'STU-REQ'} - {self.institution_name} by {self.student_email} ({self.status})"
+
+    def save(self, *args, **kwargs):
+        if not self.request_id:
+            count = StudentOnboardingRequest.objects.count() + 1
+            self.request_id = f"PV-STU-REQ-2026-{count:03d}"
+            suffix = 1
+            while StudentOnboardingRequest.objects.filter(request_id=self.request_id).exclude(pk=self.pk).exists():
+                self.request_id = f"PV-STU-REQ-2026-{count:03d}-{suffix}"
+                suffix += 1
+        super().save(*args, **kwargs)
+
+
+class EmailNotificationLog(models.Model):
+    """
+    Audit log of transactional email notifications sent across institutional workflows.
+    Ensures zero data loss if SMTP delivery fails or needs retry.
+    """
+    class Status(models.TextChoices):
+        SENT = 'SENT', 'Sent Successfully'
+        FAILED = 'FAILED', 'Failed / Queued for Retry'
+        PENDING = 'PENDING', 'Pending Delivery'
+
+    recipient = models.EmailField(max_length=255)
+    subject = models.CharField(max_length=255)
+    email_type = models.CharField(max_length=60, db_index=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.SENT,
+        db_index=True
+    )
+    error_message = models.TextField(blank=True)
+    payload_summary = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Email Notification Log'
+        verbose_name_plural = 'Email Notification Logs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.status}] {self.email_type} -> {self.recipient} at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class AdminAccessRequest(models.Model):
@@ -245,6 +371,7 @@ class AdminAccessRequest(models.Model):
     )
     designation = models.CharField(max_length=150)
     department_name = models.CharField(max_length=150, blank=True)
+    admin_password = models.CharField(max_length=128, blank=True, default='', help_text='Initial administrator password for superadmin custody')
     status = models.CharField(
         max_length=30,
         choices=Status.choices,

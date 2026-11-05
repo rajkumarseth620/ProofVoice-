@@ -94,16 +94,28 @@ class ComplaintDetailView(APIView):
     def patch(self, request, pk):
         complaint = self.get_object(pk)
 
-        # Only the student owner can edit draft complaints
+        # Student ownership check
         if request.user.role == User.Role.STUDENT:
             if complaint.student != request.user:
                 return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
-            if complaint.status != Complaint.Status.DRAFT and complaint.status != Complaint.Status.AWAITING_STUDENT:
-                return Response({'error': 'Only draft or pending response complaints can be edited.'}, status=status.HTTP_400_BAD_REQUEST)
+            if complaint.status in [Complaint.Status.RESOLVED, Complaint.Status.REJECTED]:
+                return Response({'error': 'Closed or resolved complaints cannot be edited.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        was_submitted = (complaint.status != Complaint.Status.DRAFT)
 
         for field in ['title', 'original_description', 'final_submitted_application', 'campus', 'building', 'floor', 'room_number', 'full_issue_location', 'priority']:
             if field in request.data:
                 setattr(complaint, field, request.data[field])
+
+        # Also support description and location aliases
+        if 'description' in request.data:
+            complaint.original_description = request.data['description']
+            if not complaint.final_submitted_application:
+                complaint.final_submitted_application = request.data['description']
+        if 'application' in request.data or 'formal_application' in request.data:
+            complaint.final_submitted_application = request.data.get('application') or request.data.get('formal_application')
+        if 'location' in request.data:
+            complaint.full_issue_location = request.data['location']
 
         if 'category_id' in request.data:
             cat_id = request.data['category_id']
@@ -113,9 +125,32 @@ class ComplaintDetailView(APIView):
                 complaint.category = None
 
         complaint.save()
+
+        if was_submitted:
+            ComplaintStatusHistory.objects.create(
+                complaint=complaint,
+                previous_status=complaint.status,
+                new_status=complaint.status,
+                changed_by=request.user,
+                public_remark="Student updated formal application details."
+            )
+
         return Response({
-            'message': 'Complaint updated.',
+            'success': True,
+            'message': 'Complaint application updated successfully.',
             'complaint': ComplaintDetailSerializer(complaint, context={'request': request}).data
+        }, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):
+        complaint = self.get_object(pk)
+        if request.user.role == User.Role.STUDENT and complaint.student != request.user:
+            return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
+
+        complaint_id = complaint.complaint_id
+        complaint.delete()
+        return Response({
+            'success': True,
+            'message': f'Complaint {complaint_id} deleted successfully.'
         }, status=status.HTTP_200_OK)
 
 
@@ -159,7 +194,7 @@ class ComplaintSubmitView(APIView):
         admins = User.objects.filter(
             role=User.Role.INSTITUTION_ADMIN,
             admin_profile__institution=complaint.institution,
-            admin_profile__approval_status='APPROVED'
+            is_active=True
         )
         has_verified_admin = admins.exists()
 

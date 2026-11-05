@@ -1,5 +1,6 @@
 /* ProofVoice - Global Base Styles & Utility Classes */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('theme.css');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -388,6 +389,14 @@ textarea.form-control {
   padding-right: 2.75rem;
 }
 
+/* Suppress Microsoft Edge / Internet Explorer native password reveal button to prevent overlapping duplicates */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .pwd-toggle-btn {
   position: absolute;
   right: 0.75rem;
@@ -399,6 +408,9 @@ textarea.form-control {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
+  user-select: none;
+  touch-action: manipulation;
 }
 .pwd-toggle-btn:hover {
   color: var(--color-navy);

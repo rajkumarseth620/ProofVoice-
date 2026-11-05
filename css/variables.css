@@ -1,59 +1,59 @@
 /* ProofVoice Design System - Variables & Tokens */
 :root {
-  /* Brand Colors */
-  --color-navy: #101828;
-  --color-primary: #3157D5;
-  --color-primary-hover: #2745B0;
-  --color-primary-light: #EEF2FF;
-  --color-primary-subtle: rgba(49, 87, 213, 0.08);
-  --color-accent-violet: #7457F5;
-  --color-accent-violet-light: #F4F1FE;
+  /* Brand Colors - Teal & Off-White Palette */
+  --color-navy: #134E4A;
+  --color-primary: #0F766E;
+  --color-primary-hover: #115E59;
+  --color-primary-light: #CCFBF1;
+  --color-primary-subtle: rgba(15, 118, 110, 0.08);
+  --color-accent-violet: #0F766E;
+  --color-accent-violet-light: #CCFBF1;
   
   /* Neutral Palette */
-  --color-bg: #F6F8FC;
+  --color-bg: #F8FAF9;
   --color-surface: #FFFFFF;
-  --color-surface-alt: #F9FAFB;
-  --color-border: #E5EAF2;
-  --color-border-subtle: #EDF2F7;
-  --color-border-strong: #D0D5DD;
+  --color-surface-alt: #F1F5F4;
+  --color-border: #E2E8F0;
+  --color-border-subtle: #EDF2F1;
+  --color-border-strong: #CBD5E1;
   
   /* Text Colors */
-  --color-text-primary: #172033;
-  --color-text-secondary: #667085;
-  --color-text-muted: #98A2B3;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
   --color-text-inverted: #FFFFFF;
   
   /* Status Colors */
-  --color-success: #159B72;
-  --color-success-bg: #EAF8F3;
-  --color-success-border: #A6E5D1;
+  --color-success: #16A34A;
+  --color-success-bg: #DCFCE7;
+  --color-success-border: #86EFAC;
   --color-warning: #D97706;
   --color-warning-bg: #FEF3C7;
   --color-warning-border: #FCD34D;
-  --color-error: #DC3545;
-  --color-error-bg: #FDE8E8;
-  --color-error-border: #F8B4B4;
-  --color-info: #0284C7;
-  --color-info-bg: #E0F2FE;
-  --color-info-border: #BAE6FD;
+  --color-error: #DC2626;
+  --color-error-bg: #FEE2E2;
+  --color-error-border: #FCA5A5;
+  --color-info: #0F766E;
+  --color-info-bg: #CCFBF1;
+  --color-info-border: #99F6E4;
   
   /* Status Tag Tokens */
-  --status-draft-bg: #F2F4F7;
+  --status-draft-bg: #F1F5F9;
   --status-draft-text: #475467;
-  --status-submitted-bg: #EEF4FF;
-  --status-submitted-text: #3157D5;
-  --status-under-review-bg: #FEF6EE;
-  --status-under-review-text: #C4320A;
-  --status-in-progress-bg: #FDF2FA;
-  --status-in-progress-text: #C11574;
-  --status-awaiting-bg: #F4F3FF;
-  --status-awaiting-text: #5925DC;
-  --status-resolved-bg: #ECFDF3;
-  --status-resolved-text: #027A48;
-  --status-rejected-bg: #FEF3F2;
-  --status-rejected-text: #B42318;
-  --status-reopened-bg: #FFF6ED;
-  --status-reopened-text: #B93815;
+  --status-submitted-bg: #CCFBF1;
+  --status-submitted-text: #0F766E;
+  --status-under-review-bg: #FEF3C7;
+  --status-under-review-text: #D97706;
+  --status-in-progress-bg: #EDE9FE;
+  --status-in-progress-text: #7C3AED;
+  --status-awaiting-bg: #EDE9FE;
+  --status-awaiting-text: #7C3AED;
+  --status-resolved-bg: #DCFCE7;
+  --status-resolved-text: #16A34A;
+  --status-rejected-bg: #FEE2E2;
+  --status-rejected-text: #DC2626;
+  --status-reopened-bg: #FFFBEB;
+  --status-reopened-text: #B45309;
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -104,8 +104,8 @@
   --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.1), 0 2px 4px -2px rgba(16, 24, 40, 0.06);
   --shadow-lg: 0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
   --shadow-xl: 0 20px 24px -4px rgba(16, 24, 40, 0.08), 0 8px 8px -4px rgba(16, 24, 40, 0.03);
-  --shadow-focus: 0 0 0 4px rgba(49, 87, 213, 0.18);
-  --shadow-focus-error: 0 0 0 4px rgba(220, 53, 69, 0.18);
+  --shadow-focus: 0 0 0 4px rgba(15, 118, 110, 0.2);
+  --shadow-focus-error: 0 0 0 4px rgba(220, 38, 38, 0.2);
   
   /* Layout */
   --sidebar-width: 260px;

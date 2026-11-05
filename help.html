@@ -1,342 +1,835 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Help Center & FAQ | ProofVoice</title>
+
   <meta name="description" content="Guides and frequently asked questions for using ProofVoice voice-based institutional complaint and resolution management.">
+
   <link rel="stylesheet" href="css/variables.css">
+
   <link rel="stylesheet" href="css/global.css">
+
   <link rel="stylesheet" href="css/components.css">
+
   <link rel="stylesheet" href="css/landing.css">
+
   <link rel="stylesheet" href="css/responsive.css">
+
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
+
 <body>
 
+
+
   <!-- Site Navigation -->
+
   <header class="site-header">
+
     <div class="container">
+
       <nav class="site-nav">
+
         <a href="index.html" class="brand-logo">
+
           <div class="brand-icon-wrapper">
+
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+
               <line x1="12" y1="19" x2="12" y2="22"/>
+
             </svg>
+
           </div>
+
           <div class="brand-text">
+
             <span class="brand-name">Proof<span>Voice</span></span>
+
             <span class="brand-sub">Campus Resolution</span>
+
           </div>
+
         </a>
+
         <ul class="nav-links">
+
           <li><a href="index.html" class="nav-link">Home</a></li>
+
           <li><a href="index.html#how-it-works" class="nav-link">How It Works</a></li>
+
           <li><a href="index.html#features" class="nav-link">Features</a></li>
+
           <li><a href="help.html" class="nav-link active">FAQ & Help</a></li>
+
         </ul>
+
         <div class="nav-actions">
+
           <a href="login.html" class="btn btn-ghost btn-sm">Log In</a>
+
           <a href="new-complaint.html" class="btn btn-primary btn-sm">Report an Issue</a>
+
         </div>
+
       </nav>
+
     </div>
+
   </header>
 
+
+
   <main style="padding: var(--space-12) 0 var(--space-20);">
+
     <div class="container container-narrow">
-      <div class="section-header" style="margin-bottom: var(--space-8);">
-        <span class="sub-badge">Support Knowledge Base</span>
-        <h1>How can we help you?</h1>
-        <p>Ask our intelligent campus AI assistant or browse common questions about voice reporting, application review, and tracking resolution timelines.</p>
+
+      <!-- Authenticated Portal Banner (shown when logged in) -->
+
+      <div id="authenticatedHelpBanner" style="display:none; background:#EEF2FF; border:1px solid #C7D2FE; border-radius:var(--radius-lg); padding:16px 20px; margin-bottom:var(--space-6); align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+
+        <div style="display:flex; align-items:center; gap:12px;">
+
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--color-primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;" id="authBannerAvatar">ST</div>
+
+          <div>
+
+            <div style="font-weight:700; color:var(--color-navy); font-size:14px;">Signed in as <span id="authBannerName">Student</span></div>
+
+            <div style="font-size:12px; color:var(--color-text-secondary);">Access your dedicated in-dashboard personal assistant with full complaint tracking.</div>
+
+          </div>
+
+        </div>
+
+        <a href="student-help.html" class="btn btn-primary btn-sm" id="authBannerLink" style="font-weight:600;">Go to Student Help & Support →</a>
+
       </div>
+
+
+
+      <div class="section-header" style="margin-bottom: var(--space-8);">
+
+        <span class="sub-badge">Support Knowledge Base</span>
+
+        <h1>How can we help you?</h1>
+
+        <p>Ask our intelligent campus AI assistant or browse common questions about voice reporting, application review, and tracking resolution timelines.</p>
+
+      </div>
+
+
 
       <!-- Interactive AI Campus Assistant Widget -->
+
       <div class="ai-assistant-container" id="aiAssistantWidget">
+
         <div class="ai-assistant-card">
+
           <!-- Assistant Header -->
+
           <div class="ai-assistant-header">
+
             <div class="ai-header-title">
+
               <div class="ai-bot-avatar">
+
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+
                   <line x1="12" y1="19" x2="12" y2="22"/>
+
                 </svg>
+
               </div>
+
               <div class="ai-header-info">
+
                 <h2>
+
                   ProofVoice Campus AI Assistant
+
                   <span class="ai-badge-gnani">Gnani AI Voice</span>
+
                   <span class="ai-status-dot" title="Assistant is online"></span>
+
                 </h2>
+
                 <p>Ask questions via text or voice, track tickets, or understand redressal rules</p>
+
               </div>
+
             </div>
+
+
 
             <div class="ai-header-controls">
+
               <!-- Mode Toggle -->
+
               <div class="ai-mode-toggle">
+
                 <button type="button" class="ai-mode-btn active" id="aiModeText">
+
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+
                   </svg>
+
                   Text Chat
+
                 </button>
+
                 <button type="button" class="ai-mode-btn" id="aiModeVoice">
+
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+
                   </svg>
+
                   Voice Mode
+
                 </button>
+
               </div>
 
-              <!-- Language Select for Speech -->
-              <select class="ai-lang-select" id="aiVoiceLangSelect" title="Voice Language">
+
+
+              <!-- Language Select for Speech & Chat -->
+
+              <select class="ai-lang-select" id="aiVoiceLangSelect" title="Voice & Chat Language">
                 <option value="en-IN" selected>English (IN)</option>
                 <option value="hi-IN">Hindi (हिंदी)</option>
-                <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
-                <option value="ta-IN">Tamil (தமிழ்)</option>
-                <option value="te-IN">Telugu (తెలుగు)</option>
               </select>
 
+
+
               <!-- Reset / Clear -->
+
               <button type="button" class="ai-action-btn" id="aiClearChatBtn" title="Start a new conversation">
+
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                   <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+
                   <path d="M3 3v5h5"/>
+
                 </svg>
+
                 New Chat
+
               </button>
+
             </div>
+
           </div>
+
+
 
           <!-- Audio Voice Player Bar (Hidden by default) -->
+
           <div class="ai-voice-player hidden" id="aiVoicePlayer">
+
             <div class="ai-player-info">
+
               <div class="ai-sound-waves">
+
                 <span></span><span></span><span></span><span></span>
+
               </div>
+
               <span id="aiPlayerStatus" style="font-weight: 500;">AI Voice: Speaking...</span>
+
             </div>
+
             <div class="ai-player-controls">
+
               <button type="button" class="ai-ctrl-btn" id="aiPlayerPlayPause">
+
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+
                   <rect x="6" y="4" width="4" height="16"/>
+
                   <rect x="14" y="4" width="4" height="16"/>
+
                 </svg>
+
                 Pause / Play
+
               </button>
+
               <button type="button" class="ai-ctrl-btn" id="aiPlayerStop">
+
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+
                   <rect x="5" y="5" width="14" height="14"/>
+
                 </svg>
+
                 Stop
+
               </button>
+
             </div>
+
           </div>
+
+
 
           <!-- Live Voice Recording Bar (Hidden by default) -->
+
           <div class="ai-recording-strip hidden" id="aiRecStrip">
+
             <div class="ai-rec-live">
+
               <span class="ai-rec-dot"></span>
+
               <span>Recording Voice...</span>
+
               <span id="aiRecTimer" style="font-weight: 700; color: #DC2626; margin-left: 6px;">00:00 / 02:00</span>
+
             </div>
+
             <div class="ai-rec-transcript" id="aiRecTranscript">
+
               Listening... Speak your question now.
+
             </div>
+
             <div class="ai-rec-actions">
-              <button type="button" class="btn btn-sm btn-primary" id="aiStopRecBtn" style="padding: 4px 10px; font-size: 11px;">Stop & Send</button>
+
+              <button type="button" class="btn btn-sm btn-primary" id="aiStopRecBtn" style="padding: 4px 10px; font-size: 11px;">Done Speaking (Review)</button>
+
               <button type="button" class="btn btn-sm btn-ghost" id="aiCancelRecBtn" style="padding: 4px 8px; font-size: 11px; color: #64748B;">Cancel</button>
+
             </div>
+
           </div>
+
+
 
           <!-- Chat Conversation Body -->
+
           <div class="ai-chat-body" id="aiChatBody">
+
             <!-- Messages rendered dynamically -->
+
           </div>
+
+
 
           <!-- Chat Input Bar -->
+
           <div class="ai-input-bar">
+
             <input type="text" id="aiTextInput" class="ai-text-input" placeholder="Ask anything about ProofVoice or your complaints..." autocomplete="off">
+
             <button type="button" id="aiMicBtn" class="ai-mic-btn" title="Speak your question">
+
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+
                 <line x1="12" y1="19" x2="12" y2="22"/>
+
               </svg>
+
             </button>
+
             <button type="button" id="aiSendBtn" class="ai-send-btn" title="Send Question">
+
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                 <line x1="22" y1="2" x2="11" y2="13"/>
+
                 <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+
               </svg>
+
             </button>
+
           </div>
+
         </div>
+
       </div>
+
+
 
       <!-- FAQ Section Divider & Filter -->
+
       <div style="display: flex; align-items: center; gap: 16px; margin: var(--space-8) 0 var(--space-6);">
+
         <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+
         <span style="font-size: var(--text-xs); font-weight: var(--weight-bold); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary);">Or Browse Frequently Asked Questions</span>
+
         <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+
       </div>
+
+
 
       <!-- FAQ Search Box -->
+
       <div style="margin-bottom: var(--space-6); position: relative;">
+
         <input type="text" id="faqSearchInput" class="form-control" placeholder="Search questions or keywords (e.g. voice, review, status, tracking)..." style="padding: 0.875rem 1.25rem; font-size: var(--text-base); border-radius: var(--radius-xl);">
+
       </div>
+
+
 
       <!-- FAQ Accordion -->
+
       <div class="accordion" id="faqAccordion">
 
+
+
         <!-- Item 1 -->
+
         <div class="accordion-item is-open">
+
           <button class="accordion-trigger">
+
             <span>How do I record a voice-based complaint?</span>
+
             <span class="accordion-icon">▼</span>
+
           </button>
+
           <div class="accordion-content">
+
             Navigate to the <strong>Report an Issue</strong> page and ensure the "Voice Input" tab is active. Click the microphone button and grant your browser microphone permission when prompted. Describe your concern naturally. When finished speaking, tap the button again or click "Stop Recording". ProofVoice will convert your speech to text and let you edit the transcript before generating your formal application.
+
           </div>
+
         </div>
+
+
 
         <!-- Item 2 -->
+
         <div class="accordion-item">
+
           <button class="accordion-trigger">
+
             <span>Can I edit my transcription before submitting?</span>
+
             <span class="accordion-icon">▼</span>
+
           </button>
+
           <div class="accordion-content">
+
             Yes, absolutely. You have complete control. The transcription box is an editable text area where you can fix any misheard words, add room numbers, or append more details before clicking "Generate Formal Application".
+
           </div>
+
         </div>
+
+
 
         <!-- Item 3 -->
+
         <div class="accordion-item">
+
           <button class="accordion-trigger">
+
             <span>Why do I need to review my application before submission?</span>
+
             <span class="accordion-icon">▼</span>
+
           </button>
+
           <div class="accordion-content">
+
             ProofVoice strictly requires explicit student confirmation. Before any complaint is formally transmitted to institutional authorities, you are presented with the full structured grievance letter. You can read it, listen to it using the "Read Aloud" button, or edit it. The system will never submit a complaint on your behalf without your explicit checkbox confirmation.
+
           </div>
+
         </div>
+
+
 
         <!-- Item 4 -->
+
         <div class="accordion-item">
+
           <button class="accordion-trigger">
+
             <span>What do the different complaint statuses mean?</span>
+
             <span class="accordion-icon">▼</span>
+
           </button>
+
           <div class="accordion-content">
+
             <ul style="padding-left: 20px; line-height: 1.8;">
+
               <li><strong>Submitted:</strong> Your formal application has been logged and assigned an authoritative tracking ID.</li>
+
               <li><strong>Under Review:</strong> Institutional administrators have received the grievance and are inspecting the details.</li>
+
               <li><strong>In Progress:</strong> A specific department (e.g., IT Services, Sanitation) or technician has been assigned and is actively working on the fix.</li>
+
               <li><strong>Awaiting Student:</strong> The administration has requested clarifying information or confirmation from you.</li>
+
               <li><strong>Resolved:</strong> Work has been completed and verified by the department.</li>
+
               <li><strong>Rejected:</strong> The issue could not be processed, with a mandatory recorded reason provided.</li>
+
               <li><strong>Reopened:</strong> The issue recurred or resolution was incomplete according to policy.</li>
+
             </ul>
+
           </div>
+
         </div>
+
+
 
         <!-- Item 5 -->
+
         <div class="accordion-item">
+
           <button class="accordion-trigger">
+
             <span>How does ProofVoice support multiple institutions?</span>
+
             <span class="accordion-icon">▼</span>
+
           </button>
+
           <div class="accordion-content">
+
             ProofVoice features a multi-tenant backend architecture. When you register with your university or college, your account is bound to your specific institutional workspace. Administrator accounts can only view and manage complaints from their own campus. Complaint records are isolated through server-side authorization.
+
           </div>
+
         </div>
+
+
 
         <!-- Item 6 -->
+
         <div class="accordion-item">
+
           <button class="accordion-trigger">
+
             <span>How do I listen to updates with Text-to-Speech?</span>
+
             <span class="accordion-icon">▼</span>
+
           </button>
+
           <div class="accordion-content">
+
             On the Complaint Details and Review pages, look for the <strong>Read Aloud</strong> button. Clicking this triggers the voice engine to read the formal application or administrative remarks aloud, ensuring accessibility for all campus members.
+
           </div>
+
         </div>
+
+
 
         <!-- Item 7 -->
+
         <div class="accordion-item">
+
           <button class="accordion-trigger">
+
             <span>How is my personal information protected?</span>
+
             <span class="accordion-icon">▼</span>
+
           </button>
+
           <div class="accordion-content">
+
             ProofVoice only collects necessary details such as your student identifier and campus contact email. Audio recordings are processed solely to generate the complaint text and are not retained indefinitely. Private internal administrator notes are strictly hidden from student views.
+
           </div>
+
+        </div>
+
+
+
+      </div>
+
+
+
+      <!-- System Operational Status Card -->
+
+      <div id="system-status" class="card" style="margin-top: var(--space-8); padding: var(--space-6); background: #F0FDF4; border: 1px solid #BBF7D0;">
+
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:var(--space-3);">
+
+          <div style="display:flex; align-items:center; gap:10px;">
+
+            <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#16A34A; box-shadow:0 0 0 4px rgba(22,163,74,0.2);"></span>
+
+            <h3 style="font-size: var(--text-base); color: #166534; margin: 0; font-weight:700;">
+
+              All Systems Operational
+
+            </h3>
+
+          </div>
+
+          <span style="font-size:12px; color:#15803D; font-weight:600; background:#DCFCE7; padding:4px 10px; border-radius:12px;">99.98% Platform Uptime</span>
+
+        </div>
+
+        <p style="font-size: var(--text-sm); color: #166534; line-height: 1.6; margin-bottom: 14px;">
+
+          All ProofVoice core services—including Multilingual AI Assistant, Speech-to-Text (STT), Text-to-Speech (TTS), and Grievance Processing pipelines—are fully operational and functioning normally.
+
+        </p>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; font-size:12px; color:#14532D;">
+
+          <div style="background:#FFFFFF; padding:8px 12px; border-radius:6px; border:1px solid #DCFCE7; display:flex; justify-content:space-between; align-items:center;">
+
+            <span>AI Conversational Engine</span>
+
+            <strong style="color:#16A34A;">Operational</strong>
+
+          </div>
+
+          <div style="background:#FFFFFF; padding:8px 12px; border-radius:6px; border:1px solid #DCFCE7; display:flex; justify-content:space-between; align-items:center;">
+
+            <span>Voice &amp; Audio Processing</span>
+
+            <strong style="color:#16A34A;">Operational</strong>
+
+          </div>
+
+          <div style="background:#FFFFFF; padding:8px 12px; border-radius:6px; border:1px solid #DCFCE7; display:flex; justify-content:space-between; align-items:center;">
+
+            <span>Grievance Database</span>
+
+            <strong style="color:#16A34A;">Operational</strong>
+
+          </div>
+
+          <div style="background:#FFFFFF; padding:8px 12px; border-radius:6px; border:1px solid #DCFCE7; display:flex; justify-content:space-between; align-items:center;">
+
+            <span>Multi-Tenant Auth</span>
+
+            <strong style="color:#16A34A;">Operational</strong>
+
+          </div>
+
         </div>
 
       </div>
 
-      <!-- Institutional Contact Box -->
-      <div class="card" style="margin-top: var(--space-10); padding: var(--space-6); background: var(--color-surface-alt);">
-        <h3 style="font-size: var(--text-base); color: var(--color-navy); margin-bottom: var(--space-2);">
-          Need further institutional assistance?
+
+
+      <!-- Help & Support Contact Box -->
+
+      <div class="card" style="margin-top: var(--space-6); padding: var(--space-6); background: var(--color-surface-alt); border-left: 4px solid var(--color-primary);">
+
+        <h3 style="font-size: var(--text-base); color: var(--color-navy); margin-bottom: var(--space-2); font-weight: 700;">
+
+          Help &amp; Support
+
         </h3>
-        <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;">
-          For institutional policy questions, please contact your university's Dean of Student Welfare or Grievance Redressal Committee directly through your campus portal.
+
+        <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-2);">
+
+          For assistance regarding:
+
         </p>
+
+        <ul style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.7; margin-bottom: var(--space-3); padding-left: 20px; list-style-type: disc;">
+
+          <li>Institutional Registration</li>
+
+          <li>Student Registration</li>
+
+          <li>Account Access</li>
+
+          <li>Technical Issues</li>
+
+          <li>Complaint Management</li>
+
+        </ul>
+
+        <p style="font-size: var(--text-sm); font-weight: 600; color: var(--color-navy); margin: 0;">
+
+                      <span style="display:inline-block; margin:6px 0; font-weight:600; color:var(--color-navy, #0F766E);">Support Email: <a href="mailto:proofvoice@support.ac.in" style="color:var(--color-primary, #14B8A6); font-weight:700; text-decoration:underline;">proofvoice@support.ac.in</a></span><br>          Campus Support Desk: Available Monday – Saturday, 09:00 – 18:00 IST through your institutional portal.
+
+        </p>
+
       </div>
+
     </div>
+
   </main>
 
+
+
   <!-- Footer -->
+
   <footer class="site-footer">
+
     <div class="container">
+
       <div class="footer-bottom">
+
         <div>© 2026 ProofVoice Platform. All rights reserved.</div>
+
         <div style="display:flex; gap:16px;">
+
           <a href="privacy.html" style="color:#64748B;">Privacy Policy</a>
+
           <a href="terms.html" style="color:#64748B;">Terms of Service</a>
+
         </div>
+
       </div>
+
     </div>
+
   </footer>
 
+
+
   <script src="js/data-store.js"></script>
+
   <script src="js/api-client.js"></script>
+
   <script src="js/app.js"></script>
+
   <script src="js/ai-chat-widget.js"></script>
+
   <script>
+
     document.addEventListener('DOMContentLoaded', () => {
+
       // Accordion toggle
+
       document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+
         trigger.addEventListener('click', () => {
+
           const item = trigger.closest('.accordion-item');
+
           item.classList.toggle('is-open');
+
         });
+
       });
+
+
 
       // FAQ Live Search Filter
+
       const search = document.getElementById('faqSearchInput');
+
       const items = document.querySelectorAll('.accordion-item');
 
-      search.addEventListener('input', () => {
-        const query = search.value.toLowerCase().trim();
-        items.forEach(item => {
-          const text = item.textContent.toLowerCase();
-          if (!query || text.includes(query)) {
-            item.style.display = 'block';
-            if (query) item.classList.add('is-open');
-          } else {
-            item.style.display = 'none';
-          }
+
+
+      if (search) {
+
+        search.addEventListener('input', () => {
+
+          const query = search.value.toLowerCase().trim();
+
+          items.forEach(item => {
+
+            const text = item.textContent.toLowerCase();
+
+            if (!query || text.includes(query)) {
+
+              item.style.display = 'block';
+
+              if (query) item.classList.add('is-open');
+
+            } else {
+
+              item.style.display = 'none';
+
+            }
+
+          });
+
         });
-      });
+
+      }
+
+
+
+      // Check authenticated state for banner
+
+      try {
+
+        const user = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser && window.proofVoiceApi.getStoredUser()) || (window.proofVoiceDb && window.proofVoiceDb.getCurrentUser());
+
+        if (user) {
+
+          const banner = document.getElementById('authenticatedHelpBanner');
+
+          const nameEl = document.getElementById('authBannerName');
+
+          const avatarEl = document.getElementById('authBannerAvatar');
+
+          const linkEl = document.getElementById('authBannerLink');
+
+          const isAdmin = user.role === 'admin' || user.backendRole === 'INSTITUTION_ADMIN';
+
+          if (banner) {
+
+            banner.style.display = 'flex';
+
+            if (nameEl) nameEl.textContent = user.fullName || user.full_name || (isAdmin ? 'Administrator' : 'Student');
+
+            if (avatarEl) avatarEl.textContent = user.avatar || (user.fullName ? user.fullName.slice(0, 2).toUpperCase() : (isAdmin ? 'AD' : 'ST'));
+
+            if (linkEl) {
+
+              linkEl.href = isAdmin ? 'admin-help.html' : 'student-help.html';
+
+              linkEl.textContent = isAdmin ? 'Go to Admin Help Desk →' : 'Go to Student Help & Support →';
+
+            }
+
+          }
+
+        }
+
+      } catch (e) {}
+
     });
+
   </script>
+
 </body>
+
 </html>
+

@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="auth-page">
 
@@ -17,7 +19,7 @@
     <!-- Left Brand Panel -->
     <div class="auth-side-panel">
       <div>
-        <a href="index.html" class="brand-logo" style="color: #FFFFFF;">
+        <a href="index.html#home" class="brand-logo" id="authLogoHomeLink" style="color: #FFFFFF;">
           <div class="brand-icon-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
@@ -70,19 +72,32 @@
     <!-- Right Form Panel -->
     <div class="auth-form-panel">
       <div class="auth-form-container">
+        <div style="margin-bottom:var(--space-4); display:flex; align-items:center; justify-content:space-between;">
+          <a href="index.html#home" class="auth-back-home-link" id="authBackToHomeBtn" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--color-primary); text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to Home
+          </a>
+          <div data-theme-toggle-slot data-size="sm"></div>
+        </div>
         <div class="auth-header">
           <h1>Sign In</h1>
           <p>Enter your institutional email credentials below.</p>
         </div>
 
         <!-- Role Selection Tabs (Informational Hint - Backend Enforces Permissions) -->
-        <div class="auth-role-tabs" role="tablist">
+        <div class="auth-role-tabs" role="tablist" style="display:grid; grid-template-columns:1fr 1fr 1fr;">
           <button type="button" class="auth-role-tab active" data-role="student" id="roleTabStudent">
             Student Member
           </button>
           <button type="button" class="auth-role-tab" data-role="admin" id="roleTabAdmin">
             Institution Admin
           </button>
+          <a href="super-admin/login/index.html" class="auth-role-tab" id="roleTabSuperAdmin" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:4px; cursor:pointer;" title="Open Dedicated Super Admin Login">
+            Super Admin
+          </a>
         </div>
 
         <form id="loginForm" novalidate>
@@ -132,6 +147,12 @@
           <span style="font-size:12px; margin-top:4px; display:inline-block;">
             Are you an institution official? <a href="institution-register.html">Request institutional access</a>
           </span>
+          <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--color-border); text-align: center;">
+            <a href="super-admin/login/index.html" id="superAdminLoginLink" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--color-primary); background: var(--color-primary-subtle); padding: 8px 20px; border-radius: 9999px; border: 1px solid var(--color-primary-light); text-decoration: none; transition: all 0.2s ease;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/></svg>
+              Platform Super Admin Login &rarr;
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -141,7 +162,52 @@
   <script src="js/api-client.js"></script>
   <script src="js/app.js"></script>
   <script>
+    // Safe URL sanitizer to prevent open redirect vulnerabilities
+    function getSafeRedirectUrl(rawTarget, userRole) {
+      const roleLower = (userRole || '').toLowerCase();
+      const isSuperAdmin = roleLower === 'platform_superadmin' || roleLower === 'superadmin';
+      const isInstAdmin = roleLower === 'admin' || roleLower === 'institution_admin';
+
+      if (!rawTarget) {
+        if (isSuperAdmin) return 'super-admin.html';
+        if (isInstAdmin) return 'admin-dashboard.html';
+        return 'student-dashboard.html';
+      }
+      try {
+        const decoded = decodeURIComponent(rawTarget).trim();
+        // Disallow protocol schemes and protocol-relative URLs
+        if (decoded.startsWith('//') || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(decoded)) {
+          if (isSuperAdmin) return 'super-admin.html';
+          if (isInstAdmin) return 'admin-dashboard.html';
+          return 'student-dashboard.html';
+        }
+        // Extract base target page
+        const targetPage = decoded.split('?')[0].split('#')[0].split('/').pop();
+        const superAdminPages = ['super-admin.html'];
+        const adminOnlyPages = ['admin-dashboard.html', 'admin-complaints.html', 'admin-complaint-details.html', 'departments.html', 'users.html', 'analytics.html', 'institution-settings.html', 'admin-profile.html', 'admin-notifications.html', 'admin-help.html'];
+        const studentOnlyPages = ['student-dashboard.html', 'new-complaint.html', 'review-complaint.html', 'my-complaints.html', 'student-profile.html', 'student-notifications.html', 'student-help.html'];
+
+        if (superAdminPages.includes(targetPage)) {
+          return isSuperAdmin ? decoded : 'student-dashboard.html';
+        }
+        if (!isInstAdmin && !isSuperAdmin && adminOnlyPages.includes(targetPage)) {
+          return 'student-dashboard.html';
+        }
+        if ((isInstAdmin || isSuperAdmin) && studentOnlyPages.includes(targetPage)) {
+          return isSuperAdmin ? 'super-admin.html' : 'admin-dashboard.html';
+        }
+        return decoded;
+      } catch (err) {
+        return 'student-dashboard.html';
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#authLogoHomeLink, #authBackToHomeBtn, .auth-back-home-link').forEach(btn => {
+        btn.addEventListener('click', () => {
+          try { sessionStorage.setItem('proofvoice_return_to_home', 'true'); } catch (e) {}
+        });
+      });
       let selectedRole = 'student';
 
       // Role Tabs
@@ -149,6 +215,23 @@
       const adminTab = document.getElementById('roleTabAdmin');
       const emailInput = document.getElementById('loginEmail');
       const pwdInput = document.getElementById('loginPassword');
+
+      // Direct Super Admin click handlers
+      const superAdminTab = document.getElementById('roleTabSuperAdmin');
+      if (superAdminTab) {
+        superAdminTab.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.href = 'super-admin/login/index.html';
+        });
+      }
+
+      const superAdminLink = document.getElementById('superAdminLoginLink');
+      if (superAdminLink) {
+        superAdminLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.href = 'super-admin/login/index.html';
+        });
+      }
 
       studentTab.addEventListener('click', () => {
         selectedRole = 'student';
@@ -162,8 +245,28 @@
         studentTab.classList.remove('active');
       });
 
-      // Check if arriving after registration
+      // Check if arriving after registration or from a feature card
       const urlParams = new URLSearchParams(window.location.search);
+      const redirectTarget = urlParams.get('redirect');
+      const featureName = urlParams.get('feature');
+
+      // Preserve redirect parameter on the registration link
+      if (redirectTarget) {
+        document.querySelectorAll('a[href^="register.html"]').forEach(link => {
+          link.href = `register.html?redirect=${encodeURIComponent(redirectTarget)}`;
+        });
+      }
+
+      // Check for feature prompt or auth toast
+      if (featureName) {
+        showToast('info', 'Authentication Required', `Please log in or create an account to explore ${featureName}.`, 7000);
+      } else {
+        const storedToast = sessionStorage.getItem('proofvoice_auth_toast');
+        if (storedToast) {
+          showToast('info', 'Sign In Required', storedToast, 7000);
+          try { sessionStorage.removeItem('proofvoice_auth_toast'); } catch (e) {}
+        }
+      }
       if (urlParams.get('pending') === 'true') {
         showToast('info', 'Institution Verification Pending', 'Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval.', 8000);
         const registeredEmail = urlParams.get('email');
@@ -172,7 +275,10 @@
           pwdInput.focus();
         }
       } else if (urlParams.get('registered') === 'true') {
-        showToast('success', 'Registration Successful', 'Your account has been registered. Please sign in with your credentials.');
+        selectedRole = 'student';
+        studentTab.classList.add('active');
+        adminTab.classList.remove('active');
+        showToast('success', 'Registration Successful', 'Your verified student account has been created! Please enter your password to sign in.', 6000);
         const registeredEmail = urlParams.get('email');
         if (registeredEmail) {
           emailInput.value = registeredEmail;
@@ -224,23 +330,35 @@
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="spinner"></span> Signing in...`;
 
+        let effectiveRole = selectedRole;
+        if (/superadmin/i.test(email) || email.toLowerCase() === 'superadmin') {
+          effectiveRole = 'superadmin';
+        }
+
         try {
-          const res = await window.proofVoiceApi.login(email, password, selectedRole);
+          const res = await window.proofVoiceApi.login(email, password, effectiveRole);
           const displayName = (res.user && (res.user.fullName || res.user.full_name)) || 'User';
           const role = (res.user && (res.user.role || res.role || '')).toLowerCase();
 
           showToast('success', 'Sign In Successful', `Welcome back, ${displayName}!`);
 
           setTimeout(() => {
-            if (role === 'admin' || role === 'institution_admin') {
-              window.location.replace('admin-dashboard.html');
-            } else if (role === 'superadmin' || role === 'platform_superadmin') {
-              window.location.replace('super-admin.html');
-            } else {
-              window.location.replace('student-dashboard.html');
+            if (role === 'superadmin' || (res.user && res.user.is_superuser)) {
+              window.location.replace('super-admin/dashboard/index.html');
+              return;
             }
+            const rawRedirect = urlParams.get('redirect');
+            const targetUrl = getSafeRedirectUrl(rawRedirect, role);
+            window.location.replace(targetUrl);
           }, 600);
         } catch (err) {
+          if (/superadmin/i.test(email) || email.toLowerCase() === 'superadmin') {
+            showToast('info', 'Super Admin Portal', 'Opening dedicated Super Admin Console login...');
+            setTimeout(() => {
+              window.location.href = 'super-admin/login/index.html';
+            }, 600);
+            return;
+          }
           showToast('error', 'Sign In Failed', err.message || 'Invalid email or password.');
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'Sign In to ProofVoice';

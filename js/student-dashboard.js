@@ -23,22 +23,42 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function resolveStudentContext(filter) {
-  if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
-    const user = window.proofVoiceApi.getStoredUser() || await window.proofVoiceApi.getCurrentUser();
-    const complaints = await window.proofVoiceApi.getComplaints(filter || {});
-    return {
-      user,
-      institution: {
-        name: user.institutionName || 'Your Institution',
-        categories: []
-      },
-      complaints
-    };
+  try {
+    if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+      let user = window.proofVoiceApi.getStoredUser();
+      if (!user && typeof window.proofVoiceApi.getCurrentUser === 'function') {
+        try { user = await window.proofVoiceApi.getCurrentUser(); } catch (e) {}
+      }
+      if (!user && window.proofVoiceDb) {
+        user = window.proofVoiceDb.getCurrentUser();
+      }
+      user = user || { fullName: 'Student', role: 'student', institutionName: 'Campus Institution' };
+
+      let complaints = [];
+      try {
+        complaints = await window.proofVoiceApi.getComplaints(filter || {});
+      } catch (err) {
+        if (window.proofVoiceDb) complaints = window.proofVoiceDb.getComplaints(filter || {});
+      }
+
+      return {
+        user,
+        institution: {
+          name: user.institutionName || 'Your Institution',
+          categories: []
+        },
+        complaints: Array.isArray(complaints) ? complaints : []
+      };
+    }
+  } catch (err) {
+    console.warn('[ProofVoice] Live student context failed, falling back:', err);
   }
-  const user = window.proofVoiceDb.getCurrentUser();
-  const institution = window.proofVoiceDb.getInstitution(user.institutionId);
-  const complaints = window.proofVoiceDb.getComplaints(filter || {});
-  return { user, institution, complaints };
+
+  const user = (window.proofVoiceDb && window.proofVoiceDb.getCurrentUser()) || { fullName: 'Student', role: 'student', institutionName: 'Campus Institution' };
+  const instId = user ? (user.institutionId || user.institution_id) : null;
+  const institution = (window.proofVoiceDb && instId ? window.proofVoiceDb.getInstitution(instId) : null) || { name: user.institutionName || 'Your Institution', categories: [] };
+  const complaints = (window.proofVoiceDb && typeof window.proofVoiceDb.getComplaints === 'function') ? window.proofVoiceDb.getComplaints(filter || {}) : [];
+  return { user, institution, complaints: Array.isArray(complaints) ? complaints : [] };
 }
 
 async function loadStudentDashboard() {
@@ -50,20 +70,23 @@ async function loadStudentDashboard() {
   const userAvatarEl = document.getElementById('sidebarUserAvatar');
   const userNameEl = document.getElementById('sidebarUserName');
 
-  if (greetingEl) greetingEl.textContent = user.fullName.split(' ')[0];
-  if (instBadgeEl) instBadgeEl.textContent = institution.name;
+  const fullName = (user && (user.fullName || user.full_name || user.name || user.email)) || 'Student';
+  const firstName = fullName.trim().split(/\s+/)[0] || fullName;
+
+  if (greetingEl) greetingEl.textContent = firstName;
+  if (instBadgeEl) instBadgeEl.textContent = (institution && institution.name) || (user && user.institutionName) || 'Your Institution';
   if (userAvatarEl) {
-    if (user.profileImage) {
+    if (user && user.profileImage) {
       userAvatarEl.textContent = '';
       userAvatarEl.style.backgroundImage = `url('${user.profileImage}')`;
       userAvatarEl.style.backgroundSize = 'cover';
       userAvatarEl.style.backgroundPosition = 'center';
     } else {
       userAvatarEl.style.backgroundImage = 'none';
-      userAvatarEl.textContent = user.avatar || user.fullName.slice(0, 2).toUpperCase();
+      userAvatarEl.textContent = (user && user.avatar) || firstName.slice(0, 2).toUpperCase();
     }
   }
-  if (userNameEl) userNameEl.textContent = user.fullName;
+  if (userNameEl) userNameEl.textContent = fullName;
   if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
 
   // Compute Metrics
@@ -238,14 +261,52 @@ async function loadMyComplaintsPage() {
             <td class="text-muted text-xs">${formatDateTime(c.submittedAt)}</td>
             <td>${renderStatusBadge(c.status)}</td>
             <td class="text-right">
-              <a href="complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" class="btn btn-secondary btn-sm">
-                View & Track
-              </a>
+              <div style="display:flex; justify-content:flex-end; gap:6px; flex-wrap:nowrap;">
+                <a href="complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" class="btn btn-secondary btn-sm" title="View details and track resolution">
+                  View & Track
+                </a>
+                <button type="button" class="btn btn-outline btn-sm edit-my-complaint-btn" data-id="${escapeHtml(c.id)}" title="Edit Application" style="padding:4px 8px; font-size:11px; background:#fff; border-color:#CBD5E1; color:#0F172A;">
+                  ✏️ Edit
+                </button>
+                <button type="button" class="btn btn-outline btn-sm delete-my-complaint-btn" data-id="${escapeHtml(c.id)}" title="Delete Complaint" style="padding:4px 8px; font-size:11px; background:#fff; border-color:#FECACA; color:#DC2626;">
+                  🗑️ Delete
+                </button>
+              </div>
             </td>
           </tr>
         `).join('');
       }
     }
+  }
+
+  // Edit & Delete Complaint Handlers
+  setupEditComplaintModal(renderList);
+
+  if (tableBody) {
+    tableBody.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.edit-my-complaint-btn');
+      if (editBtn) {
+        const id = editBtn.dataset.id;
+        const ctx = await resolveStudentContext();
+        const found = ctx.complaints.find(c => c.id === id);
+        if (found && window.openEditComplaintModal) window.openEditComplaintModal(found);
+      }
+
+      const delBtn = e.target.closest('.delete-my-complaint-btn');
+      if (delBtn) {
+        const id = delBtn.dataset.id;
+        const confirmed = window.confirm(`Are you sure you want to delete grievance application ${id}? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+          await window.proofVoiceApi.deleteComplaint(id);
+          await renderList();
+          showToast('success', 'Complaint Deleted', `Complaint ${id} has been deleted successfully.`);
+        } catch (err) {
+          showToast('error', 'Delete Failed', err.message || 'Unable to delete complaint.');
+        }
+      }
+    });
   }
 
   if (searchInput) searchInput.addEventListener('input', renderList);
@@ -485,6 +546,112 @@ async function loadComplaintDetailsPage() {
       } finally {
         submitReopenBtn.disabled = false;
         submitReopenBtn.innerHTML = 'Submit Reopen Request';
+      }
+    });
+  }
+
+  // Handle Edit Application & Delete on Details Page
+  const detailsEditBtn = document.getElementById('detailsEditBtn');
+  const detailsDeleteBtn = document.getElementById('detailsDeleteBtn');
+
+  setupEditComplaintModal(() => {
+    window.location.reload();
+  });
+
+  if (detailsEditBtn) {
+    detailsEditBtn.addEventListener('click', () => {
+      window.openEditComplaintModal(complaint);
+    });
+  }
+
+  if (detailsDeleteBtn) {
+    detailsDeleteBtn.addEventListener('click', async () => {
+      const confirmed = window.confirm(`Are you sure you want to delete grievance application ${complaint.id}? This action cannot be undone.`);
+      if (!confirmed) return;
+
+      try {
+        await window.proofVoiceApi.deleteComplaint(complaint.id);
+        showToast('success', 'Complaint Deleted', `Complaint ${complaint.id} has been deleted successfully.`);
+        setTimeout(() => {
+          window.location.href = 'my-complaints.html';
+        }, 1000);
+      } catch (err) {
+        showToast('error', 'Delete Failed', err.message || 'Unable to delete complaint.');
+      }
+    });
+  }
+}
+
+function setupEditComplaintModal(onSuccessCallback) {
+  const editModal = document.getElementById('editComplaintModal');
+  const editForm = document.getElementById('editComplaintForm');
+  const closeEditBtn = document.getElementById('closeEditModalBtn');
+  const cancelEditBtn = document.getElementById('cancelEditModalBtn');
+  const saveEditBtn = document.getElementById('saveEditModalBtn');
+
+  window.openEditComplaintModal = function(complaint) {
+    if (!editModal) return;
+    document.getElementById('editTargetComplaintId').value = complaint.id;
+    document.getElementById('editModalComplaintId').textContent = complaint.id;
+    document.getElementById('editComplaintTitle').value = complaint.title || '';
+    document.getElementById('editComplaintCategory').value = complaint.category || '';
+    document.getElementById('editComplaintUrgency').value = complaint.priority || complaint.urgency || 'Medium';
+    document.getElementById('editComplaintLocation').value = complaint.location || complaint.fullIssueLocation || '';
+    document.getElementById('editComplaintText').value = complaint.formalApplication || complaint.description || complaint.originalTranscription || '';
+    editModal.style.display = 'flex';
+  };
+
+  function closeEditModal() {
+    if (editModal) editModal.style.display = 'none';
+  }
+
+  if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditModal);
+  if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditModal);
+
+  if (editForm && !editForm._boundListener) {
+    editForm._boundListener = true;
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editTargetComplaintId').value;
+      const title = document.getElementById('editComplaintTitle').value.trim();
+      const category = document.getElementById('editComplaintCategory').value.trim();
+      const urgency = document.getElementById('editComplaintUrgency').value;
+      const location = document.getElementById('editComplaintLocation').value.trim();
+      const text = document.getElementById('editComplaintText').value.trim();
+
+      if (!title || !location || !text) {
+        showToast('error', 'Missing Information', 'Please complete title, location, and application text.');
+        return;
+      }
+
+      if (saveEditBtn) {
+        saveEditBtn.disabled = true;
+        saveEditBtn.textContent = 'Saving Changes...';
+      }
+
+      try {
+        await window.proofVoiceApi.updateComplaint(id, {
+          title,
+          category,
+          urgency,
+          priority: urgency,
+          location,
+          formalApplication: text,
+          description: text
+        });
+
+        closeEditModal();
+        if (typeof onSuccessCallback === 'function') {
+          await onSuccessCallback();
+        }
+        showToast('success', 'Application Updated', `Complaint ${id} application has been updated successfully.`);
+      } catch (err) {
+        showToast('error', 'Update Failed', err.message || 'Unable to update complaint application.');
+      } finally {
+        if (saveEditBtn) {
+          saveEditBtn.disabled = false;
+          saveEditBtn.textContent = 'Save Application Changes';
+        }
       }
     });
   }

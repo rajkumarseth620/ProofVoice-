@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Admin Sign In | ProofVoice Platform</title>
+  <meta name="description" content="Dedicated administrative authentication portal for ProofVoice Platform Super Administrators.">
+  <script>
+    if (!window.location.pathname.includes('/super-admin/login')) {
+      window.location.replace('super-admin/login/index.html' + window.location.search);
+    }
+  </script>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    .super-shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--color-primary);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+    .security-notice-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-left: 3px solid var(--color-primary);
+      padding: 12px 14px;
+      border-radius: 6px;
+      margin-top: var(--space-4);
+      font-size: 11px;
+      color: #64748B;
+      line-height: 1.5;
+    }
+  </style>
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-split-wrapper">
+    <!-- Left Hero Brand Panel -->
+    <div class="auth-side-panel">
+      <div>
+        <a href="index.html#home" class="brand-logo" id="authLogoHomeLink" style="color: #FFFFFF;">
+          <div class="brand-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name" style="color:#FFFFFF;">Proof<span style="color:#60A5FA;">Voice</span></span>
+            <span class="brand-sub" style="color:#94A3B8;">Campus Resolution</span>
+          </div>
+        </a>
+
+        <h2>Platform Authority Oversight</h2>
+        <p>Restricted central console for institutional verification, multi-tenant isolation audit, and SLA governance.</p>
+
+        <!-- Concise Benefits -->
+        <div class="auth-side-illustration">
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">🛡️</div>
+            <div class="auth-benefit-text">
+              <h4>Strict Cryptographic Authorization</h4>
+              <p>Platform superadmin endpoints enforce database-backed role verification.</p>
+            </div>
+          </div>
+
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">🏢</div>
+            <div class="auth-benefit-text">
+              <h4>Tenant Lifecycle Governance</h4>
+              <p>Verify registration requests, manage campus rosters, or suspend access.</p>
+            </div>
+          </div>
+
+          <div class="auth-benefit-item">
+            <div class="auth-benefit-icon">🔔</div>
+            <div class="auth-benefit-text">
+              <h4>Automated Internal Notifications</h4>
+              <p>Real-time audit dispatch on incoming campus requests with zero external email dependency.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-side-footer">
+        © 2026 ProofVoice. Central Platform Security Console.
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container">
+        <div style="margin-bottom:var(--space-4); display:flex; justify-content:space-between; align-items:center;">
+          <a href="index.html#home" class="auth-back-home-link" id="authBackToHomeBtn" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--color-primary); text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to Home
+          </a>
+          <div data-theme-toggle-slot data-size="sm"></div>
+        </div>
+
+        <div class="auth-header">
+          <div class="super-shield-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Platform Super-Admin
+          </div>
+          <h1>Super Admin Sign In</h1>
+          <p>Provide your platform administrator credentials to enter the console.</p>
+        </div>
+
+        <form id="superLoginForm" novalidate>
+          <!-- Username / Email Input -->
+          <div class="form-group">
+            <label for="superAdminEmail" class="form-label">
+              Super Admin Username or Email <span class="required">*</span>
+            </label>
+            <input type="text" id="superAdminEmail" class="form-control" placeholder="superadmin@proofvoice.platform" required autocomplete="username">
+            <div class="form-error" id="emailError" style="display:none;"></div>
+          </div>
+
+          <!-- Password Input -->
+          <div class="form-group">
+            <label for="superAdminPassword" class="form-label">
+              Password <span class="required">*</span>
+            </label>
+            <div class="input-password-wrapper">
+              <input type="password" id="superAdminPassword" class="form-control" placeholder="••••••••••••" required autocomplete="current-password">
+              <button type="button" class="pwd-toggle-btn" id="pwdToggleBtn" aria-label="Toggle password visibility">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="pwdEyeIcon">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="form-error" id="passwordError" style="display:none;"></div>
+          </div>
+
+          <!-- Options Row -->
+          <div class="auth-options-row">
+            <label class="form-check">
+              <input type="checkbox" id="rememberMe" checked>
+              <span>Remember this session</span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary w-100 btn-lg" id="superSignInBtn">
+            Sign In to Super Admin Console
+          </button>
+
+          <div class="security-notice-card">
+            <strong>Security Notice:</strong> This portal is restricted strictly to authorized Platform Super Administrators. Access attempts are recorded and monitored in the system audit log. Public self-registration is disabled.
+          </div>
+        </form>
+
+        <div class="auth-footer-prompt" style="margin-top:var(--space-6);">
+          Not a platform superadmin? <a href="login.html">Standard Campus Member Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data-store.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('superLoginForm');
+      const emailInput = document.getElementById('superAdminEmail');
+      const pwdInput = document.getElementById('superAdminPassword');
+      const submitBtn = document.getElementById('superSignInBtn');
+      const pwdToggleBtn = document.getElementById('pwdToggleBtn');
+
+      // Password visibility toggle
+      pwdToggleBtn.addEventListener('click', () => {
+        const isPassword = pwdInput.type === 'password';
+        pwdInput.type = isPassword ? 'text' : 'password';
+        pwdToggleBtn.innerHTML = isPassword
+          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`
+          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        const password = pwdInput.value;
+
+        const emailErr = document.getElementById('emailError');
+        const pwdErr = document.getElementById('passwordError');
+        emailErr.style.display = 'none';
+        pwdErr.style.display = 'none';
+        emailInput.classList.remove('is-invalid');
+        pwdInput.classList.remove('is-invalid');
+
+        if (!email) {
+          emailErr.textContent = 'Please enter your Super Admin username or email.';
+          emailErr.style.display = 'block';
+          emailInput.classList.add('is-invalid');
+          return;
+        }
+
+        if (!password) {
+          pwdErr.textContent = 'Please enter your password.';
+          pwdErr.style.display = 'block';
+          pwdInput.classList.add('is-invalid');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner"></span> Authenticating Platform Authority...`;
+
+        try {
+          const res = await window.proofVoiceApi.login(email, password, 'superadmin');
+          const role = ((res.user && (res.user.backendRole || res.user.role)) || res.role || '').toUpperCase();
+
+          if (role !== 'PLATFORM_SUPERADMIN' && role !== 'SUPERADMIN' && !(res.user && res.user.is_superuser)) {
+            window.proofVoiceApi.clearSession();
+            throw new Error('Access denied. This account does not possess Platform Super-Admin authorization.');
+          }
+
+          showToast('success', 'Authentication Verified', `Welcome back, Super Administrator!`, 3000);
+
+          setTimeout(() => {
+            // Support both direct HTML and clean route paths
+            window.location.replace('super-admin/dashboard/index.html');
+          }, 600);
+        } catch (err) {
+          showToast('error', 'Sign In Failed', err.message || 'Invalid Super Admin credentials.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Sign In to Super Admin Console';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

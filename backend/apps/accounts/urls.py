@@ -6,7 +6,9 @@ from .views import (
     LogoutView,
     MeView,
     ProfileView,
-    ProfilePhotoView
+    ProfilePhotoView,
+    ChangePasswordView,
+    PasswordResetView
 )
 
 urlpatterns = [
@@ -18,4 +20,8 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='auth-profile'),
     path('profile/photo/', ProfilePhotoView.as_view(), name='auth-profile-photo'),
     path('profile-photo/', ProfilePhotoView.as_view(), name='auth-profile-photo-alias'),
+    path('password/change/', ChangePasswordView.as_view(), name='auth-change-password'),
+    path('change-password/', ChangePasswordView.as_view(), name='auth-change-password-alias'),
+    path('password/reset/', PasswordResetView.as_view(), name='auth-password-reset'),
+    path('password-reset/', PasswordResetView.as_view(), name='auth-password-reset-alias'),
 ]

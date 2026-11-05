@@ -30,7 +30,7 @@ if not SECRET_KEY:
         from django.core.exceptions import ImproperlyConfigured
         raise ImproperlyConfigured("DJANGO_SECRET_KEY must be configured in environment when DEBUG=False.")
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver').split(',') if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver,.railway.app,.up.railway.app').split(',') if h.strip()]
 if 'testserver' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('testserver')
 
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -95,7 +96,7 @@ ASGI_APPLICATION = 'config.asgi.application'
 USE_SQLITE_FOR_TESTS = os.getenv('USE_SQLITE_FOR_TESTS', 'False').lower() in ('true', '1', 'yes')
 IS_RUNNING_TESTS = 'test' in sys.argv or 'makemigrations' in sys.argv or 'seed_demo_data' in sys.argv or 'migrate' in sys.argv or 'reset_user_password' in sys.argv
 
-if IS_RUNNING_TESTS and USE_SQLITE_FOR_TESTS:
+if USE_SQLITE_FOR_TESTS or ('test' in sys.argv):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -104,11 +105,11 @@ if IS_RUNNING_TESTS and USE_SQLITE_FOR_TESTS:
     }
 else:
     DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.mysql')
-    DB_NAME = os.getenv('DB_NAME', 'proofvoice_db')
-    DB_USER = os.getenv('DB_USER', 'proofvoice_user')
-    DB_PASSWORD = os.getenv('DB_PASSWORD')
-    DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
-    DB_PORT = os.getenv('DB_PORT', '3306')
+    DB_NAME = os.getenv('DB_NAME', os.getenv('MYSQLDATABASE', 'proofvoice_db'))
+    DB_USER = os.getenv('DB_USER', os.getenv('MYSQLUSER', 'proofvoice_user'))
+    DB_PASSWORD = os.getenv('DB_PASSWORD', os.getenv('MYSQLPASSWORD'))
+    DB_HOST = os.getenv('DB_HOST', os.getenv('MYSQLHOST', '127.0.0.1'))
+    DB_PORT = os.getenv('DB_PORT', os.getenv('MYSQLPORT', '3306'))
 
     if DB_PASSWORD is None:
         from django.core.exceptions import ImproperlyConfigured
@@ -125,6 +126,7 @@ else:
             'PASSWORD': DB_PASSWORD,
             'HOST': DB_HOST,
             'PORT': DB_PORT,
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', 60)),
             'OPTIONS': {
                 'charset': 'utf8mb4',
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -162,6 +164,16 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# WhiteNoise production compressed static file storage
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 # Media Files (Attachments & Logos)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -186,13 +198,35 @@ REST_FRAMEWORK = {
 
 # Cross-Origin Resource Sharing (CORS)
 CORS_ALLOW_CREDENTIALS = True
-cors_origins_env = os.getenv('FRONTEND_ORIGIN', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173')
+cors_origins_env = os.getenv('FRONTEND_ORIGIN', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:5500,http://127.0.0.1:5500,http://localhost:8000,http://127.0.0.1:8000,http://localhost:8080,http://127.0.0.1:8080')
 CORS_ALLOWED_ORIGINS = [orig.strip() for orig in cors_origins_env.split(',') if orig.strip()]
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/.*\.vercel\.app$",
+]
 CSRF_TRUSTED_ORIGINS = list(CORS_ALLOWED_ORIGINS)
+for orig in [o for o in [os.getenv('FRONTEND_ORIGIN'), os.getenv('RAILWAY_STATIC_URL')] if o]:
+    for single in orig.split(','):
+        clean = single.strip()
+        if clean and clean not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(clean)
 
 # Gnani AI Service Settings (https://docs.gnani.ai/)
 GNANI_API_KEY = os.getenv('GNANI_API_KEY', '')
 GNANI_API_BASE_URL = os.getenv('GNANI_API_BASE_URL', 'https://api.vachana.ai').rstrip('/')
 GNANI_STT_ENDPOINT = f"{GNANI_API_BASE_URL}/stt/v3"
 GNANI_TTS_ENDPOINT = f"{GNANI_API_BASE_URL}/api/v1/tts/inference"
+
+# OpenAI Conversational AI Reasoning Settings (https://platform.openai.com/)
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '').strip()
+OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4o-mini').strip()
+OPENAI_API_BASE_URL = os.getenv('OPENAI_API_BASE_URL', 'https://api.openai.com/v1').strip().rstrip('/')
+
+# Google Gemini API Settings (Secondary LLM Reasoning)
+GEMINI_API_KEY = (os.getenv('GEMINI_API_KEY', '') or os.getenv('GOOGLE_API_KEY', '')).strip()
+
+# In-App Notification Mode - No External Email Delivery Services
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+DEFAULT_FROM_EMAIL = 'ProofVoice Platform <notifications@proofvoice.platform>'
+SUPER_ADMIN_ROLE = 'PLATFORM_SUPERADMIN'
+

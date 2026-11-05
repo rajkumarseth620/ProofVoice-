@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body style="background-color: var(--color-bg);">
 
@@ -81,9 +83,16 @@
             </div>
 
             <!-- Contact Number -->
-            <div class="form-group">
-              <label for="profPhone" class="form-label">Contact Phone Number (Optional)</label>
-              <input type="tel" id="profPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+            <div class="form-group" style="grid-column: span 2;">
+              <label for="profPhone" class="form-label">Contact Mobile Number <span class="required">*</span></label>
+              <div class="phone-input-group">
+                <span class="phone-country-prefix" title="India Country Code">
+                  <span style="font-size:16px;">🇮🇳</span> +91
+                </span>
+                <input type="tel" id="profPhone" class="form-control" placeholder="9876543210" maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" required autocomplete="tel-national">
+              </div>
+              <div class="phone-error-msg" id="profPhoneError" style="display:none;"></div>
+              <span class="form-hint" style="font-size:11px; color:#64748B; margin-top:2px; display:block;">Enter your 10-digit Indian mobile number (e.g. 9876543210).</span>
             </div>
 
             <!-- Residential Address -->
@@ -134,7 +143,15 @@
         studentIdInput.value = user.studentIdentifier || '';
         deptInput.value = user.department || '';
         yearSemInput.value = user.yearSemester || '';
-        phoneInput.value = user.phone || '';
+        if (user.phone) {
+          let clean = String(user.phone).replace(/\D/g, '');
+          if (clean.startsWith('91') && clean.length === 12) clean = clean.slice(2);
+          else if (clean.startsWith('0') && clean.length === 11) clean = clean.slice(1);
+          phoneInput.value = clean.slice(-10);
+        }
+        if (window.setupIndianPhoneInput) {
+          window.setupIndianPhoneInput(phoneInput, document.getElementById('profPhoneError'));
+        }
         addressInput.value = user.residentialAddress || '';
       }
 
@@ -154,12 +171,26 @@
         const department = deptInput.value.trim();
         const yearSem = yearSemInput.value.trim();
         const address = addressInput.value.trim();
-        const phone = phoneInput.value.trim();
+        const rawPhone = phoneInput.value.trim();
 
         if (!fullName || !studentId || !department || !address) {
           showToast('error', 'Missing Information', 'Please complete your name, student ID, department, and correspondence address.');
           return;
         }
+
+        const phoneCheck = window.validateIndianPhoneNumber ? window.validateIndianPhoneNumber(rawPhone, true) : { valid: rawPhone.length === 10, value: `+91 ${rawPhone}` };
+        if (!phoneCheck.valid) {
+          const errEl = document.getElementById('profPhoneError');
+          if (errEl) {
+            errEl.textContent = phoneCheck.message;
+            errEl.style.display = 'block';
+          }
+          phoneInput.classList.add('is-invalid');
+          phoneInput.focus();
+          showToast('error', 'Invalid Mobile Number', phoneCheck.message);
+          return;
+        }
+        const phone = phoneCheck.value;
 
         saveBtn.disabled = true;
         saveBtn.innerHTML = `<span class="spinner"></span> Saving Profile...`;

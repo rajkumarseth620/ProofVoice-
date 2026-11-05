@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body class="auth-page">
 
@@ -17,7 +19,7 @@
     <!-- Left Hero Brand Panel -->
     <div class="auth-side-panel">
       <div>
-        <a href="index.html" class="brand-logo" style="color:#FFFFFF;">
+        <a href="index.html#home" class="brand-logo" id="authLogoHomeLink" style="color:#FFFFFF;">
           <div class="brand-icon-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
@@ -67,6 +69,16 @@
     <!-- Right Form Panel -->
     <div class="auth-form-panel">
       <div class="auth-form-container" style="max-width: 680px; padding: var(--space-8) var(--space-6);">
+        <div style="margin-bottom:var(--space-4); display:flex; align-items:center; justify-content:space-between;">
+          <a href="index.html#home" class="auth-back-home-link" id="authBackToHomeBtn" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--color-primary); text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to Home
+          </a>
+          <div data-theme-toggle-slot data-size="sm"></div>
+        </div>
         <div class="auth-header" style="margin-bottom:var(--space-6);">
           <h1>Student Registration</h1>
           <p>Complete your personal, institutional, and correspondence details below.</p>
@@ -103,7 +115,12 @@
                 <label for="regPassword" class="form-label">Password <span class="required">*</span></label>
                 <div class="input-password-wrapper">
                   <input type="password" id="regPassword" class="form-control" placeholder="At least 8 characters" required autocomplete="new-password">
-                  <button type="button" class="pwd-toggle-btn" id="regPwdToggleBtn" aria-label="Toggle password">👁️</button>
+                  <button type="button" class="pwd-toggle-btn" id="regPwdToggleBtn" aria-label="Toggle password visibility">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="regPwdEyeIcon">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
                 </div>
                 <div class="password-strength-container" style="margin-top:6px;">
                   <div class="password-strength-bars">
@@ -117,7 +134,15 @@
 
               <div class="form-group">
                 <label for="regConfirmPassword" class="form-label">Confirm Password <span class="required">*</span></label>
-                <input type="password" id="regConfirmPassword" class="form-control" placeholder="Re-enter password" required autocomplete="new-password">
+                <div class="input-password-wrapper">
+                  <input type="password" id="regConfirmPassword" class="form-control" placeholder="Re-enter password" required autocomplete="new-password">
+                  <button type="button" class="pwd-toggle-btn" id="regConfirmPwdToggleBtn" aria-label="Toggle confirm password visibility">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="regConfirmPwdEyeIcon">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </div>
                 <div class="form-error" id="confirmPwdError" style="display:none;"></div>
               </div>
             </div>
@@ -131,39 +156,62 @@
             </h3>
 
             <div class="alert alert-info" style="font-size:12px; margin-bottom:var(--space-4);">
-              <strong>Institutional Affiliation:</strong> Select your verified institution or choose <em>+ My Institution is Not Listed</em>. Students from all institutions can register immediately and lodge formal grievances.
+              <strong>Searchable Institutional Directory:</strong> Start typing your institution's name to select your verified campus. ProofVoice isolates grievance workflows strictly by approved institution tenants.
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
               <div class="form-group" style="grid-column: span 2;">
-                <label for="regInstitutionSelect" class="form-label">Select Verified Institution <span class="required">*</span></label>
-                <select id="regInstitutionSelect" class="form-control" required>
-                  <option value="">-- Choose your college, university, or school --</option>
-                </select>
-                <div class="form-error" id="instError" style="display:none;"></div>
-              </div>
+                <label for="regInstitutionSearch" class="form-label">Search & Select Institution <span class="required">*</span></label>
+                
+                <div class="autocomplete-search-wrapper" id="instSearchWrapper">
+                  <input type="text" id="regInstitutionSearch" class="form-control" placeholder="Search by college name, city, or state (e.g. Arka Jain, BIT Mesra, KIIT, IIT...)" autocomplete="off">
+                  <div class="autocomplete-dropdown-list" id="instSearchResults" style="display:none;"></div>
+                </div>
 
-              <!-- Unlisted institution fallback -->
-              <div class="form-group" id="customInstWrapper" style="grid-column: span 2; display:none;">
-                <label for="regCustomInstName" class="form-label">Enter Institution Name <span class="required">*</span></label>
-                <input type="text" id="regCustomInstName" class="form-control" placeholder="e.g. National Institute of Technology">
-                <span class="form-hint">If your institution is not listed, enter its name above. It will be added to ProofVoice and you can start lodging grievances immediately.</span>
+                <input type="hidden" id="selectedInstitutionId" value="">
+                <input type="hidden" id="selectedInstitutionName" value="">
+
+                <!-- Selected Institution Badge -->
+                <div id="selectedInstBadge" class="selected-institution-badge" style="display:none;">
+                  <div>
+                    <div class="inst-name" id="selectedInstName"></div>
+                    <div class="inst-meta" id="selectedInstMeta"></div>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-secondary" id="changeInstBtn" style="padding:4px 10px; font-size:11px;">Change</button>
+                </div>
+
+                <!-- Institution Not Found Box -->
+                <div id="institutionNotFoundBox" style="display:none; margin-top:12px; border-left:4px solid #D97706; background:#FEF3C7; padding:16px; border-radius:6px;">
+                  <h4 style="margin:0 0 6px 0; font-size:14px; font-weight:700; color:#92400E;">Institution Not Found!</h4>
+                  <p style="margin:0 0 10px 0; font-size:13px; color:#78350F; line-height:1.5;">
+                    Your institution is not currently available on ProofVoice. To access ProofVoice, please contact your college administration and request them to register their institution.
+                  </p>
+                  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnSearchAgain">Search Again</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnOpenOnboarding">Request Institution Onboarding</button>
+                  </div>
+                </div>
+
+                <!-- Unverified Directory Notice -->
+                <div id="institutionDirectoryNotice" style="display:none; margin-top:12px; border-left:4px solid #0F766E; background:#F0FDFA; padding:14px; border-radius:6px;">
+                  <strong style="color:#0F766E; font-size:13px;">Directory Listing (Awaiting Administrative Activation):</strong>
+                  <p style="margin:4px 0 8px 0; font-size:12px; color:#334155; line-height:1.5;">
+                    This institution is listed in our educational directory, but its administration has not yet activated its verified workspace. Students can submit an onboarding request to express interest and request admin activation.
+                  </p>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnOpenOnboardingFromDirectory">Request Institution Onboarding</button>
+                </div>
+
+                <div class="form-error" id="instError" style="display:none;"></div>
               </div>
 
               <div class="form-group">
                 <label for="regInstType" class="form-label">Institution Type <span class="required">*</span></label>
-                <select id="regInstType" class="form-control" required>
-                  <option value="University">University</option>
-                  <option value="College" selected>College</option>
-                  <option value="School">School</option>
-                  <option value="Polytechnic">Polytechnic</option>
-                  <option value="Other">Other</option>
-                </select>
+                <input type="text" id="regInstType" class="form-control" readonly placeholder="Auto-populated" style="background:#F8FAFC;">
               </div>
 
               <div class="form-group">
-                <label for="regInstDomain" class="form-label">Official Domain / Email</label>
-                <input type="text" id="regInstDomain" class="form-control" placeholder="e.g. apextech.edu">
+                <label for="regInstDomain" class="form-label">Official Campus Domain</label>
+                <input type="text" id="regInstDomain" class="form-control" readonly placeholder="Auto-populated" style="background:#F8FAFC;">
               </div>
 
               <div class="form-group">
@@ -216,8 +264,15 @@
               </div>
 
               <div class="form-group" style="grid-column: span 2;">
-                <label for="regPhone" class="form-label">Contact Number (Optional)</label>
-                <input type="tel" id="regPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+                <label for="regPhone" class="form-label">Contact Mobile Number (Optional)</label>
+                <div class="phone-input-group">
+                  <span class="phone-country-prefix" title="India Country Code">
+                    <span style="font-size:16px;">🇮🇳</span> +91
+                  </span>
+                  <input type="tel" id="regPhone" class="form-control" placeholder="9876543210" maxlength="10" inputmode="numeric" pattern="[6-9][0-9]{9}" autocomplete="tel-national">
+                </div>
+                <div class="phone-error-msg" id="regPhoneError" style="display:none;"></div>
+                <span class="form-hint" style="font-size:11px; color:#64748B; margin-top:2px; display:block;">Enter your 10-digit Indian mobile number (e.g. 9876543210).</span>
               </div>
             </div>
           </div>
@@ -247,231 +302,559 @@
     </div>
   </div>
 
+  <!-- Student Onboarding Expression of Interest Modal -->
+  <div id="studentOnboardingModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Request Institution Onboarding</h3>
+        <button type="button" class="modal-close-btn" id="closeOnboardingModalBtn" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body" id="onboardingFormContainer">
+        <p style="font-size:13px; color:var(--color-text-secondary); margin-bottom:var(--space-4); line-height:1.5;">
+          Cannot find your institution or is it not yet activated on ProofVoice? Submit this quick expression of interest. The Platform Super-Admin will be notified directly and reach out to your administration to activate institutional access.
+        </p>
+
+        <form id="studentOnboardingForm">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label for="onboardStudentName" class="form-label">Your Name <span class="required">*</span></label>
+            <input type="text" id="onboardStudentName" class="form-control" required placeholder="Full Name">
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px;">
+            <label for="onboardStudentEmail" class="form-label">Your Email <span class="required">*</span></label>
+            <input type="email" id="onboardStudentEmail" class="form-control" required placeholder="student@example.edu">
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px;">
+            <label for="onboardInstName" class="form-label">Institution / College Name <span class="required">*</span></label>
+            <input type="text" id="onboardInstName" class="form-control" required placeholder="e.g. Arka Jain University">
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px;">
+            <label for="onboardInstLocation" class="form-label">City, State <span class="required">*</span></label>
+            <input type="text" id="onboardInstLocation" class="form-control" required placeholder="e.g. Jamshedpur, Jharkhand">
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px;">
+            <label for="onboardInstWebsite" class="form-label">College Website or Domain (Optional)</label>
+            <input type="text" id="onboardInstWebsite" class="form-control" placeholder="e.g. https://arkajainuniversity.ac.in">
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label for="onboardMessage" class="form-label">Message / Why ProofVoice is needed (Optional)</label>
+            <textarea id="onboardMessage" class="form-control" rows="3" placeholder="Tell us about the need for transparent campus grievance redressing..."></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button type="button" class="btn btn-secondary" id="cancelOnboardingModalBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="submitOnboardingBtn">Submit Onboarding Request</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Success Screen -->
+      <div class="modal-body" id="onboardingSuccessBox" style="display:none; text-align:center; padding:var(--space-8) var(--space-6);">
+        <div style="width:56px; height:56px; border-radius:50%; background:#D1FAE5; color:#065F46; display:inline-flex; align-items:center; justify-content:center; margin-bottom:var(--space-4);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h4 style="font-size:var(--text-lg); font-weight:700; color:var(--color-navy); margin-bottom:8px;">Request Transmitted!</h4>
+        <p id="onboardingSuccessText" style="font-size:13px; color:var(--color-text-secondary); line-height:1.6; margin-bottom:var(--space-6);"></p>
+        <button type="button" class="btn btn-primary" id="doneOnboardingModalBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/data-store.js"></script>
   <script src="js/api-client.js"></script>
   <script src="js/app.js"></script>
   <script>
+    function getSafeRedirectUrl(rawTarget, userRole) {
+      if (!rawTarget) return 'student-dashboard.html';
+      try {
+        const decoded = decodeURIComponent(rawTarget).trim();
+        if (decoded.startsWith('//') || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(decoded)) {
+          return 'student-dashboard.html';
+        }
+        const targetPage = decoded.split('?')[0].split('#')[0].split('/').pop();
+        const adminOnlyPages = ['admin-dashboard.html', 'admin-complaints.html', 'admin-complaint-details.html', 'departments.html', 'users.html', 'analytics.html', 'institution-settings.html', 'admin-profile.html', 'admin-notifications.html', 'admin-help.html'];
+        if (adminOnlyPages.includes(targetPage)) {
+          return 'student-dashboard.html';
+        }
+        return decoded;
+      } catch (e) {
+        return 'student-dashboard.html';
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      // Populate institutions from data store
-      const instSelect = document.getElementById('regInstitutionSelect');
-      const customWrapper = document.getElementById('customInstWrapper');
+      const urlParams = new URLSearchParams(window.location.search);
+      const regPhoneInput = document.getElementById('regPhone');
+      if (regPhoneInput && window.setupIndianPhoneInput) {
+        window.setupIndianPhoneInput(regPhoneInput, document.getElementById('regPhoneError'));
+      }
+
+      document.querySelectorAll('#authLogoHomeLink, #authBackToHomeBtn, .auth-back-home-link').forEach(btn => {
+        btn.addEventListener('click', () => {
+          try { sessionStorage.setItem('proofvoice_return_to_home', 'true'); } catch (e) {}
+        });
+      });
+      
+      // Institutional Directory & Searchable Autocomplete
+      const instSearchInput = document.getElementById('regInstitutionSearch');
+      const instSearchResults = document.getElementById('instSearchResults');
+      const instSearchWrapper = document.getElementById('instSearchWrapper');
+      const selectedInstBadge = document.getElementById('selectedInstBadge');
+      const selectedInstName = document.getElementById('selectedInstName');
+      const selectedInstMeta = document.getElementById('selectedInstMeta');
+      const selectedInstIdInput = document.getElementById('selectedInstitutionId');
+      const selectedInstNameInput = document.getElementById('selectedInstitutionName');
+      const changeInstBtn = document.getElementById('changeInstBtn');
+      const instNotFoundBox = document.getElementById('institutionNotFoundBox');
+      const instDirNotice = document.getElementById('institutionDirectoryNotice');
+      const btnSearchAgain = document.getElementById('btnSearchAgain');
+      const btnOpenOnboarding = document.getElementById('btnOpenOnboarding');
+      const btnOpenOnboardingFromDir = document.getElementById('btnOpenOnboardingFromDirectory');
+
       const stateInput = document.getElementById('regState');
       const cityInput = document.getElementById('regCity');
       const countryInput = document.getElementById('regCountry');
+      const instTypeInput = document.getElementById('regInstType');
+      const instDomainInput = document.getElementById('regInstDomain');
 
-      async function loadInstitutions() {
-        let institutions = [];
+      let allDirectoryInstitutions = [];
+
+      async function initInstitutionalDirectory() {
         try {
-          if (window.proofVoiceApi) {
-            institutions = await window.proofVoiceApi.getInstitutions();
+          if (window.proofVoiceApi && typeof window.proofVoiceApi.searchInstitutions === 'function') {
+            allDirectoryInstitutions = await window.proofVoiceApi.searchInstitutions('', true);
+          } else if (window.proofVoiceApi && typeof window.proofVoiceApi.getInstitutions === 'function') {
+            allDirectoryInstitutions = await window.proofVoiceApi.getInstitutions();
           }
-        } catch (err) {
-          institutions = [];
+        } catch (e) {
+          allDirectoryInstitutions = [];
         }
-        if ((!institutions || institutions.length === 0) && window.proofVoiceDb) {
-          institutions = window.proofVoiceDb.getAllInstitutions();
-        }
-        institutions.forEach(inst => {
-          const city = inst.city || '';
-          instSelect.innerHTML += `<option value="${inst.id}">${escapeHtml(inst.name)} (${escapeHtml(inst.code || '')}) - ${escapeHtml(city)}</option>`;
-        });
-        instSelect.innerHTML += `<option value="OTHER">+ My Institution is Not Listed</option>`;
 
-        instSelect.addEventListener('change', () => {
-          if (instSelect.value === 'OTHER') {
-            customWrapper.style.display = 'block';
-          } else {
-            customWrapper.style.display = 'none';
-            const selected = institutions.find(i => String(i.id) === String(instSelect.value));
-            if (selected) {
-              if (selected.state) stateInput.value = selected.state;
-              if (selected.city) cityInput.value = selected.city;
-              if (selected.country) countryInput.value = selected.country;
+        if ((!allDirectoryInstitutions || allDirectoryInstitutions.length === 0) && window.proofVoiceDb) {
+          allDirectoryInstitutions = typeof window.proofVoiceDb.getAllInstitutions === 'function'
+            ? window.proofVoiceDb.getAllInstitutions()
+            : [];
+        }
+      }
+      initInstitutionalDirectory();
+
+      function renderAutocomplete(query) {
+        const q = (query || '').trim().toLowerCase();
+        instDirNotice.style.display = 'none';
+
+        if (!q) {
+          instSearchResults.style.display = 'none';
+          instNotFoundBox.style.display = 'none';
+          return;
+        }
+
+        const matches = allDirectoryInstitutions.filter(inst => {
+          const name = (inst.name || '').toLowerCase();
+          const city = (inst.city || '').toLowerCase();
+          const state = (inst.state || '').toLowerCase();
+          const code = (inst.code || '').toLowerCase();
+          return name.includes(q) || city.includes(q) || state.includes(q) || code.includes(q);
+        });
+
+        if (matches.length === 0) {
+          instSearchResults.style.display = 'none';
+          instNotFoundBox.style.display = 'block';
+          return;
+        }
+
+        instNotFoundBox.style.display = 'none';
+        instSearchResults.innerHTML = matches.map(inst => {
+          const isApproved = (inst.verification_status === 'VERIFIED' || inst.status === 'Verified' || inst.can_onboard_students);
+          const badgeHtml = isApproved
+            ? '<span class="badge" style="background:#D1FAE5; color:#065F46; font-size:10px; font-weight:700;">Approved</span>'
+            : '<span class="badge" style="background:#F1F5F9; color:#64748B; font-size:10px;">Directory Listing</span>';
+
+          return `
+            <div class="autocomplete-item" data-id="${inst.id}" data-approved="${isApproved ? '1' : '0'}">
+              <div>
+                <div class="autocomplete-item-title">${escapeHtml(inst.name)}</div>
+                <div class="autocomplete-item-meta">${escapeHtml(inst.institution_type || inst.type || 'Institute')} • ${escapeHtml(inst.city || '')}, ${escapeHtml(inst.state || '')}</div>
+              </div>
+              <div>${badgeHtml}</div>
+            </div>
+          `;
+        }).join('');
+
+        instSearchResults.style.display = 'block';
+
+        instSearchResults.querySelectorAll('.autocomplete-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const id = el.dataset.id;
+            const isApproved = el.dataset.approved === '1';
+            const selected = allDirectoryInstitutions.find(i => String(i.id) === String(id));
+            if (!selected) return;
+
+            if (!isApproved) {
+              instSearchResults.style.display = 'none';
+              instDirNotice.style.display = 'block';
+              instSearchInput.value = selected.name;
+            }
+
+            selectApprovedInstitution(selected);
+          });
+        });
+      }
+
+      function selectApprovedInstitution(inst) {
+        selectedInstIdInput.value = inst.id;
+        selectedInstNameInput.value = inst.name;
+        selectedInstName.textContent = inst.name;
+        selectedInstMeta.textContent = `${inst.institution_type || inst.type || 'Institute'} • ${inst.city || ''}, ${inst.state || ''}`;
+
+        if (inst.city) cityInput.value = inst.city;
+        if (inst.state) stateInput.value = inst.state;
+        if (inst.country) countryInput.value = inst.country;
+        if (instTypeInput && (inst.institution_type || inst.type)) instTypeInput.value = inst.institution_type || inst.type;
+        if (instDomainInput) instDomainInput.value = inst.website || inst.official_email || '';
+
+        instSearchWrapper.style.display = 'none';
+        instSearchResults.style.display = 'none';
+        instNotFoundBox.style.display = 'none';
+        instDirNotice.style.display = 'none';
+        document.getElementById('instError').style.display = 'none';
+        selectedInstBadge.style.display = 'flex';
+      }
+
+      instSearchInput.addEventListener('input', (e) => {
+        renderAutocomplete(e.target.value);
+      });
+
+      changeInstBtn.addEventListener('click', () => {
+        selectedInstIdInput.value = '';
+        selectedInstNameInput.value = '';
+        selectedInstBadge.style.display = 'none';
+        instSearchWrapper.style.display = 'block';
+        instSearchInput.value = '';
+        instSearchInput.focus();
+      });
+
+      btnSearchAgain.addEventListener('click', () => {
+        instNotFoundBox.style.display = 'none';
+        instSearchInput.value = '';
+        instSearchInput.focus();
+      });
+
+      // Student Onboarding Expression of Interest Modal
+      const onboardingModal = document.getElementById('studentOnboardingModal');
+      const onboardingForm = document.getElementById('studentOnboardingForm');
+      const onboardingFormContainer = document.getElementById('onboardingFormContainer');
+      const onboardingSuccessBox = document.getElementById('onboardingSuccessBox');
+      const onboardingSuccessText = document.getElementById('onboardingSuccessText');
+
+      function openOnboardingModal(prefillInstName = '') {
+        if (!onboardingModal) return;
+        const studentName = document.getElementById('regFullName')?.value?.trim() || '';
+        const studentEmail = document.getElementById('regEmail')?.value?.trim() || '';
+
+        const nameField = document.getElementById('onboardStudentName');
+        const emailField = document.getElementById('onboardStudentEmail');
+        const instNameField = document.getElementById('onboardInstName');
+        const locField = document.getElementById('onboardInstLocation');
+
+        if (nameField) nameField.value = studentName;
+        if (emailField) emailField.value = studentEmail;
+        if (instNameField) instNameField.value = prefillInstName || instSearchInput.value.trim();
+        if (locField) locField.value = `${cityInput.value.trim()}, ${stateInput.value.trim()}`.replace(/^, |, $/g, '');
+
+        if (onboardingFormContainer) onboardingFormContainer.style.display = 'block';
+        if (onboardingSuccessBox) onboardingSuccessBox.style.display = 'none';
+        onboardingModal.style.display = 'flex';
+      }
+
+      if (btnOpenOnboarding) btnOpenOnboarding.addEventListener('click', () => openOnboardingModal());
+      if (btnOpenOnboardingFromDir) {
+        btnOpenOnboardingFromDir.addEventListener('click', () => openOnboardingModal(instSearchInput.value.trim()));
+      }
+
+      const closeOnboardingBtn = document.getElementById('closeOnboardingModalBtn');
+      if (closeOnboardingBtn && onboardingModal) {
+        closeOnboardingBtn.addEventListener('click', () => { onboardingModal.style.display = 'none'; });
+      }
+      const cancelOnboardingBtn = document.getElementById('cancelOnboardingModalBtn');
+      if (cancelOnboardingBtn && onboardingModal) {
+        cancelOnboardingBtn.addEventListener('click', () => { onboardingModal.style.display = 'none'; });
+      }
+      const doneOnboardingBtn = document.getElementById('doneOnboardingModalBtn');
+      if (doneOnboardingBtn && onboardingModal) {
+        doneOnboardingBtn.addEventListener('click', () => {
+          onboardingModal.style.display = 'none';
+          const submittedEmail = document.getElementById('onboardStudentEmail')?.value?.trim() || '';
+          window.location.replace(`login.html?pending=true&email=${encodeURIComponent(submittedEmail)}`);
+        });
+      }
+
+      if (onboardingForm) {
+        onboardingForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const studentName = document.getElementById('onboardStudentName')?.value?.trim() || '';
+          const studentEmail = document.getElementById('onboardStudentEmail')?.value?.trim() || '';
+          const institutionName = document.getElementById('onboardInstName')?.value?.trim() || '';
+          const institutionLocation = document.getElementById('onboardInstLocation')?.value?.trim() || '';
+          const institutionWebsite = document.getElementById('onboardInstWebsite')?.value?.trim() || '';
+          const message = document.getElementById('onboardMessage')?.value?.trim() || '';
+
+          if (!studentName || !studentEmail || !institutionName || !institutionLocation) {
+            showToast('error', 'Missing Information', 'Please complete all required fields.');
+            return;
+          }
+
+          const submitBtn = document.getElementById('submitOnboardingBtn');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Transmitting...';
+          }
+
+          try {
+            const res = await window.proofVoiceApi.requestStudentOnboarding({
+              studentName,
+              studentEmail,
+              institutionName,
+              institutionLocation,
+              institutionWebsite,
+              message
+            });
+
+            const reqId = res.request_id || 'PV-STU-REQ-2026-001';
+            if (onboardingFormContainer) onboardingFormContainer.style.display = 'none';
+            if (onboardingSuccessText) {
+              onboardingSuccessText.innerHTML = `Your expression of interest for <strong>${escapeHtml(institutionName)}</strong> has been registered with Request ID: <strong style="color:#0F766E;">${reqId}</strong>.<br><br>An automatic notification has been dispatched to the Platform Super-Admin at <strong>the ProofVoice platform desk</strong>. We will review your request and invite your administration to activate institutional access.`;
+            }
+            if (onboardingSuccessBox) onboardingSuccessBox.style.display = 'block';
+            showToast('success', 'Request Dispatched', `Onboarding request ${reqId} sent to Super Admin.`);
+          } catch (err) {
+            showToast('error', 'Transmission Error', err.message || 'Failed to submit onboarding request.');
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'Submit Onboarding Request';
             }
           }
         });
       }
-      if (instSelect) {
-        loadInstitutions();
-      }
 
       // Password Strength Calculator
       const pwdInput = document.getElementById('regPassword');
+      const confirmPwdInput = document.getElementById('regConfirmPassword');
       const bar1 = document.getElementById('bar1');
       const bar2 = document.getElementById('bar2');
       const bar3 = document.getElementById('bar3');
       const strengthText = document.getElementById('strengthText');
 
-      pwdInput.addEventListener('input', () => {
-        const val = pwdInput.value;
-        bar1.className = 'strength-bar';
-        bar2.className = 'strength-bar';
-        bar3.className = 'strength-bar';
+      if (pwdInput && bar1 && bar2 && bar3 && strengthText) {
+        pwdInput.addEventListener('input', () => {
+          const val = pwdInput.value;
+          bar1.className = 'strength-bar';
+          bar2.className = 'strength-bar';
+          bar3.className = 'strength-bar';
 
-        if (val.length === 0) {
-          strengthText.textContent = 'Enter password';
-        } else if (val.length < 6) {
-          bar1.classList.add('weak');
-          strengthText.textContent = 'Weak';
-        } else if (val.length < 10) {
-          bar1.classList.add('medium');
-          bar2.classList.add('medium');
-          strengthText.textContent = 'Medium';
+          if (val.length === 0) {
+            strengthText.textContent = 'Enter password';
+          } else if (val.length < 6) {
+            bar1.classList.add('weak');
+            strengthText.textContent = 'Weak';
+          } else if (val.length < 10) {
+            bar1.classList.add('medium');
+            bar2.classList.add('medium');
+            strengthText.textContent = 'Medium';
+          } else {
+            bar1.classList.add('strong');
+            bar2.classList.add('strong');
+            bar3.classList.add('strong');
+            strengthText.textContent = 'Strong (Good)';
+          }
+        });
+      }
+
+      // Password Visibility Toggles
+      const pwdEyeSvgOpen = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      const pwdEyeSvgSlash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
+
+      const regPwdToggleBtn = document.getElementById('regPwdToggleBtn');
+      if (regPwdToggleBtn && pwdInput) {
+        regPwdToggleBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isPass = pwdInput.type === 'password';
+          pwdInput.type = isPass ? 'text' : 'password';
+          regPwdToggleBtn.innerHTML = isPass ? pwdEyeSvgSlash : pwdEyeSvgOpen;
+          regPwdToggleBtn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+        });
+      }
+
+      const regConfirmPwdToggleBtn = document.getElementById('regConfirmPwdToggleBtn');
+      if (regConfirmPwdToggleBtn && confirmPwdInput) {
+        regConfirmPwdToggleBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isPass = confirmPwdInput.type === 'password';
+          confirmPwdInput.type = isPass ? 'text' : 'password';
+          regConfirmPwdToggleBtn.innerHTML = isPass ? pwdEyeSvgSlash : pwdEyeSvgOpen;
+          regConfirmPwdToggleBtn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+        });
+      }
+
+      function validatePasswordMatch() {
+        const p1 = pwdInput ? pwdInput.value : '';
+        const p2 = confirmPwdInput ? confirmPwdInput.value : '';
+        const errEl = document.getElementById('confirmPwdError');
+        if (!errEl) return;
+        if (p2.length > 0 && p1 !== p2) {
+          errEl.textContent = 'Passwords do not match. Please ensure both passwords are identical.';
+          errEl.style.display = 'block';
+          if (confirmPwdInput) confirmPwdInput.classList.add('is-invalid');
         } else {
-          bar1.classList.add('strong');
-          bar2.classList.add('strong');
-          bar3.classList.add('strong');
-          strengthText.textContent = 'Strong (Good)';
+          errEl.style.display = 'none';
+          if (confirmPwdInput) confirmPwdInput.classList.remove('is-invalid');
         }
-      });
+      }
 
-      // Password Toggle
-      const toggleBtn = document.getElementById('regPwdToggleBtn');
-      toggleBtn.addEventListener('click', () => {
-        pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
-      });
+      if (pwdInput) pwdInput.addEventListener('input', validatePasswordMatch);
+      if (confirmPwdInput) confirmPwdInput.addEventListener('input', validatePasswordMatch);
 
-      // Form Submit
+      // Main Student Registration Form Submit
       const form = document.getElementById('studentRegisterForm');
       const submitBtn = document.getElementById('regSubmitBtn');
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
 
-        const fullName = document.getElementById('regFullName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const studentId = document.getElementById('regStudentId').value.trim();
-        const pwd = pwdInput.value;
-        const confirmPwd = document.getElementById('regConfirmPassword').value;
-        const instId = instSelect.value;
-        const customName = document.getElementById('regCustomInstName').value.trim();
-        const department = document.getElementById('regDepartment').value.trim();
-        const yearSem = document.getElementById('regYearSem').value.trim();
-        const address = document.getElementById('regAddress').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        const termsChecked = document.getElementById('regTerms').checked;
+          const fullName = document.getElementById('regFullName').value.trim();
+          const email = document.getElementById('regEmail').value.trim();
+          const studentId = document.getElementById('regStudentId').value.trim();
+          const pwd = pwdInput ? pwdInput.value : '';
+          const confirmPwd = confirmPwdInput ? confirmPwdInput.value : '';
+          const instId = selectedInstIdInput.value.trim();
+          const department = document.getElementById('regDepartment').value.trim();
+          const yearSem = document.getElementById('regYearSem').value.trim();
+          const address = document.getElementById('regAddress').value.trim();
+          const phone = document.getElementById('regPhone').value.trim();
+          const termsChecked = document.getElementById('regTerms').checked;
 
-        // Reset errors
-        document.querySelectorAll('.form-error').forEach(el => el.style.display = 'none');
+          // Reset errors
+          document.querySelectorAll('.form-error').forEach(el => el.style.display = 'none');
 
-        if (!fullName) {
-          document.getElementById('nameError').textContent = 'Please enter your full legal name.';
-          document.getElementById('nameError').style.display = 'block';
-          return;
-        }
-
-        if (!email || !email.includes('@')) {
-          document.getElementById('emailError').textContent = 'Please enter a valid email address.';
-          document.getElementById('emailError').style.display = 'block';
-          return;
-        }
-
-        if (!studentId) {
-          document.getElementById('studentIdError').textContent = 'Please enter your student ID or enrollment identifier.';
-          document.getElementById('studentIdError').style.display = 'block';
-          return;
-        }
-
-        if (!instId || (instId === 'OTHER' && !customName)) {
-          document.getElementById('instError').textContent = 'Please select or enter your institution name.';
-          document.getElementById('instError').style.display = 'block';
-          return;
-        }
-
-        if (!address) {
-          document.getElementById('addressError').textContent = 'Please provide your correspondence address for formal letters.';
-          document.getElementById('addressError').style.display = 'block';
-          return;
-        }
-
-        if (pwd.length < 8) {
-          showToast('error', 'Weak Password', 'Password must be at least 8 characters long.');
-          return;
-        }
-
-        if (pwd !== confirmPwd) {
-          document.getElementById('confirmPwdError').textContent = 'Passwords do not match.';
-          document.getElementById('confirmPwdError').style.display = 'block';
-          return;
-        }
-
-        if (!termsChecked) {
-          document.getElementById('termsError').textContent = 'You must accept the terms and privacy policy.';
-          document.getElementById('termsError').style.display = 'block';
-          return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="spinner"></span> Creating Account...`;
-
-        try {
-          const isOther = (instId === 'OTHER');
-          const customName = isOther ? document.getElementById('regCustomInstName').value.trim() : '';
-          const regInstType = document.getElementById('regInstType') ? document.getElementById('regInstType').value : 'College';
-          const regInstDomain = document.getElementById('regInstDomain') ? document.getElementById('regInstDomain').value.trim() : '';
-          const regCountry = document.getElementById('regCountry') ? document.getElementById('regCountry').value.trim() : 'India';
-          const regState = document.getElementById('regState') ? document.getElementById('regState').value.trim() : '';
-          const regCity = document.getElementById('regCity') ? document.getElementById('regCity').value.trim() : '';
-
-          if (isOther && !customName) {
-            showToast('error', 'Institution Name Required', 'Please enter your institution name.');
-            document.getElementById('regCustomInstName').focus();
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Create Verified Student Account';
+          if (!fullName) {
+            document.getElementById('nameError').textContent = 'Please enter your full legal name.';
+            document.getElementById('nameError').style.display = 'block';
             return;
           }
 
-          const res = await window.proofVoiceApi.registerStudent({
-            fullName,
-            email,
-            password: pwd,
-            institutionId: isOther ? 'OTHER' : instId,
-            customInstitutionName: customName,
-            institutionType: regInstType,
-            officialDomain: regInstDomain,
-            country: regCountry,
-            state: regState,
-            city: regCity,
-            studentIdentifier: studentId,
-            department,
-            yearSemester: yearSem,
-            residentialAddress: address,
-            phone
-          });
+          if (!email || !email.includes('@')) {
+            document.getElementById('emailError').textContent = 'Please enter a valid email address.';
+            document.getElementById('emailError').style.display = 'block';
+            return;
+          }
 
-          if (res && res.token) {
-            if (window.proofVoiceApi && window.proofVoiceApi.persistSession) {
-              window.proofVoiceApi.persistSession(res.token, res.user, res.institution);
+          if (!studentId) {
+            document.getElementById('studentIdError').textContent = 'Please enter your student ID or enrollment identifier.';
+            document.getElementById('studentIdError').style.display = 'block';
+            return;
+          }
+
+          if (!instId) {
+            document.getElementById('instError').textContent = 'Please search and select an approved institution, or submit an institution onboarding request.';
+            document.getElementById('instError').style.display = 'block';
+            instSearchInput.focus();
+            showToast('error', 'Approved Institution Required', 'Please select an approved institution to continue.');
+            return;
+          }
+
+          if (!address) {
+            document.getElementById('addressError').textContent = 'Please provide your correspondence address for formal letters.';
+            document.getElementById('addressError').style.display = 'block';
+            return;
+          }
+
+          if (pwd.length < 8) {
+            showToast('error', 'Weak Password', 'Password must be at least 8 characters long.');
+            return;
+          }
+
+          if (!/[a-zA-Z]/.test(pwd) || !/[0-9]/.test(pwd)) {
+            showToast('error', 'Password Strength', 'Password must contain both letters and numbers for institutional security.');
+            return;
+          }
+
+          if (pwd !== confirmPwd) {
+            document.getElementById('confirmPwdError').textContent = 'Passwords do not match.';
+            document.getElementById('confirmPwdError').style.display = 'block';
+            return;
+          }
+
+          let formattedPhone = '';
+          if (phone) {
+            const phoneCheck = window.validateIndianPhoneNumber ? window.validateIndianPhoneNumber(phone, false) : { valid: phone.length === 10, value: `+91 ${phone}` };
+            if (!phoneCheck.valid) {
+              const errEl = document.getElementById('regPhoneError');
+              if (errEl) {
+                errEl.textContent = phoneCheck.message;
+                errEl.style.display = 'block';
+              }
+              document.getElementById('regPhone').classList.add('is-invalid');
+              document.getElementById('regPhone').focus();
+              showToast('error', 'Invalid Mobile Number', phoneCheck.message);
+              return;
             }
-            const successMsg = (isOther || res.is_unlisted_institution)
-              ? 'Registration successful! Your institution has been added to ProofVoice. Welcome to your Student Dashboard.'
-              : 'Registration successful! Welcome to your Student Dashboard.';
-            showToast('success', 'Registration Successful', successMsg, 6000);
-            setTimeout(() => {
-              window.location.replace('student-dashboard.html');
-            }, 1200);
+            formattedPhone = phoneCheck.value;
+          }
+
+          if (!termsChecked) {
+            document.getElementById('termsError').textContent = 'You must accept the terms and privacy policy.';
+            document.getElementById('termsError').style.display = 'block';
             return;
           }
 
-          if (res && (res.requires_approval || res.institution_status === 'PENDING')) {
-            showToast('info', 'Registration Submitted', 'Your institution registration request has been submitted successfully and is awaiting platform administrator approval. You will be able to access your student dashboard after approval.', 7000);
-            setTimeout(() => {
-              window.location.replace(`login.html?pending=true&email=${encodeURIComponent(email)}`);
-            }, 1800);
-            return;
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Creating Verified Account...';
           }
 
-          showToast('success', 'Registration Successful', 'Your account has been created. Redirecting to sign in...');
-          setTimeout(() => {
-            window.location.replace(`login.html?registered=true&email=${encodeURIComponent(email)}`);
-          }, 800);
-        } catch (err) {
-          showToast('error', 'Registration Failed', err.message);
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Create Verified Student Account';
-        }
-      });
+          try {
+            const res = await window.proofVoiceApi.registerStudent({
+              fullName,
+              email,
+              password: pwd,
+              confirmPassword: confirmPwd,
+              institutionId: instId,
+              studentIdentifier: studentId,
+              department,
+              yearSemester: yearSem,
+              residentialAddress: address,
+              phone: formattedPhone
+            });
+
+            // Redirect directly to sign-in page with registered email prefill
+            showToast('success', 'Registration Successful', 'Your verified student account has been created! Redirecting to sign in...');
+            setTimeout(() => {
+              window.location.replace(`login.html?registered=true&email=${encodeURIComponent(email)}`);
+            }, 800);
+          } catch (err) {
+            showToast('error', 'Registration Failed', err.message || 'Unable to register student account.');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'Create Verified Student Account';
+            }
+          }
+        });
+      }
     });
+
   </script>
 </body>
 </html>
