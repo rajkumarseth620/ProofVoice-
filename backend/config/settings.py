@@ -360,9 +360,20 @@ STORAGES = {
 }
 
 # Media Files (Attachments & Logos)
+# Defaults to BASE_DIR / 'media' which aligns with the Railway persistent volume at /app/backend/media
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+_CUSTOM_MEDIA_ROOT = os.getenv('MEDIA_ROOT', '').strip()
+MEDIA_ROOT = Path(_CUSTOM_MEDIA_ROOT) if _CUSTOM_MEDIA_ROOT else (BASE_DIR / 'media')
 MAX_UPLOAD_SIZE_MB = int(os.getenv('MAX_UPLOAD_SIZE_MB', 5))
+
+# Safely initialize required media volume subdirectories
+try:
+    os.makedirs(MEDIA_ROOT / 'profile_photos', exist_ok=True)
+    os.makedirs(MEDIA_ROOT / 'complaints' / 'attachments', exist_ok=True)
+    os.makedirs(MEDIA_ROOT / 'institutions' / 'logos', exist_ok=True)
+    os.makedirs(MEDIA_ROOT / 'institutions' / 'docs', exist_ok=True)
+except Exception:
+    pass
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -6,6 +6,7 @@ from apps.accounts.models import User
 
 class ComplaintAttachmentSerializer(serializers.ModelSerializer):
     uploaded_by_name = serializers.CharField(source='uploaded_by.full_name', read_only=True)
+    download_url = serializers.SerializerMethodField()
 
     class Meta:
         model = ComplaintAttachment
@@ -15,11 +16,17 @@ class ComplaintAttachmentSerializer(serializers.ModelSerializer):
             'file_name',
             'file_size',
             'mime_type',
+            'download_url',
             'uploaded_by',
             'uploaded_by_name',
             'created_at'
         ]
         read_only_fields = ['id', 'uploaded_by', 'created_at']
+
+    def get_download_url(self, obj):
+        request = self.context.get('request')
+        url = f"/api/v1/complaints/{obj.complaint_id}/attachments/{obj.id}/"
+        return request.build_absolute_uri(url) if request else url
 
 
 class ComplaintStatusHistorySerializer(serializers.ModelSerializer):
