@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from django.core.exceptions import ValidationError
+from apps.accounts.file_security import validate_and_sanitize_attachment
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
@@ -414,17 +416,59 @@ class ComplaintAttachmentUploadView(APIView):
         if not upload_file:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Max 5MB check
-        if upload_file.size > 5 * 1024 * 1024:
-            return Response({'error': 'File size exceeds maximum limit of 5MB.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Validate file content, signature (magic bytes), and re-encode images via Pillow
+        try:
+            sanitized_file = validate_and_sanitize_attachment(upload_file, max_size=5 * 1024 * 1024)
+        except ValidationError as ve:
+            err_msg = ve.message if hasattr(ve, 'message') else str(ve)
+            return Response({'error': err_msg}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f'Attachment validation failed: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
         attachment = ComplaintAttachment.objects.create(
             complaint=complaint,
-            file=upload_file,
-            file_name=upload_file.name,
-            file_size=upload_file.size,
-            mime_type=upload_file.content_type or 'application/octet-stream',
+            file=sanitized_file,
+            file_name=sanitized_file.name,
+            file_size=sanitized_file.size,
+            mime_type=sanitized_file.content_type or 'application/octet-stream',
             uploaded_by=request.user
         )
 
         return Response(ComplaintAttachmentSerializer(attachment).data, status=status.HTTP_201_CREATED)
+
+class ComplaintAttachmentDownloadView(APIView):
+    """
+    Secure, authenticated endpoint for viewing/downloading complaint attachments.
+    Verifies that the requester is the student owner, the campus institution administrator,
+    or platform superadmin before serving the file.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk, attachment_id):
+        if str(pk).isdigit():
+            complaint = get_object_or_404(Complaint, pk=int(pk))
+        else:
+            complaint = get_object_or_404(Complaint, complaint_id=pk)
+
+        user = request.user
+        is_owner = (user.role == User.Role.STUDENT and complaint.student == user)
+        is_super = (user.role == User.Role.PLATFORM_SUPERADMIN or user.is_superuser)
+        is_inst_admin = False
+        if user.role == User.Role.INSTITUTION_ADMIN and hasattr(user, 'admin_profile'):
+            admin_inst = getattr(user.admin_profile, 'institution', None)
+            if admin_inst and admin_inst.id == complaint.institution_id:
+                is_inst_admin = True
+
+        if not (is_owner or is_super or is_inst_admin):
+            return Response({'error': 'You do not have permission to view or download this document.'}, status=status.HTTP_403_FORBIDDEN)
+
+        attachment = get_object_or_404(ComplaintAttachment, pk=attachment_id, complaint=complaint)
+        if not attachment.file:
+            return Response({'error': 'Attachment file not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        from django.http import FileResponse
+        response = FileResponse(attachment.file.open('rb'), content_type=attachment.mime_type or 'application/octet-stream')
+        response['Content-Disposition'] = f'inline; filename="{attachment.file_name}"'
+        response['X-Content-Type-Options'] = 'nosniff'
+        return response
+

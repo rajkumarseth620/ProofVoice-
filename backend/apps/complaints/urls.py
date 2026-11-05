@@ -6,7 +6,8 @@ from .views import (
     ComplaintTimelineView,
     GenerateApplicationView,
     ComplaintReopenView,
-    ComplaintAttachmentUploadView
+    ComplaintAttachmentUploadView,
+    ComplaintAttachmentDownloadView
 )
 
 urlpatterns = [
@@ -31,4 +32,6 @@ urlpatterns = [
     path('<str:pk>/reopen/', ComplaintReopenView.as_view(), name='complaint-reopen-alt-str'),
     path('<int:pk>/attachments/', ComplaintAttachmentUploadView.as_view(), name='complaint-attachment-id'),
     path('<str:pk>/attachments/', ComplaintAttachmentUploadView.as_view(), name='complaint-attachment-str'),
+    path('<int:pk>/attachments/<int:attachment_id>/', ComplaintAttachmentDownloadView.as_view(), name='complaint-attachment-download-id'),
+    path('<str:pk>/attachments/<int:attachment_id>/', ComplaintAttachmentDownloadView.as_view(), name='complaint-attachment-download-str'),
 ]

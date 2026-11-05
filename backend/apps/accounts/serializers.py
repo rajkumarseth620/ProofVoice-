@@ -60,14 +60,13 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             'semester',
             'address',
             'phone',
-            'initial_password',
             'notify_in_app',
             'notify_email',
             'is_profile_complete',
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['is_profile_complete', 'initial_password', 'created_at', 'updated_at']
+        read_only_fields = ['is_profile_complete', 'created_at', 'updated_at']
 
     def validate_phone(self, value):
         return validate_indian_mobile_number(value)
@@ -89,14 +88,13 @@ class AdministratorProfileSerializer(serializers.ModelSerializer):
             'staff_id',
             'office_address',
             'phone',
-            'initial_password',
             'requested_role',
             'approval_status',
             'approved_at',
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['approval_status', 'approved_at', 'initial_password', 'created_at', 'updated_at']
+        read_only_fields = ['approval_status', 'approved_at', 'created_at', 'updated_at']
 
 
 class UserSerializer(serializers.ModelSerializer):

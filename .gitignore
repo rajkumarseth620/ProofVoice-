@@ -54,10 +54,15 @@ media/
 _audit_backup/
 scratch/
 
-# Security Keys & Certificates
+# Security Keys, Certificates & Database Dumps
 *.pem
 *.key
 *.p12
+*.sql
+!backend/init_db.sql
+*.dump
+*.bak
+*.backup
 *.pfx
 *.cert
 

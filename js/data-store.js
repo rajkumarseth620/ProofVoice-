@@ -909,7 +909,16 @@ class DataStore {
     if (!user && db.users.length > 0) {
       user = db.users.find(u => String(u.id).toLowerCase() === lookupId);
     }
-    if (!user) return false;
+    if (!user) {
+      user = {
+        id: userId,
+        email: profileData.email || (String(userId).includes('@') ? userId : ''),
+        fullName: profileData.fullName || 'Campus User',
+        role: 'student',
+        ...profileData
+      };
+      db.users.push(user);
+    }
 
     if (profileData.fullName) user.fullName = profileData.fullName;
     if (profileData.studentIdentifier !== undefined) user.studentIdentifier = profileData.studentIdentifier;

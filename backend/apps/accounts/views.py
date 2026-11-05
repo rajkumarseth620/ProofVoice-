@@ -8,6 +8,9 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import login as django_login, logout as django_logout
 
+from django.core.cache import cache
+from django.core.exceptions import ValidationError
+from .file_security import validate_and_sanitize_image
 from .models import User, StudentProfile, AdministratorProfile
 from apps.institutions.models import InstitutionRegistrationRequest
 from apps.notifications.models import Notification
@@ -73,16 +76,89 @@ class AdminRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '127.0.0.1')
+
+
+def check_login_rate_limit(request, email):
+    ip = get_client_ip(request)
+    email_key = f"login_fail_email_{email.lower().strip()}"
+    ip_key = f"login_fail_ip_{ip}"
+    email_fails = cache.get(email_key, 0)
+    ip_fails = cache.get(ip_key, 0)
+    if email_fails >= 5 or ip_fails >= 10:
+        return False, "Too many failed login attempts. Please wait 15 minutes before trying again."
+    return True, None
+
+
+def record_login_failure(request, email):
+    ip = get_client_ip(request)
+    email_key = f"login_fail_email_{email.lower().strip()}"
+    ip_key = f"login_fail_ip_{ip}"
+    try:
+        cache.set(email_key, cache.get(email_key, 0) + 1, timeout=900)
+        cache.set(ip_key, cache.get(ip_key, 0) + 1, timeout=900)
+    except Exception:
+        pass
+
+
+def clear_login_failures(request, email):
+    ip = get_client_ip(request)
+    email_key = f"login_fail_email_{email.lower().strip()}"
+    ip_key = f"login_fail_ip_{ip}"
+    try:
+        cache.delete(email_key)
+        cache.delete(ip_key)
+    except Exception:
+        pass
+
+
+def check_reset_rate_limit(request, email):
+    ip = get_client_ip(request)
+    key = f"reset_fail_{email.lower().strip()}_{ip}"
+    fails = cache.get(key, 0)
+    if fails >= 5:
+        return False, "Too many password recovery attempts. Please wait 15 minutes before trying again."
+    return True, None
+
+
+def record_reset_failure(request, email):
+    ip = get_client_ip(request)
+    key = f"reset_fail_{email.lower().strip()}_{ip}"
+    try:
+        cache.set(key, cache.get(key, 0) + 1, timeout=900)
+    except Exception:
+        pass
+
+
+def clear_reset_failures(request, email):
+    ip = get_client_ip(request)
+    key = f"reset_fail_{email.lower().strip()}_{ip}"
+    try:
+        cache.delete(key)
+    except Exception:
+        pass
+
 class LoginView(APIView):
     """
-    Authenticates a user via email and password.
+    Authenticates a user via email and password with brute-force rate limiting.
     Returns auth token, user profile, and institutional scope.
     """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        email = request.data.get('email', '').strip()
+        allowed, wait_msg = check_login_rate_limit(request, email)
+        if not allowed:
+            return Response({'error': wait_msg}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
+            clear_login_failures(request, email)
             user = serializer.validated_data['user']
             token, _ = Token.objects.get_or_create(user=user)
             
@@ -115,6 +191,8 @@ class LoginView(APIView):
                 'is_approved': is_approved,
                 'message': 'Login successful.'
             }, status=status.HTTP_200_OK)
+
+        record_login_failure(request, email)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -185,30 +263,13 @@ class ProfilePhotoView(APIView):
         if not image_file:
             return Response({'error': 'No image file was provided in the request.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # File size check (max 5 MB)
-        max_size = 5 * 1024 * 1024
-        if image_file.size > max_size:
-            return Response({'error': f'Image file exceeds maximum allowed size of 5 MB (received {round(image_file.size / (1024*1024), 2)} MB).'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # File extension validation
-        ext = os.path.splitext(image_file.name)[1].lower()
-        allowed_exts = ['.jpg', '.jpeg', '.png', '.webp']
-        if ext not in allowed_exts:
-            return Response({'error': f'Unsupported image file extension ({ext}). Allowed formats are JPG, JPEG, PNG, and WebP.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Deep image content inspection via Pillow
         try:
-            image_file.seek(0)
-            img = Image.open(image_file)
-            img.verify()
-
-            # Format verification
-            if img.format.upper() not in ['JPEG', 'PNG', 'WEBP']:
-                return Response({'error': f'Invalid image format ({img.format}). Allowed formats are JPEG, PNG, and WebP.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            image_file.seek(0)
+            sanitized_image = validate_and_sanitize_image(image_file, max_size=5 * 1024 * 1024)
+        except ValidationError as ve:
+            err_msg = ve.message if hasattr(ve, 'message') else str(ve)
+            return Response({'error': err_msg}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'error': f'Uploaded file is corrupted or not a valid image: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': f'Image validation failed: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
 
@@ -220,7 +281,7 @@ class ProfilePhotoView(APIView):
             except Exception:
                 pass
 
-        user.profile_image = image_file
+        user.profile_image = sanitized_image
         user.save(update_fields=['profile_image', 'updated_at'])
 
         photo_url = request.build_absolute_uri(user.profile_image.url) if hasattr(user.profile_image, 'url') else None
@@ -294,6 +355,13 @@ class UserProfileDetailView(APIView):
         if request.user.id != target_user.id and request.user.role not in [User.Role.INSTITUTION_ADMIN, User.Role.PLATFORM_SUPERADMIN] and not request.user.is_superuser and not request.user.is_staff:
             return Response({'error': 'You do not have permission to view this profile.'}, status=status.HTTP_403_FORBIDDEN)
 
+        # Cross-institution access boundary: Institution Admins can only view users of their own campus
+        if request.user.role == User.Role.INSTITUTION_ADMIN and not (request.user.is_superuser or request.user.role == User.Role.PLATFORM_SUPERADMIN):
+            admin_inst = getattr(getattr(request.user, 'admin_profile', None), 'institution', None)
+            target_inst = getattr(getattr(target_user, 'student_profile', None), 'institution', None) or getattr(getattr(target_user, 'admin_profile', None), 'institution', None)
+            if not admin_inst or not target_inst or admin_inst.id != target_inst.id:
+                return Response({'error': 'You do not have permission to view profile details of users from another institution.'}, status=status.HTTP_403_FORBIDDEN)
+
         return Response(UserSerializer(target_user).data, status=status.HTTP_200_OK)
 
     def patch(self, request, pk):
@@ -303,6 +371,13 @@ class UserProfileDetailView(APIView):
 
         if request.user.role not in [User.Role.INSTITUTION_ADMIN, User.Role.PLATFORM_SUPERADMIN] and not request.user.is_superuser and not request.user.is_staff:
             return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Cross-institution IDOR protection: Institution Admins can only manage users of their own campus
+        if request.user.role == User.Role.INSTITUTION_ADMIN and not (request.user.is_superuser or request.user.role == User.Role.PLATFORM_SUPERADMIN):
+            admin_inst = getattr(getattr(request.user, 'admin_profile', None), 'institution', None)
+            target_inst = getattr(getattr(target_user, 'student_profile', None), 'institution', None) or getattr(getattr(target_user, 'admin_profile', None), 'institution', None)
+            if not admin_inst or not target_inst or admin_inst.id != target_inst.id:
+                return Response({'error': 'You do not have permission to manage users belonging to another institution.'}, status=status.HTTP_403_FORBIDDEN)
 
         # Update verification status
         if 'is_verified' in request.data:

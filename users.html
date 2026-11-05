@@ -334,6 +334,7 @@
                   fullName: lu.full_name || lu.fullName || existing.fullName || 'Campus User',
                   email: lu.email || existing.email || '',
                   role: lu.role === 'STUDENT' ? 'student' : (lu.role === 'INSTITUTION_ADMIN' ? 'admin' : (existing.role || 'student')),
+                  backendRole: lu.role || existing.backendRole || (lu.is_superuser ? 'PLATFORM_SUPERADMIN' : ''),
                   studentId: sp.student_id || ap.staff_id || lu.student_id || existing.studentId || '',
                   department: sp.department || ap.department_name || lu.department || existing.department || '',
                   course: sp.course || lu.course || existing.course || '',
@@ -358,9 +359,20 @@
       // Filter out Platform Super-Admins from individual campus user directory
       users = users.filter(u => {
         const r = (u.backendRole || u.role || '').toLowerCase();
-        const em = (u.email || '').toLowerCase();
+        const em = (u.email || '').toLowerCase().trim();
         const fn = (u.fullName || '').toLowerCase();
-        if (r === 'superadmin' || r === 'platform_superadmin' || em.includes('superadmin') || em === 'platform.admin@proofvoice.io' || fn.includes('super admin') || fn.includes('platform super')) {
+        if (
+          r === 'superadmin' || 
+          r === 'platform_superadmin' || 
+          u.is_superuser || 
+          em.includes('superadmin') || 
+          em === 'platform.admin@proofvoice.io' || 
+          em === 'superadmin@proofvoice.platform' || 
+          em === 'superadmin@proofvoice.edu' || 
+          em === 'seth86274@gmail.com' || 
+          fn.includes('super admin') || 
+          fn.includes('platform super')
+        ) {
           return false;
         }
         return true;

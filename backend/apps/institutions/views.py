@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from django.core.exceptions import ValidationError
+from apps.accounts.file_security import validate_and_sanitize_attachment
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
@@ -246,12 +248,12 @@ class InstitutionCategoryListView(APIView):
 class InstitutionRegistrationRequestView(APIView):
     """
     Handles submitting and listing institution registration requests.
-    POST is public (AllowAny). GET requires authentication (Super Admin sees all, applicant sees theirs).
+    POST is public (AllowAny). GET requires Platform Superadmin privileges.
     """
     def get_permissions(self):
         if self.request.method == 'POST':
             return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+        return [IsPlatformSuperAdmin()]
 
     def get(self, request):
         if request.user.role == User.Role.PLATFORM_SUPERADMIN or request.user.is_superuser:
@@ -337,14 +339,15 @@ class InstitutionRegistrationRequestView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Document validation (size and extension)
+        # Document validation (content signature, Pillow re-encoding for images, and size)
         if verification_doc:
-            import os
-            ext = os.path.splitext(verification_doc.name)[1].lower()
-            if ext not in ['.pdf', '.jpg', '.jpeg', '.png']:
-                return Response({'error': 'Verification document must be a PDF, JPG, or PNG file.'}, status=status.HTTP_400_BAD_REQUEST)
-            if verification_doc.size > 5 * 1024 * 1024:
-                return Response({'error': 'Verification document must not exceed 5MB in size.'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                verification_doc = validate_and_sanitize_attachment(verification_doc, max_size=5 * 1024 * 1024)
+            except ValidationError as ve:
+                err_msg = ve.message if hasattr(ve, 'message') else str(ve)
+                return Response({'error': err_msg}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({'error': f'Document verification failed: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
         admin_password = request.data.get('admin_password', '').strip()
         confirm_password = request.data.get('confirm_password', '').strip()
@@ -838,8 +841,15 @@ class AdminAccessRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        if request.user.role in [User.Role.PLATFORM_SUPERADMIN, User.Role.INSTITUTION_ADMIN] or request.user.is_superuser or request.user.is_staff:
+        if request.user.role == User.Role.PLATFORM_SUPERADMIN or request.user.is_superuser:
             requests = AdminAccessRequest.objects.all().order_by('-created_at')
+        elif request.user.role == User.Role.INSTITUTION_ADMIN or request.user.is_staff:
+            admin_prof = getattr(request.user, 'admin_profile', None)
+            inst = getattr(admin_prof, 'institution', None) if admin_prof else None
+            if inst:
+                requests = AdminAccessRequest.objects.filter(institution=inst).order_by('-created_at')
+            else:
+                requests = AdminAccessRequest.objects.none()
         else:
             requests = AdminAccessRequest.objects.filter(user=request.user).order_by('-created_at')
 
@@ -914,6 +924,12 @@ class AdminAccessRequestApproveView(APIView):
 
         if not (request.user.role in [User.Role.PLATFORM_SUPERADMIN, User.Role.INSTITUTION_ADMIN] or request.user.is_superuser or request.user.is_staff):
             return Response({'error': 'Insufficient permissions to review access requests.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if request.user.role == User.Role.INSTITUTION_ADMIN and not (request.user.is_superuser or request.user.role == User.Role.PLATFORM_SUPERADMIN):
+            admin_prof = getattr(request.user, 'admin_profile', None)
+            user_inst = getattr(admin_prof, 'institution', None) if admin_prof else None
+            if not user_inst or not access_req.institution or user_inst.id != access_req.institution.id:
+                return Response({'error': 'You do not have permission to review access requests for another institution.'}, status=status.HTTP_403_FORBIDDEN)
 
         action = request.data.get('action', 'approve').lower()
         if action == 'approve':

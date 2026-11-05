@@ -95,6 +95,7 @@ class ComplaintRecipientConfigurationSerializer(serializers.ModelSerializer):
 class InstitutionRegistrationRequestSerializer(serializers.ModelSerializer):
     applicant_email = serializers.CharField(source='applicant_user.email', read_only=True)
     applicant_name = serializers.CharField(source='applicant_user.full_name', read_only=True)
+    admin_password = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = InstitutionRegistrationRequest
@@ -129,7 +130,6 @@ class InstitutionRegistrationRequestSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'request_id',
-            'admin_password',
             'applicant_user',
             'status',
             'rejection_reason',
@@ -193,6 +193,7 @@ class AdminAccessRequestSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True)
     user_phone = serializers.SerializerMethodField(read_only=True)
     institution_name = serializers.CharField(source='institution.name', read_only=True)
+    admin_password = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     def get_user_phone(self, obj):
         if hasattr(obj.user, 'admin_profile') and obj.user.admin_profile and obj.user.admin_profile.phone:
@@ -217,4 +218,4 @@ class AdminAccessRequestSerializer(serializers.ModelSerializer):
             'reviewed_at',
             'created_at'
         ]
-        read_only_fields = ['id', 'user', 'user_phone', 'admin_password', 'status', 'reviewed_by', 'reviewed_at', 'created_at']
+        read_only_fields = ['id', 'user', 'user_phone', 'status', 'reviewed_by', 'reviewed_at', 'created_at']

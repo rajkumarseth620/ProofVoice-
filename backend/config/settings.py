@@ -20,7 +20,12 @@ sys.path.insert(0, str(BASE_DIR / 'apps'))
 load_dotenv(BASE_DIR / '.env')
 
 # Security Settings
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
+if os.getenv('DJANGO_DEBUG') is not None:
+    DEBUG = os.getenv('DJANGO_DEBUG').strip().lower() in ('true', '1', 'yes')
+elif os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('RAILWAY_STATIC_URL') or os.getenv('ENVIRONMENT') == 'production':
+    DEBUG = False
+else:
+    DEBUG = True
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 if not SECRET_KEY:
@@ -33,6 +38,32 @@ if not SECRET_KEY:
 ALLOWED_HOSTS = [h.strip() for h in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver,.railway.app,.up.railway.app').split(',') if h.strip()]
 if 'testserver' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('testserver')
+
+# Security & Cookie Protection
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True').lower() in ('true', '1', 'yes')
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', 31536000))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    X_FRAME_OPTIONS = 'DENY'
+else:
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Application definition
 INSTALLED_APPS = [
@@ -182,34 +213,79 @@ MAX_UPLOAD_SIZE_MB = int(os.getenv('MAX_UPLOAD_SIZE_MB', 5))
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# In-Memory Cache Configuration for Throttling & Brute-Force Defense
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'proofvoice-security-cache',
+    }
+}
+
 # Django REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'apps.accounts.authentication.ExpiringTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '120/min',
+        'user': '300/min',
+        'login': '5/min',
+    },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S%z',
+    'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
 }
 
-# Cross-Origin Resource Sharing (CORS)
+# Cross-Origin Resource Sharing (CORS) & CSRF Configuration
 CORS_ALLOW_CREDENTIALS = True
-cors_origins_env = os.getenv('FRONTEND_ORIGIN', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:5500,http://127.0.0.1:5500,http://localhost:8000,http://127.0.0.1:8000,http://localhost:8080,http://127.0.0.1:8080')
-CORS_ALLOWED_ORIGINS = [orig.strip() for orig in cors_origins_env.split(',') if orig.strip()]
-CORS_ALLOW_ALL_ORIGINS = DEBUG
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https:\/\/.*\.vercel\.app$",
+CORS_ALLOW_ALL_ORIGINS = False
+
+# Strict Origin Whitelist
+DEV_CORS_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
 ]
+
+PROD_CORS_ORIGINS = [
+    'https://proofvoice.vercel.app',
+]
+
+custom_origin_env = os.getenv('FRONTEND_ORIGIN', '').strip()
+if custom_origin_env:
+    for single_origin in custom_origin_env.split(','):
+        clean_origin = single_origin.strip()
+        if clean_origin and clean_origin not in PROD_CORS_ORIGINS:
+            PROD_CORS_ORIGINS.append(clean_origin)
+
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = sorted(list(set(DEV_CORS_ORIGINS + PROD_CORS_ORIGINS)))
+else:
+    CORS_ALLOWED_ORIGINS = sorted(list(set(PROD_CORS_ORIGINS)))
+
+# Removed broad Vercel subdomain regex - exact production origins only
+CORS_ALLOWED_ORIGIN_REGEXES = []
+
 CSRF_TRUSTED_ORIGINS = list(CORS_ALLOWED_ORIGINS)
-for orig in [o for o in [os.getenv('FRONTEND_ORIGIN'), os.getenv('RAILWAY_STATIC_URL')] if o]:
-    for single in orig.split(','):
-        clean = single.strip()
-        if clean and clean not in CSRF_TRUSTED_ORIGINS:
-            CSRF_TRUSTED_ORIGINS.append(clean)
+railway_static = os.getenv('RAILWAY_STATIC_URL', '').strip()
+if railway_static and railway_static not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(railway_static)
 
 # Gnani AI Service Settings (https://docs.gnani.ai/)
 GNANI_API_KEY = os.getenv('GNANI_API_KEY', '')

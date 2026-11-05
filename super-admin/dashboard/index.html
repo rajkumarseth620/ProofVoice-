@@ -1149,15 +1149,26 @@
         if (window.proofVoiceDb) cachedAdminAccessRequests = window.proofVoiceDb.getAdminRequests() || [];
       }
 
-      // Deduplicate admin access requests: 1 request per applicant email
+      // Deduplicate admin access requests: 1 request per applicant email and 1 per applicant+institution
       const seenAccessEmails = new Set();
+      const seenAccessKeys = new Set();
       const uniqueAccess = [];
       for (const r of (cachedAdminAccessRequests || [])) {
         const emailKey = (r.user_email || r.officialEmail || '').toLowerCase().trim();
-        if (emailKey && seenAccessEmails.has(emailKey)) {
+        const nameKey = (r.user_name || r.fullName || '').toLowerCase().trim();
+        const instKey = (r.institution_name || r.institutionName || '').toLowerCase().trim();
+        const compositeKey = nameKey + ':::' + instKey;
+        
+        // Exclude automated test/audit requests from dashboard view
+        if (emailKey.includes('audit_') || emailKey.includes('test_admin') || nameKey.includes('audit admin')) {
+          continue;
+        }
+
+        if ((emailKey && seenAccessEmails.has(emailKey)) || (nameKey && compositeKey && seenAccessKeys.has(compositeKey))) {
           continue;
         }
         if (emailKey) seenAccessEmails.add(emailKey);
+        if (compositeKey) seenAccessKeys.add(compositeKey);
         uniqueAccess.push(r);
       }
       cachedAdminAccessRequests = uniqueAccess;
@@ -1292,12 +1303,19 @@
       const uniqueInstRequests = [];
       for (const req of (cachedInstRequests || [])) {
         const emailKey = (req.official_email || '').toLowerCase().trim();
-        const nameKey = (req.institution_name || '').toLowerCase().trim();
-        if ((emailKey && seenInstEmails.has(emailKey)) || (nameKey && seenInstNames.has(nameKey))) {
+        const rawName = (req.institution_name || '').toLowerCase().trim();
+        const normalizedName = rawName.replace(/\s+[a-f0-9]{4,8}$/i, '').trim();
+
+        // Exclude test/audit noise
+        if (emailKey.includes('audit_') || emailKey.includes('auditscience.edu') || rawName.includes('audit institute')) {
+          continue;
+        }
+
+        if ((emailKey && seenInstEmails.has(emailKey)) || (normalizedName && seenInstNames.has(normalizedName))) {
           continue; // skip duplicate submissions for same institute or email
         }
         if (emailKey) seenInstEmails.add(emailKey);
-        if (nameKey) seenInstNames.add(nameKey);
+        if (normalizedName) seenInstNames.add(normalizedName);
         uniqueInstRequests.push(req);
       }
 
@@ -1527,7 +1545,7 @@
 
           <tr><td style="color:#94A3B8; padding:6px 0;">Official Email:</td><td><a href="mailto:${escapeHtml(req.official_email)}" style="color:#93C5FD;">${escapeHtml(req.official_email)}</a></td></tr>
 
-          <tr><td style="color:#94A3B8; padding:6px 0;">Admin Password (MySQL):</td><td style="font-family:monospace; color:#10B981; font-weight:700;">${escapeHtml(req.admin_password || 'ArkaJain@2026')}</td></tr>
+          <tr><td style="color:#94A3B8; padding:6px 0;">Admin Credentials:</td><td style="font-family:monospace; color:#10B981; font-weight:700;">PBKDF2 SHA-256 (Protected)</td></tr>
 
           <tr><td style="color:#94A3B8; padding:6px 0;">Contact Person:</td><td style="color:#FFFFFF;">${escapeHtml(req.contact_person_name || 'N/A')} (${escapeHtml(req.applicant_designation || '')})</td></tr>
 
