@@ -38,52 +38,52 @@
 
  * - Define window.PROOFVOICE_API_BASE in a script, OR
 
- * - Set in browser console: localStorage.setItem('proofvoice_api_base_url', 'https://<your-backend>.onrender.com')
+ * - Set in browser console: localStorage.setItem('proofvoice_api_base_url', 'https://web-production-39c80.up.railway.app')
 
  */
 
-const PRODUCTION_BACKEND_URL = ''; // Leave empty until backend is deployed, then paste your Render HTTPS URL here
+const PRODUCTION_BACKEND_URL = 'https://web-production-39c80.up.railway.app';
 
 const LOCAL_BACKEND_URL = 'http://127.0.0.1:8000/api/v1';
 
 
 
 function resolveApiBaseUrl() {
+  function formatBaseUrl(url) {
+    if (!url) return '';
+    const base = String(url).trim().replace(/\/+$/, '');
+    return base.endsWith('/api/v1') ? base : `${base}/api/v1`;
+  }
+
   // 1. Runtime override via window global
   if (typeof window !== 'undefined' && window.PROOFVOICE_API_BASE) {
-    const base = String(window.PROOFVOICE_API_BASE).trim().replace(/\/+$/, '');
-    return base.endsWith('/api/v1') ? base : `${base}/api/v1`;
+    return formatBaseUrl(window.PROOFVOICE_API_BASE);
   }
 
   // 2. Runtime override via localStorage (enables live switching to production backend without code redeploy)
   if (typeof localStorage !== 'undefined') {
     const custom = localStorage.getItem('proofvoice_api_base_url');
     if (custom && custom.trim()) {
-      const base = custom.trim().replace(/\/+$/, '');
-      return base.endsWith('/api/v1') ? base : `${base}/api/v1`;
+      return formatBaseUrl(custom);
     }
   }
 
-  // 3. Explicit production backend URL constant
-  if (PRODUCTION_BACKEND_URL && PRODUCTION_BACKEND_URL.trim()) {
-    const base = PRODUCTION_BACKEND_URL.trim().replace(/\/+$/, '');
-    return base.endsWith('/api/v1') ? base : `${base}/api/v1`;
-  }
-
-  // 4. Automatic production environment detection (e.g. Vercel deployment)
+  // 3. Localhost development environment detection
   if (typeof window !== 'undefined' && window.location) {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0' || hostname.endsWith('.local');
-    if (!isLocalhost) {
-      if (hostname.includes('railway.app') || hostname.includes('up.railway.app')) {
-        return `${window.location.origin}/api/v1`;
-      }
-      return 'https://proofvoice-backend.up.railway.app/api/v1';
+    if (isLocalhost) {
+      return formatBaseUrl(LOCAL_BACKEND_URL);
     }
   }
 
-  // 5. Default to local development server
-  return LOCAL_BACKEND_URL;
+  // 4. Explicit production backend URL constant
+  if (PRODUCTION_BACKEND_URL && PRODUCTION_BACKEND_URL.trim()) {
+    return formatBaseUrl(PRODUCTION_BACKEND_URL);
+  }
+
+  // 5. Default production Railway backend
+  return 'https://web-production-39c80.up.railway.app/api/v1';
 }
 
 
