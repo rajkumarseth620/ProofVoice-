@@ -240,11 +240,35 @@ class GnaniAiService:
             }
 
     @classmethod
-    def text_to_speech(cls, text, language='en-IN', voice=None):
+    def _prepare_tts_text(cls, text: str) -> str:
+        """
+        Normalizes formal letter and complaint text for neural TTS playback:
+        - Collapses consecutive newlines and whitespace that generate unnatural pauses
+        - Strips markdown formatting (*, _, #, `, ~, etc.)
+        - Normalizes repeated punctuation and divider lines
+        - Preserves natural sentence punctuation (. , ? !) for authentic Hindi/English prosody
+        """
+        if not text:
+            return ""
+        import re
+        # Remove markdown formatting characters
+        cleaned = re.sub(r'[*_`#~]', '', text)
+        # Collapse multiple horizontal whitespace
+        cleaned = re.sub(r'[ 	]+', ' ', cleaned)
+        # Collapse 3 or more newlines into double newline (paragraph pause)
+        cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+        # Collapse repeated dashes or equal signs used as section dividers
+        cleaned = re.sub(r'[-_=]{3,}', ' ', cleaned)
+        return cleaned.strip()
+
+    @classmethod
+    def text_to_speech(cls, text, language='en-IN', voice=None, speed=None):
         """
         Converts text to spoken audio using Gnani AI Timbre TTS.
         Official Endpoint: https://api.vachana.ai/api/v1/tts/inference
         Header: X-API-Key-ID: <key>
+        Strictly specifies audio_config with 16kHz linear PCM in WAV container
+        to ensure zero sample-rate mismatch and eliminate slow-playback distortion.
         """
         if not cls.is_configured():
             return {
@@ -255,27 +279,44 @@ class GnaniAiService:
 
         endpoint = getattr(settings, 'GNANI_TTS_ENDPOINT', 'https://api.vachana.ai/api/v1/tts/inference')
         api_key = settings.GNANI_API_KEY.strip()
+        tts_model = getattr(settings, 'GNANI_TTS_MODEL', 'timbre-v3.0')
 
-        # Select verified voice
+        # Select verified voice (defaulting to Shivani for natural Indian English / Hindi articulation)
         target_voice = voice if (voice and voice in cls.GNANI_SUPPORTED_VOICES) else cls.LANGUAGE_VOICE_MAP.get(language, 'Shivani')
+
+        # Speaking speed multiplier: Gnani supported range is 0.85 to 1.15 (1.0 = normal natural speed)
+        raw_speed = speed if speed is not None else getattr(settings, 'GNANI_TTS_SPEED', 1.0)
+        try:
+            speed_val = float(raw_speed)
+            speed_val = max(0.85, min(1.15, speed_val))
+        except (ValueError, TypeError):
+            speed_val = 1.0
 
         headers = {
             'X-API-Key-ID': api_key,
             'Content-Type': 'application/json'
         }
 
+        clean_text = cls._prepare_tts_text(text)
+
         payload = {
-            'text': text[:2000],  # Limit chunk size
+            'text': clean_text[:2000],  # Limit chunk size
             'voice': target_voice,
-            'model': 'timbre-v3.0',
+            'model': tts_model,
             'language': language,
-            'speed': 1.0,
-            'sampling_rate': 16000
+            'speed': speed_val,
+            'audio_config': {
+                'encoding': 'linear_pcm',
+                'container': 'wav',
+                'sample_rate': 16000,
+                'num_channels': 1,
+                'sample_width': 2
+            }
         }
 
         logger.info(
-            "[Gnani TTS] Initiating TTS request to %s (voice=%s, lang=%s, text_len=%d)",
-            endpoint, target_voice, language, len(payload['text'])
+            "[Gnani TTS] Initiating TTS request to %s (model=%s, voice=%s, lang=%s, speed=%.2f, text_len=%d)",
+            endpoint, tts_model, target_voice, language, speed_val, len(payload['text'])
         )
 
         try:

@@ -342,6 +342,9 @@ async function speakText(text, onStart, onEnd, complaintId = null) {
       const audioUrl = await window.proofVoiceApi.textToSpeech(text, complaintId);
       if (audioUrl) {
         currentTtsAudio = new Audio(audioUrl);
+        currentTtsAudio.defaultPlaybackRate = 1.0;
+        currentTtsAudio.playbackRate = 1.0;
+        currentTtsAudio.preservesPitch = true;
         currentTtsAudio.onended = () => {
           currentTtsAudio = null;
           if (onEnd) onEnd();
@@ -374,7 +377,7 @@ function playBrowserSynthesis(text, onStart, onEnd) {
   showToast('info', 'Audio Read Aloud', 'Playing preview via Browser SpeechSynthesis.', 2500);
 
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.95;
+  utterance.rate = 1.0;
   utterance.pitch = 1.0;
 
   if (onStart) utterance.onstart = onStart;

@@ -522,6 +522,8 @@ GNANI_API_BASE_URL = os.getenv('GNANI_API_BASE_URL', 'https://api.vachana.ai').r
 GNANI_STT_ENDPOINT = f"{GNANI_API_BASE_URL}/stt/v3"
 GNANI_TTS_ENDPOINT = f"{GNANI_API_BASE_URL}/api/v1/tts/inference"
 GNANI_STT_MODEL = os.getenv('GNANI_STT_MODEL', 'prisma-v3.0')
+GNANI_TTS_MODEL = os.getenv('GNANI_TTS_MODEL', 'timbre-v3.0')
+GNANI_TTS_SPEED = float(os.getenv('GNANI_TTS_SPEED', '1.0'))
 
 # OpenAI Conversational AI Reasoning Settings (https://platform.openai.com/)
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '').strip()

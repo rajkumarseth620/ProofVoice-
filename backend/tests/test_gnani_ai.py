@@ -139,3 +139,73 @@ class GnaniAiIntegrationTests(TestCase):
         is_valid, err = validate_pcm_wav(wav_output)
         self.assertTrue(is_valid)
         self.assertEqual(err, "")
+
+    @patch('requests.post')
+    def test_text_to_speech_payload_structure(self, mock_post):
+        """Verifies text_to_speech includes timbre-v3.0, Shivani voice, speed, and audio_config."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.headers = {'Content-Type': 'audio/wav'}
+        mock_resp.content = pcm_to_wav(b'\x00\x00' * 8000, sample_rate=16000, num_channels=1, sampwidth=2)
+        mock_post.return_value = mock_resp
+
+        self.client.force_authenticate(user=self.student)
+        with patch.object(GnaniAiService, 'is_configured', return_value=True):
+            response = self.client.post(
+                '/api/v1/ai/text-to-speech/',
+                {'text': 'Formal grievance regarding classroom facilities.', 'language': 'en-IN'},
+                format='json'
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response['Content-Type'], 'audio/wav')
+            self.assertEqual(response['X-Voice-Used'], 'Shivani')
+            self.assertTrue(response.content.startswith(b'RIFF'))
+
+            mock_post.assert_called_once()
+            _, kwargs = mock_post.call_args
+            payload = kwargs['json']
+            self.assertEqual(payload['model'], 'timbre-v3.0')
+            self.assertEqual(payload['voice'], 'Shivani')
+            self.assertEqual(payload['speed'], 1.0)
+            self.assertIn('audio_config', payload)
+            self.assertEqual(payload['audio_config']['sample_rate'], 16000)
+            self.assertEqual(payload['audio_config']['container'], 'wav')
+            self.assertEqual(payload['audio_config']['encoding'], 'linear_pcm')
+
+    def test_text_to_speech_speed_clamping(self):
+        """Verifies speaking speed is safely clamped to Gnani supported range [0.85, 1.15]."""
+        with patch.object(GnaniAiService, 'is_configured', return_value=True):
+            with patch('requests.post') as mock_post:
+                mock_resp = MagicMock()
+                mock_resp.status_code = 200
+                mock_resp.headers = {'Content-Type': 'audio/wav'}
+                mock_resp.content = b'RIFF' + b'\x00' * 40
+                mock_post.return_value = mock_resp
+
+                # Test high speed clamping
+                GnaniAiService.text_to_speech('Hello', speed=2.5)
+                self.assertEqual(mock_post.call_args[1]['json']['speed'], 1.15)
+
+                # Test low speed clamping
+                GnaniAiService.text_to_speech('Hello', speed=0.5)
+                self.assertEqual(mock_post.call_args[1]['json']['speed'], 0.85)
+
+                # Test normal speed preservation
+                GnaniAiService.text_to_speech('Hello', speed=1.05)
+                self.assertEqual(mock_post.call_args[1]['json']['speed'], 1.05)
+
+    def test_text_to_speech_text_cleaner(self):
+        """Verifies _prepare_tts_text removes markdown and collapses excessive whitespace/newlines."""
+        raw_text = """### Formal Grievance Regarding **Fan**
+        
+        
+        Respected Sir/Madam,
+        ---
+        Please inspect the *classroom* lab."""
+        cleaned = GnaniAiService._prepare_tts_text(raw_text)
+        self.assertNotIn('###', cleaned)
+        self.assertNotIn('**', cleaned)
+        self.assertNotIn('---', cleaned)
+        self.assertNotIn('*', cleaned)
+        self.assertNotIn('\n\n\n', cleaned)
+        self.assertIn('Respected Sir/Madam', cleaned)

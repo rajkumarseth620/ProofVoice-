@@ -643,7 +643,7 @@ class ProofVoiceAiAssistant {
     try {
       window.speechSynthesis.cancel();
       this.currentUtterance = new SpeechSynthesisUtterance(plain);
-      this.currentUtterance.rate = 0.95;
+      this.currentUtterance.rate = 1.0;
       this.currentUtterance.pitch = 1.0;
 
       const targetLang = langCode || (this.langSelect ? this.langSelect.value : 'en-IN');

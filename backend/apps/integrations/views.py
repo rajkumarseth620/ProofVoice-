@@ -88,13 +88,14 @@ class TextToSpeechView(APIView):
 
         language = request.data.get('language', 'en-IN')
         voice = request.data.get('voice', 'Shivani')
+        speed = request.data.get('speed', None)
 
         logger.info(
             "[TTS View] Incoming text-to-speech synthesis request: user=%s, text_len=%d, voice=%s, lang=%s",
             request.user.id, len(text), voice, language
         )
 
-        result = GnaniAiService.text_to_speech(text, language=language, voice=voice)
+        result = GnaniAiService.text_to_speech(text, language=language, voice=voice, speed=speed)
 
         if not result['success']:
             logger.warning("[TTS View] Speech synthesis failed: %s", result.get('error'))
@@ -103,6 +104,7 @@ class TextToSpeechView(APIView):
         if 'audio_bytes' in result:
             response = HttpResponse(result['audio_bytes'], content_type=result.get('content_type', 'audio/wav'))
             response['Content-Disposition'] = 'inline; filename="complaint_audio.wav"'
+            response['X-Voice-Used'] = result.get('voice', voice)
             return response
 
         return Response(result, status=status.HTTP_200_OK)
