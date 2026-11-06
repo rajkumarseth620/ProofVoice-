@@ -81,9 +81,20 @@ class AdminDashboardView(APIView):
 
         total_complaints = complaints.count()
         pending_review = complaints.filter(status=Complaint.Status.SUBMITTED).count()
+        unassigned_count = complaints.filter(assigned_department__isnull=True).exclude(status__in=[Complaint.Status.RESOLVED, Complaint.Status.REJECTED]).count()
         in_progress = complaints.filter(status__in=[Complaint.Status.UNDER_REVIEW, Complaint.Status.ASSIGNED, Complaint.Status.IN_PROGRESS]).count()
+        under_review_count = complaints.filter(status=Complaint.Status.UNDER_REVIEW).count()
         resolved = complaints.filter(status=Complaint.Status.RESOLVED).count()
+        rejected = complaints.filter(status=Complaint.Status.REJECTED).count()
         critical_priority = complaints.filter(priority__in=[Complaint.Priority.HIGH, Complaint.Priority.CRITICAL]).exclude(status=Complaint.Status.RESOLVED).count()
+
+        from apps.institutions.models import AdminAccessRequest
+        if institution:
+            pending_students = User.objects.filter(role=User.Role.STUDENT, is_verified=False, student_profile__institution=institution).count()
+            pending_admin_reqs = AdminAccessRequest.objects.filter(institution=institution, status=AdminAccessRequest.Status.PENDING).count()
+        else:
+            pending_students = User.objects.filter(role=User.Role.STUDENT, is_verified=False).count()
+            pending_admin_reqs = AdminAccessRequest.objects.filter(status=AdminAccessRequest.Status.PENDING).count()
 
         # Today's submissions
         today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -95,10 +106,15 @@ class AdminDashboardView(APIView):
             'metrics': {
                 'total_complaints': total_complaints,
                 'pending_review': pending_review,
+                'unassigned_complaints': unassigned_count,
+                'under_review': under_review_count,
                 'in_progress': in_progress,
                 'resolved': resolved,
+                'rejected': rejected,
                 'critical_priority': critical_priority,
-                'today_new': today_new
+                'today_new': today_new,
+                'pending_student_verifications': pending_students,
+                'pending_admin_access_requests': pending_admin_reqs
             },
             'institution': {
                 'id': institution.id if institution else None,

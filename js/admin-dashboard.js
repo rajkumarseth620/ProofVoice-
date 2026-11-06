@@ -95,12 +95,25 @@ async function loadAdminDashboard() {
   if (sidebarRole) sidebarRole.textContent = user.designation || 'Administrator';
   if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
 
+  // Try fetching live dashboard metrics from Django API
+  let liveMetrics = null;
+  if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+    try {
+      const resp = await window.proofVoiceApi.getAdminDashboardMetrics();
+      if (resp && resp.metrics) {
+        liveMetrics = resp.metrics;
+      }
+    } catch (e) {
+      console.warn('Could not fetch live dashboard metrics:', e);
+    }
+  }
+
   // Compute Metrics
-  const total = complaints.length;
-  const newSubmissions = complaints.filter(c => c.status === 'Submitted').length;
-  const underReview = complaints.filter(c => c.status === 'Under Review').length;
-  const inProgress = complaints.filter(c => ['In Progress', 'Assigned'].includes(c.status)).length;
-  const resolved = complaints.filter(c => c.status === 'Resolved').length;
+  const total = liveMetrics ? liveMetrics.total_complaints : complaints.length;
+  const newSubmissions = liveMetrics ? (liveMetrics.unassigned_complaints !== undefined ? liveMetrics.unassigned_complaints : liveMetrics.pending_review) : complaints.filter(c => c.status === 'Submitted').length;
+  const underReview = liveMetrics ? liveMetrics.under_review : complaints.filter(c => c.status === 'Under Review').length;
+  const inProgress = liveMetrics ? liveMetrics.in_progress : complaints.filter(c => ['In Progress', 'Assigned'].includes(c.status)).length;
+  const resolved = liveMetrics ? liveMetrics.resolved : complaints.filter(c => c.status === 'Resolved').length;
 
   document.getElementById('adminStatTotal').textContent = total;
   document.getElementById('adminStatNew').textContent = newSubmissions;
@@ -110,15 +123,20 @@ async function loadAdminDashboard() {
 
   // Check for pending staff/administrator access requests
   try {
-    let adminReqs = [];
-    if (window.proofVoiceApi && typeof window.proofVoiceApi.getAdminAccessRequests === 'function') {
-      adminReqs = await window.proofVoiceApi.getAdminAccessRequests() || [];
-    } else if (window.proofVoiceDb) {
-      adminReqs = window.proofVoiceDb.getAdminRequests() || [];
+    let pendingCount = 0;
+    if (liveMetrics && liveMetrics.pending_admin_access_requests !== undefined) {
+      pendingCount = liveMetrics.pending_admin_access_requests;
+    } else {
+      let adminReqs = [];
+      if (window.proofVoiceApi && typeof window.proofVoiceApi.getAdminAccessRequests === 'function') {
+        adminReqs = await window.proofVoiceApi.getAdminAccessRequests() || [];
+      } else if (window.proofVoiceDb) {
+        adminReqs = window.proofVoiceDb.getAdminRequests() || [];
+      }
+      pendingCount = (adminReqs || []).filter(r => (r.status || '').toUpperCase() === 'PENDING').length;
     }
-    const pendingReqs = (adminReqs || []).filter(r => (r.status || '').toUpperCase() === 'PENDING');
     const existingBanner = document.getElementById('pendingAdminReqsAlert');
-    if (pendingReqs.length > 0) {
+    if (pendingCount > 0) {
       if (!existingBanner) {
         const banner = document.createElement('div');
         banner.id = 'pendingAdminReqsAlert';
@@ -132,18 +150,23 @@ async function loadAdminDashboard() {
             <div>
               <strong style="color:var(--color-navy); font-size:14px;">Staff Administrator Requests Pending:</strong>
               <div class="text-xs text-muted" style="margin-top:2px;">
-                ${pendingReqs.length} staff member(s) have requested administrator access to your institution. Review their credentials to approve or reject.
+                ${pendingCount} staff member(s) have requested administrator access to your institution. Review their credentials to approve or reject.
               </div>
             </div>
           </div>
           <a href="users.html?tab=requests" class="btn btn-primary btn-sm" style="white-space:nowrap;">
-            Review Access Requests (${pendingReqs.length}) →
+            Review Access Requests (${pendingCount}) →
           </a>
         `;
         const statsGrid = document.getElementById('adminStatsGrid');
         if (statsGrid && statsGrid.parentNode) {
           statsGrid.parentNode.insertBefore(banner, statsGrid);
         }
+      } else {
+        existingBanner.querySelector('strong').textContent = 'Staff Administrator Requests Pending:';
+        existingBanner.querySelector('.text-muted').textContent = `${pendingCount} staff member(s) have requested administrator access to your institution. Review their credentials to approve or reject.`;
+        const link = existingBanner.querySelector('a');
+        if (link) link.textContent = `Review Access Requests (${pendingCount}) →`;
       }
     } else if (existingBanner) {
       existingBanner.remove();
@@ -305,6 +328,31 @@ async function loadAdminComplaintsTable() {
     });
   }
 
+  const isSuperAdmin = user.role === 'superadmin' || user.backendRole === 'PLATFORM_SUPERADMIN';
+  let instFilter = document.getElementById('adminInstFilter');
+  if (isSuperAdmin && !instFilter) {
+    const filtersContainer = document.querySelector('.table-filters');
+    if (filtersContainer) {
+      instFilter = document.createElement('select');
+      instFilter.id = 'adminInstFilter';
+      instFilter.className = 'form-control';
+      instFilter.style.cssText = 'width:auto; max-width:200px;';
+      instFilter.innerHTML = '<option value="All">All Campuses</option>';
+      filtersContainer.insertBefore(instFilter, filtersContainer.firstChild);
+
+      if (window.proofVoiceApi && typeof window.proofVoiceApi.getInstitutions === 'function') {
+        window.proofVoiceApi.getInstitutions().then(insts => {
+          if (Array.isArray(insts)) {
+            insts.forEach(it => {
+              instFilter.innerHTML += `<option value="${escapeHtml(String(it.id))}">${escapeHtml(it.name)}</option>`;
+            });
+          }
+        }).catch(() => {});
+      }
+      instFilter.addEventListener('change', renderRows);
+    }
+  }
+
   async function renderRows() {
     const filter = {
       search: searchInput ? searchInput.value.trim() : '',
@@ -312,6 +360,9 @@ async function loadAdminComplaintsTable() {
       category: categoryFilter ? categoryFilter.value : 'All',
       department: deptFilter ? deptFilter.value : 'All'
     };
+    if (instFilter && instFilter.value !== 'All') {
+      filter.institution_id = instFilter.value;
+    }
 
     const ctx = await resolveAdminContext(filter);
     let complaints = ctx.complaints || [];
@@ -335,7 +386,10 @@ async function loadAdminComplaintsTable() {
           <a href="admin-complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" style="font-weight:600; color:var(--color-navy); text-decoration:none;">
             ${escapeHtml(c.title)}
           </a>
-          <div class="text-xs text-muted">By: ${escapeHtml(c.studentName || 'Student')} (${escapeHtml(c.studentIdentifier || 'Verified')})</div>
+          <div class="text-xs text-muted">
+            ${isSuperAdmin && c.institutionName ? `Campus: <strong>${escapeHtml(c.institutionName)}</strong> • ` : ''}
+            By: ${escapeHtml(c.studentName || 'Student')} (${escapeHtml(c.studentIdentifier || 'Verified')})
+          </div>
         </td>
         <td><span class="badge" style="background:#F1F5F9; color:#475569;">${escapeHtml(c.category)}</span></td>
         <td>${renderPriorityBadge(c.priority)}</td>

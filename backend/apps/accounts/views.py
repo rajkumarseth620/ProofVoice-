@@ -10,6 +10,7 @@ from django.contrib.auth import login as django_login, logout as django_logout
 
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from .file_security import validate_and_sanitize_image
 from .models import User, StudentProfile, AdministratorProfile
 from apps.institutions.models import InstitutionRegistrationRequest
@@ -362,7 +363,7 @@ class UserProfileDetailView(APIView):
             if not admin_inst or not target_inst or admin_inst.id != target_inst.id:
                 return Response({'error': 'You do not have permission to view profile details of users from another institution.'}, status=status.HTTP_403_FORBIDDEN)
 
-        return Response(UserSerializer(target_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializer(target_user, context={'request': request}).data, status=status.HTTP_200_OK)
 
     def patch(self, request, pk):
         target_user = self._resolve_user(pk)
@@ -374,43 +375,71 @@ class UserProfileDetailView(APIView):
 
         # Cross-institution IDOR protection: Institution Admins can only manage users of their own campus
         if request.user.role == User.Role.INSTITUTION_ADMIN and not (request.user.is_superuser or request.user.role == User.Role.PLATFORM_SUPERADMIN):
-            admin_inst = getattr(getattr(request.user, 'admin_profile', None), 'institution', None)
+            admin_prof = getattr(request.user, 'admin_profile', None)
+            admin_inst = getattr(admin_prof, 'institution', None) if admin_prof else None
             target_inst = getattr(getattr(target_user, 'student_profile', None), 'institution', None) or getattr(getattr(target_user, 'admin_profile', None), 'institution', None)
             if not admin_inst or not target_inst or admin_inst.id != target_inst.id:
                 return Response({'error': 'You do not have permission to manage users belonging to another institution.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Update verification status
-        if 'is_verified' in request.data:
-            val = bool(request.data['is_verified'])
-            target_user.is_verified = val
-            if hasattr(target_user, 'student_profile') and target_user.student_profile:
-                target_user.student_profile.is_profile_complete = True
+        with transaction.atomic():
+            # Update verification status
+            if 'is_verified' in request.data:
+                raw_val = request.data['is_verified']
+                if isinstance(raw_val, str):
+                    val = raw_val.strip().lower() in ('true', '1', 't', 'yes')
+                else:
+                    val = bool(raw_val)
+
+                action = request.data.get('action', '').lower()
+                reason = request.data.get('reason', '').strip()
+
+                target_user.is_verified = val
+                if val:
+                    target_user.is_active = True
+                    if hasattr(target_user, 'student_profile') and target_user.student_profile:
+                        target_user.student_profile.is_profile_complete = True
+                        try:
+                            target_user.student_profile.save()
+                        except Exception:
+                            pass
+                else:
+                    if action == 'reject' and 'is_active' in request.data:
+                        raw_act = request.data['is_active']
+                        target_user.is_active = (raw_act.strip().lower() in ('true', '1', 't', 'yes')) if isinstance(raw_act, str) else bool(raw_act)
+
                 try:
-                    target_user.student_profile.save()
+                    from apps.notifications.models import Notification
+                    if val:
+                        notif_msg = 'Your student enrollment has been officially verified and approved by the campus administration.'
+                        notif_title = 'Student Status Verified'
+                    else:
+                        if action == 'reject':
+                            notif_msg = f"Your student verification request was not approved by campus administration. Reason: {reason or 'Please contact your department administration.'}"
+                            notif_title = 'Verification Request Rejected'
+                        else:
+                            notif_msg = 'Your student enrollment verification status has been updated to unverified by campus administration.'
+                            notif_title = 'Verification Status Updated'
+
+                    Notification.create_for_event(
+                        recipient=target_user,
+                        institution=getattr(getattr(target_user, 'student_profile', None), 'institution', None),
+                        notification_type=Notification.NotificationType.ACCOUNT,
+                        title=notif_title,
+                        message=notif_msg
+                    )
                 except Exception:
                     pass
 
-            try:
-                from apps.notifications.models import Notification
-                notif_msg = 'Your student membership has been officially verified and approved by the campus administration.' if val else 'Your student enrollment verification status has been changed to unverified.'
-                Notification.create_for_event(
-                    recipient=target_user,
-                    institution=getattr(getattr(target_user, 'student_profile', None), 'institution', None),
-                    notification_type=Notification.NotificationType.ACCOUNT,
-                    title='Student Status Verified' if val else 'Verification Status Updated',
-                    message=notif_msg
-                )
-            except Exception:
-                pass
+            if 'is_active' in request.data:
+                raw_act = request.data['is_active']
+                target_user.is_active = (raw_act.strip().lower() in ('true', '1', 't', 'yes')) if isinstance(raw_act, str) else bool(raw_act)
 
-        if 'is_active' in request.data:
-            target_user.is_active = bool(request.data['is_active'])
-
-        target_user.save()
+            target_user.save()
 
         return Response({
+            'success': True,
             'message': 'User status updated successfully.',
-            'user': UserSerializer(target_user).data
+            'user': UserSerializer(target_user, context={'request': request}).data
         }, status=status.HTTP_200_OK)
 
 
@@ -426,29 +455,30 @@ class InstitutionUserListView(APIView):
         if user.role not in [User.Role.INSTITUTION_ADMIN, User.Role.PLATFORM_SUPERADMIN] and not user.is_superuser:
             return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
-        institution = None
+        from django.db.models import Q
         if user.role == User.Role.PLATFORM_SUPERADMIN or user.is_superuser:
             inst_id = request.query_params.get('institution_id')
             if inst_id:
-                from apps.institutions.models import Institution
-                institution = Institution.objects.filter(id=inst_id).first()
+                users_qs = User.objects.filter(
+                    Q(student_profile__institution_id=inst_id) |
+                    Q(admin_profile__institution_id=inst_id)
+                ).distinct()
+            else:
+                users_qs = User.objects.all()
         else:
             admin_prof = getattr(user, 'admin_profile', None)
             institution = getattr(admin_prof, 'institution', None) if admin_prof else None
-
-        from django.db.models import Q
-        if institution:
+            if not institution:
+                return Response([], status=status.HTTP_200_OK)
             users_qs = User.objects.filter(
                 Q(student_profile__institution=institution) |
                 Q(admin_profile__institution=institution)
-            ).exclude(role=User.Role.PLATFORM_SUPERADMIN).distinct().select_related('student_profile', 'admin_profile')
-        else:
-            users_qs = User.objects.exclude(role=User.Role.PLATFORM_SUPERADMIN).select_related('student_profile', 'admin_profile')
+            ).exclude(role=User.Role.PLATFORM_SUPERADMIN).distinct()
 
         role_filter = request.query_params.get('role')
         if role_filter and role_filter != 'All':
             r = role_filter.upper()
-            if r in ['STUDENT', 'INSTITUTION_ADMIN', 'PLATFORM_SUPERADMIN']:
+            if r in ['STUDENT', 'INSTITUTION_ADMIN']:
                 users_qs = users_qs.filter(role=r)
 
         search = request.query_params.get('search')
@@ -457,11 +487,14 @@ class InstitutionUserListView(APIView):
             users_qs = users_qs.filter(
                 Q(full_name__icontains=s) |
                 Q(email__icontains=s) |
-                Q(student_profile__student_id__icontains=s)
+                Q(student_profile__student_id__icontains=s) |
+                Q(admin_profile__staff_id__icontains=s) |
+                Q(student_profile__department__icontains=s) |
+                Q(admin_profile__department_name__icontains=s)
             )
 
         data = []
-        for u in users_qs.order_by('-created_at'):
+        for u in users_qs.select_related('student_profile__institution', 'admin_profile__institution').order_by('-created_at'):
             photo_url = request.build_absolute_uri(u.profile_image.url) if u.profile_image and hasattr(u.profile_image, 'url') else None
             user_dict = {
                 'id': u.id,
@@ -470,8 +503,11 @@ class InstitutionUserListView(APIView):
                 'full_name': u.full_name,
                 'role': 'admin' if u.role == User.Role.INSTITUTION_ADMIN else ('superadmin' if u.role == User.Role.PLATFORM_SUPERADMIN else 'student'),
                 'backendRole': u.role,
+                'is_active': u.is_active,
                 'isActive': u.is_active,
+                'is_verified': u.is_verified,
                 'isVerified': u.is_verified,
+                'status': 'verified' if u.is_verified else ('suspended' if not u.is_active else 'pending_verification'),
                 'profileImage': photo_url,
                 'profile_image_url': photo_url,
                 'dateJoined': u.created_at.isoformat() if u.created_at else None
@@ -479,25 +515,31 @@ class InstitutionUserListView(APIView):
             if hasattr(u, 'student_profile') and u.student_profile:
                 sp = u.student_profile
                 user_dict.update({
-                    'studentId': sp.student_id or 'AIT-STU',
-                    'identifier': sp.student_id or 'AIT-STU',
+                    'studentId': sp.student_id or '',
+                    'identifier': sp.student_id or u.email,
                     'department': sp.department or sp.course or 'General Campus',
                     'course': sp.course or '',
                     'yearSemester': sp.semester or '',
+                    'semester': sp.semester or '',
                     'phone': sp.phone or '',
+                    'address': sp.address or '',
                     'institutionId': sp.institution_id,
                     'institutionName': sp.institution.name if sp.institution else '',
-                    'profileComplete': bool(sp.student_id and sp.address)
+                    'institutionCode': sp.institution.code if sp.institution else '',
+                    'profileComplete': bool(sp.is_profile_complete)
                 })
             elif hasattr(u, 'admin_profile') and u.admin_profile:
                 ap = u.admin_profile
                 user_dict.update({
-                    'studentId': 'STAFF-AUTH',
-                    'identifier': 'STAFF-AUTH',
+                    'studentId': ap.staff_id or 'STAFF-AUTH',
+                    'identifier': ap.staff_id or 'STAFF-AUTH',
                     'department': ap.department_name or ap.designation or 'Academic Administration',
                     'designation': ap.designation or 'Administrator',
+                    'phone': ap.phone or '',
+                    'address': ap.office_address or '',
                     'institutionId': ap.institution_id,
                     'institutionName': ap.institution.name if ap.institution else '',
+                    'institutionCode': ap.institution.code if ap.institution else '',
                     'profileComplete': True
                 })
             data.append(user_dict)

@@ -35,27 +35,46 @@ class AdminComplaintListView(APIView):
 
         # Filters
         st = request.query_params.get('status')
-        if st:
-            complaints = complaints.filter(status=st.upper())
+        if st and st.upper() != 'ALL':
+            if st.upper() == 'UNASSIGNED':
+                complaints = complaints.filter(assigned_department__isnull=True)
+            else:
+                complaints = complaints.filter(status=st.replace(' ', '_').upper())
 
-        pr = request.query_params.get('priority')
-        if pr:
-            complaints = complaints.filter(priority=pr.upper())
+        pr = request.query_params.get('priority') or request.query_params.get('urgency')
+        if pr and pr.upper() != 'ALL':
+            p_val = pr.upper()
+            if p_val == 'URGENT':
+                p_val = Complaint.Priority.CRITICAL
+            complaints = complaints.filter(priority=p_val)
 
-        dept = request.query_params.get('department_id')
-        if dept:
-            complaints = complaints.filter(assigned_department_id=dept)
+        dept = request.query_params.get('department_id') or request.query_params.get('department')
+        if dept and str(dept).upper() != 'ALL':
+            if str(dept).isdigit():
+                complaints = complaints.filter(assigned_department_id=int(dept))
+            else:
+                complaints = complaints.filter(assigned_department__name__iexact=str(dept).strip())
+
+        cat = request.query_params.get('category_id') or request.query_params.get('category')
+        if cat and str(cat).upper() != 'ALL':
+            if str(cat).isdigit():
+                complaints = complaints.filter(category_id=int(cat))
+            else:
+                complaints = complaints.filter(category__name__iexact=str(cat).strip())
 
         search = request.query_params.get('search')
         if search:
+            s = search.strip()
             complaints = complaints.filter(
-                Q(title__icontains=search) |
-                Q(complaint_id__icontains=search) |
-                Q(student__full_name__icontains=search) |
-                Q(student__email__icontains=search) |
-                Q(institution__name__icontains=search) |
-                Q(category__name__icontains=search) |
-                Q(full_issue_location__icontains=search)
+                Q(title__icontains=s) |
+                Q(complaint_id__icontains=s) |
+                Q(student__full_name__icontains=s) |
+                Q(student__email__icontains=s) |
+                Q(student__student_profile__student_id__icontains=s) |
+                Q(institution__name__icontains=s) |
+                Q(category__name__icontains=s) |
+                Q(full_issue_location__icontains=s) |
+                Q(assigned_department__name__icontains=s)
             )
 
         serializer = ComplaintListSerializer(complaints.order_by('-created_at'), many=True)
@@ -88,7 +107,12 @@ class AdminComplaintAssignView(APIView):
 
         dept = None
         if dept_id:
-            dept = get_object_or_404(InstitutionDepartment, pk=dept_id, institution=complaint.institution)
+            if str(dept_id).isdigit():
+                dept = InstitutionDepartment.objects.filter(pk=int(dept_id), institution=complaint.institution).first()
+            else:
+                dept = InstitutionDepartment.objects.filter(name__iexact=str(dept_id).strip(), institution=complaint.institution).first()
+            if not dept:
+                return Response({'error': f'Department "{dept_id}" not found in this institution.'}, status=status.HTTP_400_BAD_REQUEST)
             complaint.assigned_department = dept
 
         assigned_user = None

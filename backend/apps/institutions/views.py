@@ -153,6 +153,15 @@ class InstitutionDepartmentListView(APIView):
     permission_classes = [IsInstitutionAdmin]
 
     def get(self, request):
+        if request.user.role == User.Role.PLATFORM_SUPERADMIN or request.user.is_superuser:
+            inst_id = request.query_params.get('institution_id')
+            if inst_id:
+                departments = InstitutionDepartment.objects.filter(institution_id=inst_id).order_by('name')
+            else:
+                departments = InstitutionDepartment.objects.all().order_by('institution__name', 'name')
+            serializer = InstitutionDepartmentSerializer(departments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
         institution = get_user_institution(request.user)
         if not institution:
             return Response({'error': 'Institution not found.'}, status=status.HTTP_404_NOT_FOUND)
@@ -821,6 +830,7 @@ class SuperAdminOverviewView(APIView):
         suspended_inst = Institution.objects.filter(verification_status=Institution.VerificationStatus.SUSPENDED).count()
         student_requests = StudentOnboardingRequest.objects.count()
         total_students = User.objects.filter(role=User.Role.STUDENT).count()
+        total_admins = User.objects.filter(role=User.Role.INSTITUTION_ADMIN).count()
         pending_admin_access = AdminAccessRequest.objects.filter(status=AdminAccessRequest.Status.PENDING).count()
 
         total_complaints = Complaint.objects.exclude(status=Complaint.Status.DRAFT).count()
@@ -838,6 +848,7 @@ class SuperAdminOverviewView(APIView):
             'suspended_institutions': suspended_inst,
             'student_onboarding_requests': student_requests,
             'total_registered_students': total_students,
+            'total_institution_administrators': total_admins,
             'pending_admin_access_requests': pending_admin_access,
             'total_complaints': total_complaints,
             'pending_complaints': pending_complaints,
@@ -857,6 +868,9 @@ class AdminAccessRequestView(APIView):
     def get(self, request):
         if request.user.role == User.Role.PLATFORM_SUPERADMIN or request.user.is_superuser:
             requests = AdminAccessRequest.objects.all().order_by('-created_at')
+            inst_id = request.query_params.get('institution_id')
+            if inst_id:
+                requests = requests.filter(institution_id=inst_id)
         elif request.user.role == User.Role.INSTITUTION_ADMIN or request.user.is_staff:
             admin_prof = getattr(request.user, 'admin_profile', None)
             inst = getattr(admin_prof, 'institution', None) if admin_prof else None

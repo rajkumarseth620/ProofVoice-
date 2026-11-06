@@ -310,40 +310,34 @@
       let usersMap = new Map();
       const isLive = window.proofVoiceApi && window.proofVoiceApi.isLiveSession();
 
-      // Seed with local store users first so any locally registered accounts appear
-      (db.users || []).forEach(u => {
-        const key = String(u.email || u.id || '').toLowerCase();
-        if (key) usersMap.set(key, u);
-      });
-
-      // If live session, fetch live users from Django API and merge seamlessly
+      // If live session, fetch live users from Django API and populate usersMap exclusively from live backend
       if (isLive) {
         try {
           const liveUsers = await window.proofVoiceApi.getCampusUsers(roleVal !== 'All' ? roleVal : null, searchVal || null);
-          if (liveUsers && Array.isArray(liveUsers) && liveUsers.length > 0) {
+          if (liveUsers && Array.isArray(liveUsers)) {
             liveUsers.forEach(lu => {
               const key = String(lu.email || lu.id || '').toLowerCase();
               if (key) {
-                const existing = usersMap.get(key) || {};
                 const sp = lu.student_profile || {};
                 const ap = lu.admin_profile || {};
+                const userInst = lu.institution_name || (sp.institution && sp.institution.name) || (ap.institution && ap.institution.name) || '';
                 const merged = {
-                  ...existing,
                   ...lu,
-                  id: lu.id || existing.id,
-                  fullName: lu.full_name || lu.fullName || existing.fullName || 'Campus User',
-                  email: lu.email || existing.email || '',
-                  role: lu.role === 'STUDENT' ? 'student' : (lu.role === 'INSTITUTION_ADMIN' ? 'admin' : (existing.role || 'student')),
-                  backendRole: lu.role || existing.backendRole || (lu.is_superuser ? 'PLATFORM_SUPERADMIN' : ''),
-                  studentId: sp.student_id || ap.staff_id || lu.student_id || existing.studentId || '',
-                  department: sp.department || ap.department_name || lu.department || existing.department || '',
-                  course: sp.course || lu.course || existing.course || '',
-                  semester: sp.semester || lu.semester || existing.semester || '',
-                  phone: sp.phone || ap.phone || lu.phone || existing.phone || '',
-                  address: sp.address || ap.office_address || lu.address || existing.address || '',
-                  is_verified: lu.is_verified !== undefined ? lu.is_verified : (existing.is_verified || false),
-                  is_active: lu.is_active !== undefined ? lu.is_active : (existing.is_active !== false),
-                  profileComplete: Boolean(sp.is_profile_complete || lu.profileComplete || existing.profileComplete)
+                  id: lu.id,
+                  fullName: lu.full_name || lu.fullName || 'Campus User',
+                  email: lu.email || '',
+                  role: lu.role === 'STUDENT' ? 'student' : (lu.role === 'INSTITUTION_ADMIN' ? 'admin' : 'student'),
+                  backendRole: lu.role || (lu.is_superuser ? 'PLATFORM_SUPERADMIN' : ''),
+                  studentId: sp.student_id || ap.staff_id || lu.student_id || '',
+                  department: sp.department || ap.department_name || lu.department || '',
+                  course: sp.course || lu.course || '',
+                  semester: sp.semester || lu.semester || '',
+                  phone: sp.phone || ap.phone || lu.phone || '',
+                  address: sp.address || ap.office_address || lu.address || '',
+                  institutionName: userInst,
+                  is_verified: lu.is_verified !== undefined ? lu.is_verified : false,
+                  is_active: lu.is_active !== undefined ? lu.is_active : true,
+                  profileComplete: Boolean(sp.is_profile_complete || lu.profileComplete)
                 };
                 usersMap.set(key, merged);
               }
@@ -352,6 +346,12 @@
         } catch (e) {
           console.warn('[ProofVoice Users] Live fetch error:', e);
         }
+      } else {
+        // In local demo mode, seed with local store users
+        (db.users || []).forEach(u => {
+          const key = String(u.email || u.id || '').toLowerCase();
+          if (key) usersMap.set(key, u);
+        });
       }
 
       let users = Array.from(usersMap.values());
@@ -542,6 +542,9 @@
             <button type="button" class="btn btn-primary btn-sm" id="btnVerifyStudent" onclick="toggleStudentVerification('${escapeHtml(targetId)}', true)">
               ✓ Verify & Approve Student
             </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnRejectStudent" style="color:var(--color-error); border-color:#FECACA;" onclick="rejectStudentVerification('${escapeHtml(targetId)}')">
+              ✕ Reject Student
+            </button>
           ` : `
             <button type="button" class="btn btn-primary btn-sm" id="btnVerifyStudent" style="background:#10B981; border-color:#10B981; cursor:default;" disabled>
               ✓ Verified & Approved
@@ -569,6 +572,20 @@
         btn.textContent = 'Updating...';
       }
       try {
+        if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+          await window.proofVoiceApi.updateUserStatus(userId, { 
+            is_verified: verifyStatus, 
+            action: verifyStatus ? 'approve' : 'revoke' 
+          });
+        } else if (window.proofVoiceDb) {
+          window.proofVoiceDb.updateUserProfile(userId, { 
+            is_verified: verifyStatus, 
+            isVerified: verifyStatus,
+            profileComplete: verifyStatus,
+            status: verifyStatus ? 'verified' : 'pending_verification'
+          });
+        }
+
         const u = cachedUsersList.find(x => 
           (x.id && String(x.id) === String(userId)) || 
           (x.email && String(x.email).toLowerCase() === String(userId).toLowerCase())
@@ -580,23 +597,6 @@
           u.profileComplete = verifyStatus;
         }
 
-        if (window.proofVoiceDb) {
-          window.proofVoiceDb.updateUserProfile(userId, { 
-            is_verified: verifyStatus, 
-            isVerified: verifyStatus,
-            profileComplete: verifyStatus,
-            status: verifyStatus ? 'verified' : 'pending_verification'
-          });
-        }
-
-        if (window.proofVoiceApi && typeof window.proofVoiceApi.updateUserStatus === 'function') {
-          try {
-            await window.proofVoiceApi.updateUserStatus(userId, { is_verified: verifyStatus });
-          } catch (apiErr) {
-            console.warn('[ProofVoice] Live API updateUserStatus notice:', apiErr);
-          }
-        }
-
         showToast('success', verifyStatus ? 'Student Verified' : 'Status Updated', 
           verifyStatus ? 'Student enrollment has been officially verified and approved.' : 'Student verification revoked.');
         
@@ -604,18 +604,76 @@
         openInspectModal(userId);
       } catch (err) {
         console.error('[ProofVoice] Error updating verification:', err);
-        if (window.proofVoiceDb) {
-          window.proofVoiceDb.updateUserProfile(userId, { is_verified: verifyStatus });
+        showToast('error', 'Verification Failed', err.message || 'Could not update student verification.');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = verifyStatus ? '✓ Verify & Approve Student' : 'Revoke Verification';
         }
+      }
+    }
+
+    async function rejectStudentVerification(userId) {
+      const reason = prompt('Please enter the reason for rejecting student verification (optional):', 'Incomplete enrollment details');
+      if (reason === null) return;
+
+      const btn = document.getElementById('btnRejectStudent');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Rejecting...';
+      }
+
+      try {
+        if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+          await window.proofVoiceApi.updateUserStatus(userId, { 
+            is_verified: false, 
+            is_active: false,
+            action: 'reject',
+            reason: reason.trim()
+          });
+        } else if (window.proofVoiceDb) {
+          window.proofVoiceDb.updateUserProfile(userId, { 
+            is_verified: false, 
+            is_active: false,
+            isVerified: false,
+            profileComplete: false,
+            status: 'rejected'
+          });
+        }
+
+        const u = cachedUsersList.find(x => 
+          (x.id && String(x.id) === String(userId)) || 
+          (x.email && String(x.email).toLowerCase() === String(userId).toLowerCase())
+        );
+        if (u) {
+          u.is_verified = false;
+          u.is_active = false;
+          u.isVerified = false;
+          u.status = 'rejected';
+          u.profileComplete = false;
+        }
+
+        showToast('info', 'Verification Rejected', 'Student verification request has been rejected.');
         await renderCampusUsers();
-        openInspectModal(userId);
-        showToast('success', 'Student Verified', 'Student enrollment has been officially verified and approved.');
+        closeInspectModal();
+      } catch (err) {
+        console.error('[ProofVoice] Error rejecting student verification:', err);
+        showToast('error', 'Rejection Failed', err.message || 'Could not reject student verification.');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '✕ Reject Student';
+        }
       }
     }
 
     async function toggleStudentActive(userId, activeStatus) {
       if (!confirm(`Are you sure you want to ${activeStatus ? 'activate' : 'suspend'} this campus user?`)) return;
       try {
+        if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+          await window.proofVoiceApi.updateUserStatus(userId, { is_active: activeStatus });
+        } else if (window.proofVoiceDb) {
+          window.proofVoiceDb.updateUserProfile(userId, { is_active: activeStatus });
+        }
+
         const u = cachedUsersList.find(x => 
           (x.id && String(x.id) === String(userId)) || 
           (x.email && String(x.email).toLowerCase() === String(userId).toLowerCase())
@@ -624,27 +682,13 @@
           u.is_active = activeStatus;
           if (!activeStatus) u.status = 'suspended';
         }
-        if (window.proofVoiceDb) {
-          window.proofVoiceDb.updateUserProfile(userId, { is_active: activeStatus });
-        }
-        if (window.proofVoiceApi && typeof window.proofVoiceApi.updateUserStatus === 'function') {
-          try {
-            await window.proofVoiceApi.updateUserStatus(userId, { is_active: activeStatus });
-          } catch (apiErr) {
-            console.warn('[ProofVoice] Live API updateUserStatus active notice:', apiErr);
-          }
-        }
+
         showToast('info', 'Account Status Changed', `User has been ${activeStatus ? 'activated' : 'suspended'}.`);
         await renderCampusUsers();
         openInspectModal(userId);
       } catch (err) {
         console.error('[ProofVoice] Error changing active state:', err);
-        if (window.proofVoiceDb) {
-          window.proofVoiceDb.updateUserProfile(userId, { is_active: activeStatus });
-        }
-        await renderCampusUsers();
-        openInspectModal(userId);
-        showToast('info', 'Account Status Changed', `User has been ${activeStatus ? 'activated' : 'suspended'}.`);
+        showToast('error', 'Status Update Failed', err.message || 'Could not update user active state.');
       }
     }
 

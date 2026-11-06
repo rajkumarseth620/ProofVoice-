@@ -415,7 +415,7 @@ class ProofVoiceApiClient {
 
       studentName: c.student_name || c.studentName || '',
 
-      studentIdentifier: c.student_email || c.studentIdentifier || '',
+      studentIdentifier: c.student_identifier || c.student_email || c.studentIdentifier || '',
 
       originalTranscription: c.original_description || c.original_transcription || c.originalTranscription || '',
 
@@ -426,6 +426,16 @@ class ProofVoiceApiClient {
       originalInputMethod: String(c.source_type || c.originalInputMethod || 'TEXT').toLowerCase() === 'voice' ? 'voice' : 'text',
 
       recipientAuthority: c.recipientAuthority || 'The Dean',
+
+      institutionName: c.institution_name || (c.institution && c.institution.name) || '',
+
+      institutionId: c.institution ? (c.institution.id || c.institution) : null,
+
+      adminNotes: historySource.filter(h => h && h.internal_note).map(h => ({
+        author: h.changed_by_name || 'Administrator',
+        timestamp: h.timestamp,
+        text: h.internal_note
+      })),
 
       history: historySource.map((h) => ({
 
@@ -2340,7 +2350,12 @@ class ProofVoiceApiClient {
       }
     }
 
-    // Merge with local datastore requests so both backend and local requests display cleanly
+    // In a live backend session, return ONLY the live backend requests to preserve strict institution isolation
+    if (this.isLiveSession()) {
+      return list;
+    }
+
+    // In local demo mode, merge with mock datastore requests
     if (window.proofVoiceDb) {
       const localReqs = window.proofVoiceDb.getAdminRequests() || [];
       const knownIds = new Set(list.map(r => String(r.id)));
@@ -2369,27 +2384,21 @@ class ProofVoiceApiClient {
     const act = String(action || 'approve').toLowerCase();
     let backendResult = null;
 
-    if (this.config.USE_REAL_BACKEND && this.getToken()) {
-      try {
-        const url = this.config.BASE_URL + '/institutions/admin-access-requests/' + encodeURIComponent(id) + '/approve/';
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: this.getHeaders(),
-          body: JSON.stringify({ action: act })
-        });
-        if (res.ok) {
-          backendResult = await this.handleResponse(res);
-        } else if (res.status === 404) {
-          console.info('[ProofVoice API] Request not indexed in backend, using local datastore resolution.');
-        } else {
-          backendResult = await this.handleResponse(res);
-        }
-      } catch (err) {
-        console.warn('[ProofVoice API] Backend review error:', err);
+    if (this.isLiveSession()) {
+      const url = this.config.BASE_URL + '/institutions/admin-access-requests/' + encodeURIComponent(id) + '/approve/';
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ action: act })
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || errData.error || `Review action failed (HTTP ${res.status}).`);
       }
+      backendResult = await this.handleResponse(res);
     }
 
-    // Always keep local datastore in sync so UI immediately reflects decision
+    // Keep local datastore in sync so UI immediately reflects decision
     if (window.proofVoiceDb) {
       if (act === 'approve') {
         window.proofVoiceDb.approveAdminRequest(id);
@@ -2404,6 +2413,23 @@ class ProofVoiceApiClient {
       action: act,
       message: 'Administrator access request ' + verb + ' successfully.'
     };
+  }
+
+  async getAdminDashboardMetrics(institutionId = null) {
+    if (this.isLiveSession()) {
+      try {
+        const qs = institutionId ? `?institution_id=${encodeURIComponent(institutionId)}` : '';
+        const res = await fetch(`${this.config.BASE_URL}/dashboard/admin/${qs}`, {
+          headers: this.getHeaders()
+        });
+        if (res.ok) {
+          return await this.handleResponse(res);
+        }
+      } catch (err) {
+        console.warn('[ProofVoice API] Error fetching admin dashboard metrics:', err);
+      }
+    }
+    return null;
   }
 
   async requestAdminAccess(payload) {
@@ -2462,16 +2488,28 @@ class ProofVoiceApiClient {
 
       const query = new URLSearchParams();
 
-      if (filter.status && filter.status !== 'All' && filter.status !== 'Unassigned') {
-
+      if (filter.status && filter.status !== 'All') {
         query.set('status', String(filter.status).replace(/\s+/g, '_').toUpperCase());
+      }
 
+      if (filter.priority && filter.priority !== 'All') {
+        query.set('priority', String(filter.priority).toUpperCase());
       }
 
       if (filter.search) {
-
         query.set('search', filter.search);
+      }
 
+      if (filter.category && filter.category !== 'All') {
+        query.set('category', filter.category);
+      }
+
+      if (filter.department && filter.department !== 'All') {
+        query.set('department', filter.department);
+      }
+
+      if (filter.institution_id) {
+        query.set('institution_id', filter.institution_id);
       }
 
       const qs = query.toString();
@@ -5201,7 +5239,7 @@ class ProofVoiceApiClient {
 
 
 
-  async getCampusUsers(role = null, search = null) {
+  async getCampusUsers(role = null, search = null, institutionId = null) {
 
     if (this.isLiveSession()) {
 
@@ -5212,6 +5250,8 @@ class ProofVoiceApiClient {
         if (role && role !== 'All') query.set('role', role);
 
         if (search) query.set('search', search);
+
+        if (institutionId) query.set('institution_id', institutionId);
 
         const qs = query.toString();
 
@@ -5246,21 +5286,17 @@ class ProofVoiceApiClient {
   async updateUserStatus(userId, updates) {
     let liveResult = null;
     if (this.isLiveSession()) {
-      try {
-        const url = this.config.BASE_URL + '/users/' + encodeURIComponent(userId) + '/profile/';
-        const res = await fetch(url, {
-          method: 'PATCH',
-          headers: this.getHeaders(),
-          body: JSON.stringify(updates)
-        });
-        if (res.ok) {
-          liveResult = await this.handleResponse(res);
-        } else {
-          console.warn('[ProofVoice API] Non-OK response for user update, falling back:', res.status);
-        }
-      } catch (e) {
-        console.warn('[ProofVoice API] Live updateUserStatus error, falling back:', e);
+      const url = this.config.BASE_URL + '/users/' + encodeURIComponent(userId) + '/profile/';
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: this.getHeaders(),
+        body: JSON.stringify(updates)
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || errData.error || `Failed to update user profile (HTTP ${res.status}).`);
       }
+      liveResult = await this.handleResponse(res);
     }
     // Always keep local datastore in sync so UI immediately reflects verification/active state
     if (window.proofVoiceDb && typeof window.proofVoiceDb.updateUserProfile === 'function') {
