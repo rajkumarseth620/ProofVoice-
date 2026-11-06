@@ -204,6 +204,13 @@
 
         </a>
 
+        <a href="admin-complaints.html" class="sidebar-nav-item" style="color:#94A3B8;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Platform Complaints Desk
+          <span class="badge" id="superComplaintsBadge" style="background:#0F766E; color:#FFFFFF; font-size:10px; margin-left:auto;">0</span>
+        </a>
         <a href="#audit-logs" class="sidebar-nav-item" style="color:#94A3B8;" onclick="switchSuperTab('audit-logs', this)">
 
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -472,6 +479,30 @@
               <div class="stat-card-title" style="color:#94A3B8;">Staff Access Requests</div>
               <div class="stat-number" style="color:#2DD4BF; margin-top:8px;" id="kpiAdminAccessReq">0</div>
               <div class="stat-subtext" style="color:#2DD4BF;">Existing campus staff</div>
+            </div>
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155; cursor:pointer;" onclick="window.location.href='admin-complaints.html'" title="View All Institutional Complaints">
+              <div class="stat-card-title" style="color:#94A3B8;">Total Grievances</div>
+              <div class="stat-number" style="color:#38BDF8; margin-top:8px;" id="kpiTotalComplaints">0</div>
+              <div class="stat-subtext" style="color:#38BDF8;">Platform complaints</div>
+            </div>
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155; cursor:pointer;" onclick="window.location.href='admin-complaints.html'" title="View Pending Complaints">
+              <div class="stat-card-title" style="color:#94A3B8;">Pending / Submitted</div>
+              <div class="stat-number" style="color:#F59E0B; margin-top:8px;" id="kpiPendingComplaints">0</div>
+              <div class="stat-subtext" style="color:#F59E0B;">Awaiting review</div>
+            </div>
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155; cursor:pointer;" onclick="window.location.href='admin-complaints.html'" title="View Under Review Complaints">
+              <div class="stat-card-title" style="color:#94A3B8;">Under Review</div>
+              <div class="stat-number" style="color:#818CF8; margin-top:8px;" id="kpiUnderReviewComplaints">0</div>
+              <div class="stat-subtext" style="color:#818CF8;">In verification</div>
+            </div>
+
+            <div class="stat-card" style="background:#1E293B; border-color:#334155; cursor:pointer;" onclick="window.location.href='admin-complaints.html'" title="View Resolved Complaints">
+              <div class="stat-card-title" style="color:#94A3B8;">Resolved Complaints</div>
+              <div class="stat-number" style="color:#10B981; margin-top:8px;" id="kpiResolvedComplaints">0</div>
+              <div class="stat-subtext" style="color:#10B981;">Successfully closed</div>
             </div>
 
           </div>

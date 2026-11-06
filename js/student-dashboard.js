@@ -215,6 +215,10 @@ async function loadMyComplaintsPage() {
   const user = initial.user;
   const institution = initial.institution;
 
+  if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
+  const instEls = document.querySelectorAll('#studentInstitutionName, #sidebarInstName, .sidebar-institution-name, #topbarInst');
+  instEls.forEach(el => { if (user && user.institutionName) el.textContent = user.institutionName; });
+
   // Populate Categories
   if (categoryFilter && institution && institution.categories) {
     categoryFilter.innerHTML = '<option value="All">All Categories</option>';

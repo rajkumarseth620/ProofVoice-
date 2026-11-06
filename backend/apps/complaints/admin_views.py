@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from .models import Complaint, ComplaintStatusHistory
 from .serializers import ComplaintDetailSerializer, ComplaintListSerializer
@@ -47,7 +48,15 @@ class AdminComplaintListView(APIView):
 
         search = request.query_params.get('search')
         if search:
-            complaints = complaints.filter(title__icontains=search)
+            complaints = complaints.filter(
+                Q(title__icontains=search) |
+                Q(complaint_id__icontains=search) |
+                Q(student__full_name__icontains=search) |
+                Q(student__email__icontains=search) |
+                Q(institution__name__icontains=search) |
+                Q(category__name__icontains=search) |
+                Q(full_issue_location__icontains=search)
+            )
 
         serializer = ComplaintListSerializer(complaints.order_by('-created_at'), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -67,7 +76,9 @@ class AdminComplaintAssignView(APIView):
 
         # Verify institution boundary
         if request.user.role != User.Role.PLATFORM_SUPERADMIN and not request.user.is_superuser:
-            if complaint.institution_id != request.user.admin_profile.institution_id:
+            admin_prof = getattr(request.user, 'admin_profile', None)
+            admin_inst_id = getattr(admin_prof, 'institution_id', None)
+            if not admin_inst_id or complaint.institution_id != admin_inst_id:
                 return Response({'error': 'Permission denied. Cannot modify complaints from another institution.'}, status=status.HTTP_403_FORBIDDEN)
 
         dept_id = request.data.get('department_id') or request.data.get('department')
@@ -140,9 +151,9 @@ class AdminComplaintStatusView(APIView):
         # Verify institution boundary
         if request.user.role != User.Role.PLATFORM_SUPERADMIN and not request.user.is_superuser:
             admin_prof = getattr(request.user, 'admin_profile', None)
-            if admin_prof and admin_prof.institution_id and complaint.institution_id:
-                if complaint.institution_id != admin_prof.institution_id:
-                    return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+            admin_inst_id = getattr(admin_prof, 'institution_id', None)
+            if not admin_inst_id or complaint.institution_id != admin_inst_id:
+                return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
         new_status = request.data.get('status', '').upper()
         if new_status not in Complaint.Status.values:
@@ -228,7 +239,9 @@ class AdminComplaintRemarksView(APIView):
             complaint = get_object_or_404(Complaint, complaint_id=pk)
 
         if request.user.role != User.Role.PLATFORM_SUPERADMIN and not request.user.is_superuser:
-            if complaint.institution_id != request.user.admin_profile.institution_id:
+            admin_prof = getattr(request.user, 'admin_profile', None)
+            admin_inst_id = getattr(admin_prof, 'institution_id', None)
+            if not admin_inst_id or complaint.institution_id != admin_inst_id:
                 return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
         remark = request.data.get('remark', '').strip()
@@ -269,7 +282,9 @@ class AdminComplaintInternalNotesView(APIView):
             complaint = get_object_or_404(Complaint, complaint_id=pk)
 
         if request.user.role != User.Role.PLATFORM_SUPERADMIN and not request.user.is_superuser:
-            if complaint.institution_id != request.user.admin_profile.institution_id:
+            admin_prof = getattr(request.user, 'admin_profile', None)
+            admin_inst_id = getattr(admin_prof, 'institution_id', None)
+            if not admin_inst_id or complaint.institution_id != admin_inst_id:
                 return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
         note = request.data.get('internal_note', '').strip()
@@ -300,7 +315,9 @@ class AdminComplaintResolutionView(APIView):
             complaint = get_object_or_404(Complaint, complaint_id=pk)
 
         if request.user.role != User.Role.PLATFORM_SUPERADMIN and not request.user.is_superuser:
-            if complaint.institution_id != request.user.admin_profile.institution_id:
+            admin_prof = getattr(request.user, 'admin_profile', None)
+            admin_inst_id = getattr(admin_prof, 'institution_id', None)
+            if not admin_inst_id or complaint.institution_id != admin_inst_id:
                 return Response({'error': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
         resolution_details = request.data.get('resolution_details', '').strip()

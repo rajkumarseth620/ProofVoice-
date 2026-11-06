@@ -137,7 +137,8 @@ function syncGlobalUserAvatars() {
   const firstName = displayName.trim().split(/\s+/)[0] || displayName;
   const initials = (user.avatar || (displayName ? displayName.split(' ').map(n => n[0]).join('').slice(0, 2) : 'PV')).toUpperCase();
   const photoUrl = user.profileImage || null;
-  const isAdmin = user.role === 'admin' || user.backendRole === 'INSTITUTION_ADMIN';
+  const isSuperAdmin = user.role === 'superadmin' || user.backendRole === 'PLATFORM_SUPERADMIN';
+  const isAdmin = !isSuperAdmin && (user.role === 'admin' || user.backendRole === 'INSTITUTION_ADMIN');
 
   const avatarEls = document.querySelectorAll(
     '.user-avatar, #sidebarUserAvatar, #sidebarAvatar, #topbarAvatar, #adminTopbarAvatar, #adminSidebarAvatar, #profilePhotoDisplay, [id*="UserAvatar"], [id*="SidebarAvatar"], [id*="TopbarAvatar"]'
@@ -155,7 +156,7 @@ function syncGlobalUserAvatars() {
     } else {
       el.style.backgroundImage = 'none';
       el.textContent = initials;
-      el.style.backgroundColor = isAdmin ? '#1E293B' : '#4F46E5';
+      el.style.backgroundColor = isSuperAdmin ? '#0F766E' : (isAdmin ? '#1E293B' : '#4F46E5');
       el.style.color = '#FFFFFF';
     }
   });
@@ -176,7 +177,9 @@ function syncGlobalUserAvatars() {
 
   const roleEls = document.querySelectorAll('#sidebarUserRole, #adminSidebarRole, .sidebar-footer .user-role-label, .user-role-label');
   roleEls.forEach(el => {
-    if (isAdmin) {
+    if (isSuperAdmin) {
+      el.textContent = 'Platform Super-Admin';
+    } else if (isAdmin) {
       el.textContent = user.designation || 'Administrator';
     } else {
       const dept = user.department || 'Student';
@@ -185,13 +188,26 @@ function syncGlobalUserAvatars() {
     }
   });
 
-  const instEls = document.querySelectorAll('#studentInstitutionName, #adminInstitutionName, #sidebarInstName, #topbarInst, .user-tenant-display, .institution-pill span');
+  const instEls = document.querySelectorAll(
+    '#studentInstitutionName, #adminInstitutionName, #sidebarInstName, #topbarInst, .sidebar-institution-name, .user-tenant-display, .institution-pill span, [class*="sidebar-institution-name"], [id*="InstName"]'
+  );
   instEls.forEach(el => {
-    if (user.institutionName) {
+    if (isSuperAdmin) {
+      if (el.closest('.sidebar-institution-badge') || el.classList.contains('sidebar-institution-name')) {
+        el.textContent = 'Platform Super-Admin';
+        return;
+      }
+      if (el.id === 'topbarInst' || el.closest('.institution-pill')) {
+        el.textContent = 'Campus Administration Workspace';
+        return;
+      }
+    }
+    const instName = user.institutionName || (user.institution && user.institution.name) || '';
+    if (instName) {
       if (el.textContent.includes('Tenant:')) {
-        el.textContent = `Tenant: ${user.institutionName}`;
+        el.textContent = `Tenant: ${instName}`;
       } else {
-        el.textContent = user.institutionName;
+        el.textContent = instName;
       }
     }
   });
@@ -704,6 +720,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Universally synchronize profile photos and initials across avatars
   syncGlobalUserAvatars();
+
+  if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+    window.proofVoiceApi.getCurrentUser().then(u => {
+      if (u) syncGlobalUserAvatars();
+    }).catch(() => {});
+  }
 
   if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
     window.proofVoiceApi.getNotifications().then(notifs => {

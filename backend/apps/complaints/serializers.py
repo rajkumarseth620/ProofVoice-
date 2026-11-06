@@ -59,6 +59,19 @@ class ComplaintListSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     institution_name = serializers.CharField(source='institution.name', read_only=True)
     department_name = serializers.CharField(source='assigned_department.name', read_only=True)
+    assigned_department_name = serializers.CharField(source='assigned_department.name', read_only=True)
+    assigned_admin_name = serializers.CharField(source='assigned_admin.full_name', read_only=True)
+    student_name = serializers.CharField(source='student.full_name', read_only=True)
+    student_email = serializers.CharField(source='student.email', read_only=True)
+    student_identifier = serializers.SerializerMethodField()
+
+    def get_student_identifier(self, obj):
+        if obj.student:
+            sp = getattr(obj.student, 'student_profile', None)
+            if sp and sp.student_id:
+                return sp.student_id
+            return obj.student.email
+        return 'N/A'
 
     class Meta:
         model = Complaint
@@ -68,9 +81,17 @@ class ComplaintListSerializer(serializers.ModelSerializer):
             'title',
             'institution',
             'institution_name',
+            'student',
+            'student_name',
+            'student_email',
+            'student_identifier',
             'category',
             'category_name',
             'department_name',
+            'assigned_department',
+            'assigned_department_name',
+            'assigned_admin',
+            'assigned_admin_name',
             'priority',
             'status',
             'source_type',
@@ -84,12 +105,21 @@ class ComplaintListSerializer(serializers.ModelSerializer):
 class ComplaintDetailSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.full_name', read_only=True)
     student_email = serializers.CharField(source='student.email', read_only=True)
+    student_identifier = serializers.SerializerMethodField()
     institution_name = serializers.CharField(source='institution.name', read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     assigned_department_name = serializers.CharField(source='assigned_department.name', read_only=True)
     assigned_admin_name = serializers.CharField(source='assigned_admin.full_name', read_only=True)
     status_history = ComplaintStatusHistorySerializer(many=True, read_only=True)
     attachments = ComplaintAttachmentSerializer(many=True, read_only=True)
+
+    def get_student_identifier(self, obj):
+        if obj.student:
+            sp = getattr(obj.student, 'student_profile', None)
+            if sp and sp.student_id:
+                return sp.student_id
+            return obj.student.email
+        return 'N/A'
 
     class Meta:
         model = Complaint
@@ -102,6 +132,7 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
             'student',
             'student_name',
             'student_email',
+            'student_identifier',
             'category',
             'category_name',
             'priority',
@@ -144,6 +175,9 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
     category_id = serializers.IntegerField(required=False, allow_null=True)
     category = serializers.CharField(required=False, allow_blank=True, write_only=True)
     submit_now = serializers.BooleanField(required=False, default=False)
+    description = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    formal_application = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    location = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = Complaint
@@ -161,14 +195,39 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
             'floor',
             'room_number',
             'full_issue_location',
-            'submit_now'
+            'submit_now',
+            'description',
+            'formal_application',
+            'location'
         ]
         extra_kwargs = {
-            'category': {'required': False}
+            'category': {'required': False},
+            'original_description': {'required': False, 'allow_blank': True}
         }
+
+    def to_internal_value(self, data):
+        data_copy = data.copy() if hasattr(data, 'copy') else dict(data)
+        desc = (
+            data_copy.get('original_description') or
+            data_copy.get('description') or
+            data_copy.get('original_transcription') or
+            data_copy.get('formal_application') or
+            data_copy.get('final_submitted_application') or
+            data_copy.get('title') or
+            'Complaint application'
+        )
+        data_copy['original_description'] = desc
+        if not data_copy.get('final_submitted_application') and data_copy.get('formal_application'):
+            data_copy['final_submitted_application'] = data_copy['formal_application']
+        if not data_copy.get('full_issue_location') and data_copy.get('location'):
+            data_copy['full_issue_location'] = data_copy['location']
+        return super().to_internal_value(data_copy)
 
     @transaction.atomic
     def create(self, validated_data):
+        validated_data.pop('description', None)
+        validated_data.pop('formal_application', None)
+        validated_data.pop('location', None)
         submit_now = validated_data.pop('submit_now', False)
         category_id = validated_data.pop('category_id', None)
         category_name = validated_data.pop('category', None)

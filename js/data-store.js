@@ -708,7 +708,12 @@ class DataStore {
         return liveUser;
       }
     }
-    return null;
+    const db = this.getDb();
+    if (db && db.currentSession && db.currentSession.userId) {
+      const found = db.users && db.users.find(u => u.id === db.currentSession.userId);
+      if (found) return found;
+    }
+    return (db && db.users && db.users[0]) || null;
   }
 
   getInstitution(institutionId) {
@@ -1018,17 +1023,20 @@ class DataStore {
 
     const matchInstitution = (cInstId, userInstId) => {
       if (!userInstId || !cInstId) return true;
-      if (String(cInstId) === String(userInstId)) return true;
-      const cStr = String(cInstId).toLowerCase();
-      const uStr = String(userInstId).toLowerCase();
-      if ((cStr.includes('apex') || cStr === '1') && (uStr.includes('apex') || uStr === '1')) return true;
-      if ((cStr.includes('horizon') || cStr === '2') && (uStr.includes('horizon') || uStr === '2')) return true;
-      if ((cStr.includes('greenfield') || cStr === '3') && (uStr.includes('greenfield') || uStr === '3')) return true;
+      if (String(cInstId).trim() === String(userInstId).trim()) return true;
+      const cStr = String(cInstId).toLowerCase().trim();
+      const uStr = String(userInstId).toLowerCase().trim();
+      if (cStr === uStr) return true;
+      const norm = s => s.replace(/^inst_/, '').replace(/[_\s-]+/g, ' ').trim();
+      const nC = norm(cStr);
+      const nU = norm(uStr);
+      if (nC === nU) return true;
+      if (nC.length > 2 && nU.length > 2 && (nC.includes(nU) || nU.includes(nC))) return true;
       return false;
     };
 
-    const targetRole = forceRole || currentUser.role;
-    const targetInstId = currentUser.institutionId || 'inst_apex_01';
+    const targetRole = forceRole || (currentUser && currentUser.role) || 'student';
+    const targetInstId = (currentUser && (currentUser.institutionId || currentUser.institution_id)) || 'inst_apex_01';
 
     // Strict Tenant Isolation
     if (targetRole === 'student') {
@@ -1074,17 +1082,20 @@ class DataStore {
 
     const matchInstitution = (cInstId, userInstId) => {
       if (!userInstId || !cInstId) return true;
-      if (String(cInstId) === String(userInstId)) return true;
-      const cStr = String(cInstId).toLowerCase();
-      const uStr = String(userInstId).toLowerCase();
-      if ((cStr.includes('apex') || cStr === '1') && (uStr.includes('apex') || uStr === '1')) return true;
-      if ((cStr.includes('horizon') || cStr === '2') && (uStr.includes('horizon') || uStr === '2')) return true;
-      if ((cStr.includes('greenfield') || cStr === '3') && (uStr.includes('greenfield') || uStr === '3')) return true;
+      if (String(cInstId).trim() === String(userInstId).trim()) return true;
+      const cStr = String(cInstId).toLowerCase().trim();
+      const uStr = String(userInstId).toLowerCase().trim();
+      if (cStr === uStr) return true;
+      const norm = s => s.replace(/^inst_/, '').replace(/[_\s-]+/g, ' ').trim();
+      const nC = norm(cStr);
+      const nU = norm(uStr);
+      if (nC === nU) return true;
+      if (nC.length > 2 && nU.length > 2 && (nC.includes(nU) || nU.includes(nC))) return true;
       return false;
     };
 
-    const targetRole = forceRole || currentUser.role;
-    const targetInstId = currentUser.institutionId || 'inst_apex_01';
+    const targetRole = forceRole || (currentUser && currentUser.role) || 'student';
+    const targetInstId = (currentUser && (currentUser.institutionId || currentUser.institution_id)) || 'inst_apex_01';
 
     // Cross-tenant security check: Ensure grievance belongs to the active tenant
     if (!matchInstitution(complaint.institutionId, targetInstId)) {

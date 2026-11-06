@@ -813,6 +813,7 @@ class SuperAdminOverviewView(APIView):
     permission_classes = [IsPlatformSuperAdmin]
 
     def get(self, request):
+        from apps.complaints.models import Complaint
         total_inst = Institution.objects.count()
         approved_inst = Institution.objects.filter(verification_status=Institution.VerificationStatus.VERIFIED).count()
         pending_inst_reqs = InstitutionRegistrationRequest.objects.filter(status=InstitutionRegistrationRequest.Status.PENDING).count()
@@ -822,6 +823,13 @@ class SuperAdminOverviewView(APIView):
         total_students = User.objects.filter(role=User.Role.STUDENT).count()
         pending_admin_access = AdminAccessRequest.objects.filter(status=AdminAccessRequest.Status.PENDING).count()
 
+        total_complaints = Complaint.objects.exclude(status=Complaint.Status.DRAFT).count()
+        pending_complaints = Complaint.objects.filter(status=Complaint.Status.SUBMITTED).count()
+        under_review = Complaint.objects.filter(status=Complaint.Status.UNDER_REVIEW).count()
+        in_progress = Complaint.objects.filter(status__in=[Complaint.Status.IN_PROGRESS, Complaint.Status.ASSIGNED]).count()
+        resolved = Complaint.objects.filter(status=Complaint.Status.RESOLVED).count()
+        rejected_complaints = Complaint.objects.filter(status=Complaint.Status.REJECTED).count()
+
         return Response({
             'total_institutions': total_inst,
             'approved_institutions': approved_inst,
@@ -830,7 +838,13 @@ class SuperAdminOverviewView(APIView):
             'suspended_institutions': suspended_inst,
             'student_onboarding_requests': student_requests,
             'total_registered_students': total_students,
-            'pending_admin_access_requests': pending_admin_access
+            'pending_admin_access_requests': pending_admin_access,
+            'total_complaints': total_complaints,
+            'pending_complaints': pending_complaints,
+            'under_review_complaints': under_review,
+            'in_progress_complaints': in_progress,
+            'resolved_complaints': resolved,
+            'rejected_complaints': rejected_complaints
         }, status=status.HTTP_200_OK)
 
 

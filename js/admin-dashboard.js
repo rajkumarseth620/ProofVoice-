@@ -42,7 +42,7 @@ async function resolveAdminContext(filter) {
     return {
       user,
       institution: {
-        name: user.institutionName || instObj.name || 'Campus Administration Workspace',
+        name: (user.role === 'superadmin' || user.backendRole === 'PLATFORM_SUPERADMIN') ? 'Campus Administration Workspace' : (user.institutionName || instObj.name || 'Campus Administration Workspace'),
         departments: (instObj.departments && instObj.departments.length > 0) ? instObj.departments : [
           'Estate & Maintenance',
           'Hostel Administration',

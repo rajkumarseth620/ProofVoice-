@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from apps.accounts.file_security import validate_and_sanitize_attachment
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from .models import Complaint, ComplaintStatusHistory, ComplaintAttachment
 from .serializers import (
@@ -47,7 +48,12 @@ class ComplaintListCreateView(APIView):
         # Optional search
         q = request.query_params.get('search')
         if q:
-            complaints = complaints.filter(title__icontains=q)
+            complaints = complaints.filter(
+                Q(title__icontains=q) |
+                Q(complaint_id__icontains=q) |
+                Q(full_issue_location__icontains=q) |
+                Q(category__name__icontains=q)
+            )
 
         serializer = ComplaintListSerializer(complaints, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

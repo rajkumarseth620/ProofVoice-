@@ -101,6 +101,10 @@ class UserSerializer(serializers.ModelSerializer):
     student_profile = StudentProfileSerializer(read_only=True)
     admin_profile = AdministratorProfileSerializer(read_only=True)
     profile_image_url = serializers.SerializerMethodField()
+    institution = serializers.SerializerMethodField()
+    institution_name = serializers.SerializerMethodField()
+    institution_id = serializers.SerializerMethodField()
+    institution_code = serializers.SerializerMethodField()
 
     def get_profile_image_url(self, obj):
         if obj.profile_image and hasattr(obj.profile_image, 'url'):
@@ -112,6 +116,37 @@ class UserSerializer(serializers.ModelSerializer):
                 return f"http://127.0.0.1:8000{url}"
             return url
         return None
+
+    def _get_user_institution(self, obj):
+        if hasattr(obj, 'student_profile') and obj.student_profile and obj.student_profile.institution:
+            return obj.student_profile.institution
+        if hasattr(obj, 'admin_profile') and obj.admin_profile and obj.admin_profile.institution:
+            return obj.admin_profile.institution
+        return None
+
+    def get_institution(self, obj):
+        inst = self._get_user_institution(obj)
+        if inst:
+            return {
+                'id': inst.id,
+                'name': inst.name,
+                'code': inst.code,
+                'verification_status': inst.verification_status,
+                'is_active': inst.is_active
+            }
+        return None
+
+    def get_institution_name(self, obj):
+        inst = self._get_user_institution(obj)
+        return inst.name if inst else ''
+
+    def get_institution_id(self, obj):
+        inst = self._get_user_institution(obj)
+        return inst.id if inst else None
+
+    def get_institution_code(self, obj):
+        inst = self._get_user_institution(obj)
+        return inst.code if inst else ''
 
     class Meta:
         model = User
@@ -126,10 +161,14 @@ class UserSerializer(serializers.ModelSerializer):
             'profile_image_url',
             'student_profile',
             'admin_profile',
+            'institution',
+            'institution_name',
+            'institution_id',
+            'institution_code',
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['id', 'role', 'is_verified', 'profile_image', 'profile_image_url', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'role', 'is_verified', 'profile_image', 'profile_image_url', 'institution', 'institution_name', 'institution_id', 'institution_code', 'created_at', 'updated_at']
 
 
 class StudentRegistrationSerializer(serializers.Serializer):
