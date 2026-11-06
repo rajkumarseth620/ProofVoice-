@@ -329,15 +329,49 @@ function formatDateOnly(isoStr) {
   });
 }
 
-// Browser Text-To-Speech with honest disclosure (Gnani AI Timbre integration placeholder)
-function speakText(text, onStart, onEnd) {
+// Speech Synthesis Audio Player (supports live Gnani AI Timbre TTS with browser fallback)
+let currentTtsAudio = null;
+
+async function speakText(text, onStart, onEnd, complaintId = null) {
+  stopSpeaking();
+
+  if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+    try {
+      showToast('info', 'Gnani AI Timbre TTS', 'Synthesizing voice audio via Gnani AI Timbre...', 2500);
+      if (onStart) onStart();
+      const audioUrl = await window.proofVoiceApi.textToSpeech(text, complaintId);
+      if (audioUrl) {
+        currentTtsAudio = new Audio(audioUrl);
+        currentTtsAudio.onended = () => {
+          currentTtsAudio = null;
+          if (onEnd) onEnd();
+        };
+        currentTtsAudio.onerror = (e) => {
+          console.warn('[ProofVoice TTS] Audio playback error on Gnani audio stream, falling back to browser synthesis:', e);
+          currentTtsAudio = null;
+          playBrowserSynthesis(text, onStart, onEnd);
+        };
+        await currentTtsAudio.play();
+        return;
+      }
+    } catch (err) {
+      console.warn('[ProofVoice TTS] Live Gnani TTS call failed, falling back to browser synthesis:', err);
+    }
+  }
+
+  // Graceful fallback to browser speech synthesis
+  playBrowserSynthesis(text, onStart, onEnd);
+}
+
+function playBrowserSynthesis(text, onStart, onEnd) {
   if (!('speechSynthesis' in window)) {
     showToast('warning', 'TTS Unavailable', 'Your browser does not support SpeechSynthesis.');
+    if (onEnd) onEnd();
     return;
   }
   window.speechSynthesis.cancel();
 
-  showToast('info', 'Audio Read Aloud', 'Playing preview via Browser SpeechSynthesis (Gnani AI Timbre API is not connected yet).', 3000);
+  showToast('info', 'Audio Read Aloud', 'Playing preview via Browser SpeechSynthesis.', 2500);
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.95;
@@ -354,6 +388,13 @@ function speakText(text, onStart, onEnd) {
 }
 
 function stopSpeaking() {
+  if (currentTtsAudio) {
+    try {
+      currentTtsAudio.pause();
+      currentTtsAudio.currentTime = 0;
+    } catch (e) {}
+    currentTtsAudio = null;
+  }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }

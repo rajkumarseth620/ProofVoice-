@@ -46,10 +46,14 @@ class SpeechToTextView(APIView):
             return Response({'error': 'No audio file provided in request.'}, status=status.HTTP_400_BAD_REQUEST)
 
         language = request.data.get('language_code', 'en-IN')
+        logger.info(
+            "[STT View] Incoming voice transcription request: user=%s, file=%s, size=%s bytes, lang=%s",
+            request.user.id, getattr(audio_file, 'name', 'unknown'), getattr(audio_file, 'size', 'unknown'), language
+        )
         result = GnaniAiService.speech_to_text(audio_file, language_code=language)
 
         if not result['success']:
-            # If Gnani is unconfigured, provide a transparent response
+            logger.warning("[STT View] Transcription failed: %s", result.get('error'))
             return Response(result, status=status.HTTP_503_SERVICE_UNAVAILABLE if not result.get('is_configured') else status.HTTP_502_BAD_GATEWAY)
 
         return Response(result, status=status.HTTP_200_OK)
@@ -83,11 +87,17 @@ class TextToSpeechView(APIView):
             return Response({'error': 'No text provided for speech synthesis.'}, status=status.HTTP_400_BAD_REQUEST)
 
         language = request.data.get('language', 'en-IN')
-        voice = request.data.get('voice', 'Nalini')
+        voice = request.data.get('voice', 'Shivani')
+
+        logger.info(
+            "[TTS View] Incoming text-to-speech synthesis request: user=%s, text_len=%d, voice=%s, lang=%s",
+            request.user.id, len(text), voice, language
+        )
 
         result = GnaniAiService.text_to_speech(text, language=language, voice=voice)
 
         if not result['success']:
+            logger.warning("[TTS View] Speech synthesis failed: %s", result.get('error'))
             return Response(result, status=status.HTTP_503_SERVICE_UNAVAILABLE if not result.get('is_configured') else status.HTTP_502_BAD_GATEWAY)
 
         if 'audio_bytes' in result:

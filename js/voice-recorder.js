@@ -171,10 +171,108 @@ class VoiceRecorderEngine {
       this.analyser.fftSize = 64;
       source.connect(this.analyser);
 
+      // Raw PCM Audio Capturer: Records 16-bit linear PCM audio at 16000Hz (Gnani AI Prisma format)
+      this.pcmChunks = [];
+      this.pcmInputSampleRate = this.audioContext.sampleRate || 44100;
+
+      // ScriptProcessor captures real microphone audio slices
+      const bufferSize = 4096;
+      this.recorderProcessor = this.audioContext.createScriptProcessor(bufferSize, 1, 1);
+      this.recorderProcessor.onaudioprocess = (e) => {
+        if (!this.isRecording || this.isPaused) return;
+        const channelData = e.inputBuffer.getChannelData(0);
+        this.pcmChunks.push(new Float32Array(channelData));
+      };
+
+      source.connect(this.recorderProcessor);
+      this.recorderProcessor.connect(this.audioContext.destination);
+
       this.drawLiveWaveform();
     } catch (e) {
       console.warn('[ProofVoice] Web Audio API initialization failed, drawing simulated wave.', e);
       this.drawSimulatedWaveform();
+    }
+  }
+
+  buildWavBlobFromPcmChunks() {
+    if (!this.pcmChunks || this.pcmChunks.length === 0) return null;
+
+    try {
+      // 1. Merge Float32Array PCM chunks
+      let totalSamples = 0;
+      for (let i = 0; i < this.pcmChunks.length; i++) {
+        totalSamples += this.pcmChunks[i].length;
+      }
+      if (totalSamples === 0) return null;
+
+      const merged = new Float32Array(totalSamples);
+      let offset = 0;
+      for (let i = 0; i < this.pcmChunks.length; i++) {
+        merged.set(this.pcmChunks[i], offset);
+        offset += this.pcmChunks[i].length;
+      }
+
+      // 2. Linear resample to standard 16,000 Hz
+      const inRate = this.pcmInputSampleRate || 44100;
+      const targetRate = 16000;
+      let downsampled;
+
+      if (inRate === targetRate) {
+        downsampled = merged;
+      } else {
+        const ratio = inRate / targetRate;
+        const newLen = Math.round(merged.length / ratio);
+        downsampled = new Float32Array(newLen);
+        for (let i = 0; i < newLen; i++) {
+          const origIdx = i * ratio;
+          const lower = Math.floor(origIdx);
+          const upper = Math.min(lower + 1, merged.length - 1);
+          const weight = origIdx - lower;
+          downsampled[i] = merged[lower] * (1 - weight) + merged[upper] * weight;
+        }
+      }
+
+      // 3. Encode to 16-bit Linear PCM RIFF WAV container
+      const numSamples = downsampled.length;
+      const buffer = new ArrayBuffer(44 + numSamples * 2);
+      const view = new DataView(buffer);
+
+      const writeStr = (v, off, str) => {
+        for (let k = 0; k < str.length; k++) v.setUint8(off + k, str.charCodeAt(k));
+      };
+
+      // RIFF chunk descriptor
+      writeStr(view, 0, 'RIFF');
+      view.setUint32(4, 36 + numSamples * 2, true);
+      writeStr(view, 8, 'WAVE');
+
+      // fmt sub-chunk
+      writeStr(view, 12, 'fmt ');
+      view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
+      view.setUint16(20, 1, true); // AudioFormat (1 = Linear PCM)
+      view.setUint16(22, 1, true); // NumChannels (1 = Mono)
+      view.setUint32(24, targetRate, true); // SampleRate (16000)
+      view.setUint32(28, targetRate * 2, true); // ByteRate (16000 * 1 * 2 = 32000)
+      view.setUint16(32, 2, true); // BlockAlign (1 * 2 = 2)
+      view.setUint16(34, 16, true); // BitsPerSample (16)
+
+      // data sub-chunk
+      writeStr(view, 36, 'data');
+      view.setUint32(40, numSamples * 2, true);
+
+      // Write PCM 16-bit signed integer samples
+      let pcmOffset = 44;
+      for (let i = 0; i < numSamples; i++) {
+        const s = Math.max(-1, Math.min(1, downsampled[i]));
+        const int16 = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        view.setInt16(pcmOffset, int16, true);
+        pcmOffset += 2;
+      }
+
+      return new Blob([buffer], { type: 'audio/wav' });
+    } catch (e) {
+      console.warn('[ProofVoice Voice] Error encoding PCM WAV buffer:', e);
+      return null;
     }
   }
 
@@ -302,6 +400,10 @@ class VoiceRecorderEngine {
       this.handleRecordingComplete();
     }
 
+    if (this.recorderProcessor) {
+      try { this.recorderProcessor.disconnect(); } catch (e) {}
+    }
+
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach(track => track.stop());
     }
@@ -322,20 +424,41 @@ class VoiceRecorderEngine {
   }
 
   async handleRecordingComplete() {
-    this.statusText.innerHTML = `<span class="spinner" style="border-color:#3157D5;border-top-color:transparent;margin-right:6px;"></span> Transcribing speech audio...`;
+    this.statusText.innerHTML = `<span class="spinner" style="border-color:#3157D5;border-top-color:transparent;margin-right:6px;"></span> Transcribing speech audio via Gnani AI Prisma STT...`;
 
     try {
-      const audioBlob = this.audioChunks.length > 0 ? new Blob(this.audioChunks, { type: 'audio/webm' }) : null;
+      const pcmWavBlob = this.buildWavBlobFromPcmChunks();
+      if (!pcmWavBlob) {
+        console.error('[ProofVoice Voice] PCM-to-WAV generation failed. WebM audio will never be sent to Gnani STT.');
+        this.statusText.innerHTML = `
+          <div style="padding:10px 14px; background:#FEF2F2; border:1px solid #FCA5A5; border-radius:var(--radius-md); color:#991B1B; font-size:13px; margin:8px 0;">
+            <div style="font-weight:600; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Audio Encoding Failed
+            </div>
+            WAV audio encoding failed. Please record again or type your complaint description directly into the text box below.
+          </div>
+        `;
+        if (typeof showToast === 'function') {
+          showToast('warning', 'Audio Encoding Issue', 'WAV audio encoding failed. Please record again or type your complaint manually.');
+        }
+        if (this.retryBtn) this.retryBtn.style.display = 'inline-flex';
+        if (this.discardBtn) this.discardBtn.style.display = 'inline-flex';
+        return;
+      }
+
+      const audioBlob = pcmWavBlob;
       const selectedLang = this.langSelect ? this.langSelect.value : 'en-IN';
 
-      // Render audio preview player
+      // Render audio preview player using the encoded 16kHz linear PCM WAV
       if (audioBlob) {
         let previewContainer = this.audioPreviewContainer || document.getElementById('audioPreviewContainer');
         if (previewContainer) {
+          const formatLabel = '16kHz Linear PCM WAV';
           previewContainer.innerHTML = `
             <div id="voiceAudioPreviewWrapper" style="margin: 12px 0; padding: 10px 14px; background: var(--color-surface-alt); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
               <div style="font-size:12px; font-weight:600; color:var(--color-navy); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                <span>🎙️ Recorded Voice Preview (${this.seconds}s, ${selectedLang})</span>
+                <span>🎙️ Recorded Voice Preview (${this.seconds}s, ${selectedLang} • ${formatLabel})</span>
                 <span class="text-xs text-muted">Ready to listen</span>
               </div>
               <audio id="voiceAudioPreviewPlayer" controls style="width:100%; height:36px; outline:none;"></audio>
@@ -351,7 +474,9 @@ class VoiceRecorderEngine {
       // Send to Django backend for Gnani AI Prisma STT
       let result = null;
       if (window.proofVoiceApi) {
+        console.info('[ProofVoice] Transmitting recorded audio (' + (audioBlob ? audioBlob.size : 0) + ' bytes, ' + (audioBlob ? audioBlob.type : 'none') + ') to Gnani AI STT endpoint...');
         result = await window.proofVoiceApi.speechToText(audioBlob, selectedLang);
+        console.info('[ProofVoice] Gnani AI STT response result:', result);
       }
 
       let transcriptText = '';
@@ -359,28 +484,33 @@ class VoiceRecorderEngine {
 
       if (result && result.success && result.transcript) {
         transcriptText = result.transcript;
+        const modelLabel = result.model || 'Prisma v3.0';
+        const reqInfo = result.request_id ? `<span class="text-xs" style="opacity:0.85; margin-left:6px;">(Request ID: ${escapeHtml(result.request_id)})</span>` : '';
         providerNotice = `
-          <span class="badge" style="background:#D1FAE5; color:#065F46; margin-bottom:4px; display:inline-block;">
-            ✓ Transcribed via Gnani AI Prisma STT (${selectedLang})
+          <span class="badge" style="background:#D1FAE5; color:#065F46; margin-bottom:4px; display:inline-flex; align-items:center; gap:4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Transcribed via Gnani AI ${escapeHtml(modelLabel)} (${selectedLang}) ${reqInfo}
           </span>
           <div style="font-size:12px; color:var(--color-text-secondary);">
-            Audio transcribed successfully. You can edit the text below before submitting.
+            Audio transcribed successfully via live Gnani AI speech engine. You can review and edit below.
           </div>
         `;
       } else if (this.liveLocalTranscript && this.liveLocalTranscript.trim()) {
         transcriptText = this.liveLocalTranscript.trim();
+        const errNotice = result && result.error ? `<div style="font-size:11px; color:#B45309; margin-bottom:4px;">Gnani AI STT: ${escapeHtml(result.error)}</div>` : '';
         providerNotice = `
           <span class="badge" style="background:#EEF2FF; color:var(--color-primary); margin-bottom:4px; display:inline-block;">
-            🎙️ Speech Audio Transcribed (${selectedLang})
+            🎙️ Speech Audio Transcribed (Local Browser Fallback • ${selectedLang})
           </span>
+          ${errNotice}
           <div style="font-size:12px; color:var(--color-text-secondary);">
-            Transcribed from spoken voice. Please review and edit your description below:
+            Transcribed from spoken voice via browser assistant. Please review and edit your description below:
           </div>
         `;
       } else if (result && result.error) {
         providerNotice = `
           <span class="badge" style="background:#FEF3C7; color:#92400E; margin-bottom:4px; display:inline-block;">
-            Speech Service Note: ${result.error.slice(0, 100)}
+            Speech Service Note: ${escapeHtml(result.error.slice(0, 120))}
           </span>
           <div style="font-size:12px; color:var(--color-text-secondary);">
             Spoken audio captured (${this.seconds}s). You can type or edit your complaint description directly below:

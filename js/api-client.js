@@ -3032,6 +3032,18 @@ class ProofVoiceApiClient {
 
     if (this.config.USE_REAL_BACKEND) {
 
+      if (!audioBlob) {
+        return { success: false, error: 'No audio data captured' };
+      }
+
+      if (audioBlob.type && audioBlob.type.toLowerCase().includes('webm')) {
+        console.warn('[ProofVoice API] Blocked sending WebM to Gnani STT endpoint. WebM audio is not accepted.');
+        return {
+          success: false,
+          error: 'WebM audio format cannot be sent to Gnani AI. A 16kHz linear PCM WAV file is required.'
+        };
+      }
+
       const formData = new FormData();
 
       formData.append('audio', audioBlob, 'recording.wav');
@@ -3048,6 +3060,8 @@ class ProofVoiceApiClient {
 
       }
 
+      console.info(`[ProofVoice API] Dispatching speech audio to ${this.config.BASE_URL}/ai/speech-to-text/ (${audioBlob.size} bytes, ${audioBlob.type || 'audio/wav'})`);
+
       try {
 
         const res = await fetch(`${this.config.BASE_URL}/ai/speech-to-text/`, {
@@ -3059,6 +3073,8 @@ class ProofVoiceApiClient {
           body: formData
 
         });
+
+        console.info(`[ProofVoice API] Gnani AI STT HTTP status: ${res.status}`);
 
         const data = await res.json().catch(() => ({}));
 
@@ -3081,6 +3097,8 @@ class ProofVoiceApiClient {
         return data;
 
       } catch (err) {
+
+        console.warn('[ProofVoice API] Network error during speechToText:', err);
 
         return {
 

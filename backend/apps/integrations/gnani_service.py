@@ -34,6 +34,41 @@ def pcm_to_wav(pcm_bytes: bytes, sample_rate: int = 16000, num_channels: int = 1
     return wav_io.getvalue()
 
 
+def validate_pcm_wav(audio_bytes: bytes) -> tuple[bool, str]:
+    """
+    Strictly verifies that audio_bytes is an uncompressed, 16kHz, mono, 16-bit linear PCM WAV.
+    Explicitly rejects WebM, compressed formats, and invalid configurations before contacting Gnani AI.
+    """
+    if not audio_bytes or len(audio_bytes) < 44:
+        return False, "Audio data is empty or too short to be a valid WAV file."
+
+    if audio_bytes.startswith(b'\x1a\x45\xdf\xa3'):
+        return False, "WebM audio format cannot be sent to Gnani AI. A 16kHz mono linear PCM WAV file is required."
+
+    if not (audio_bytes.startswith(b'RIFF') and audio_bytes[8:12] == b'WAVE'):
+        return False, "Audio file is not in valid RIFF WAVE format."
+
+    try:
+        with wave.open(io.BytesIO(audio_bytes), 'rb') as wf:
+            channels = wf.getnchannels()
+            sample_width = wf.getsampwidth()
+            framerate = wf.getframerate()
+            comptype = wf.getcomptype()
+
+            if comptype != 'NONE':
+                return False, f"Compressed WAV ({comptype}) is unsupported. Uncompressed linear PCM is required."
+            if channels != 1:
+                return False, f"Audio must be mono (1 channel). Received {channels} channels."
+            if sample_width != 2:
+                return False, f"Audio must be 16-bit (2 bytes per sample). Received {sample_width * 8}-bit."
+            if framerate != 16000:
+                return False, f"Audio sample rate must be exactly 16000 Hz. Received {framerate} Hz."
+    except Exception as e:
+        return False, f"Invalid or unreadable WAV structure: {str(e)}"
+
+    return True, ""
+
+
 class GnaniAiService:
     """
     Server-side client for Gnani AI APIs.
@@ -75,19 +110,20 @@ class GnaniAiService:
 
         endpoint = getattr(settings, 'GNANI_STT_ENDPOINT', 'https://api.vachana.ai/stt/v3')
         api_key = settings.GNANI_API_KEY.strip()
+        stt_model = getattr(settings, 'GNANI_STT_MODEL', 'prisma-v3.0')
 
         headers = {
             'X-API-Key-ID': api_key
         }
 
-        # Format validation
-        allowed_extensions = ['.wav', '.mp3', '.ogg', '.webm', '.m4a', '.flac']
+        # Format validation: Gnani AI Prisma STT only accepts linear PCM .wav files
+        allowed_extensions = ['.wav']
         file_name = getattr(audio_file, 'name', 'audio.wav').lower()
         if not any(file_name.endswith(ext) for ext in allowed_extensions):
             return {
                 'success': False,
                 'is_configured': True,
-                'error': f'Unsupported audio format. Allowed: {", ".join(allowed_extensions)}'
+                'error': f'Unsupported audio format. Gnani AI Prisma STT requires a 16kHz linear PCM .wav file. Allowed: {", ".join(allowed_extensions)}'
             }
 
         # Size check (max 10MB)
@@ -100,14 +136,41 @@ class GnaniAiService:
 
         try:
             audio_file.seek(0)
+            raw_audio_bytes = audio_file.read()
+            audio_size = len(raw_audio_bytes)
+
+            # Strict 16kHz mono 16-bit linear PCM WAV verification
+            is_valid_wav, val_err = validate_pcm_wav(raw_audio_bytes)
+            if not is_valid_wav:
+                logger.warning(
+                    "[Gnani STT] Audio validation failed: %s (file: %s, size: %d bytes)",
+                    val_err, file_name, audio_size
+                )
+                return {
+                    'success': False,
+                    'is_configured': True,
+                    'error': f'Invalid audio format: {val_err}'
+                }
+
+            logger.info(
+                "[Gnani STT] Audio verified: 16kHz mono 16-bit linear PCM WAV (%d bytes, file: %s)",
+                audio_size, file_name
+            )
+
             files = {
-                'audio_file': (audio_file.name, audio_file.read(), audio_file.content_type or 'audio/wav')
+                'audio_file': ('recording.wav', raw_audio_bytes, 'audio/wav')
             }
             data = {
+                'model': stt_model,
                 'language_code': language_code,
                 'format': 'transcribe',
                 'itn_native_numerals': 'true'
             }
+
+            logger.info(
+                "[Gnani STT] Initiating request to %s (model=%s, lang=%s, size=%d bytes)",
+                endpoint, stt_model, language_code, audio_size
+            )
 
             response = requests.post(
                 endpoint,
@@ -117,29 +180,45 @@ class GnaniAiService:
                 timeout=25
             )
 
+            logger.info("[Gnani STT] Upstream response HTTP %s received", response.status_code)
+
             if response.status_code == 200:
                 result = response.json()
+                req_id = result.get('request_id', 'N/A')
+                resp_model = result.get('model', stt_model)
                 transcript = result.get('transcript') or result.get('text') or result.get('data', {}).get('transcript', '')
+                logger.info(
+                    "[Gnani STT] Request succeeded! (request_id=%s, model=%s, transcript_len=%d)",
+                    req_id, resp_model, len(transcript)
+                )
                 return {
                     'success': True,
                     'is_configured': True,
                     'transcript': transcript,
                     'language': language_code,
+                    'request_id': req_id,
+                    'model': resp_model,
                     'raw_response': result
                 }
             elif response.status_code == 401:
+                logger.warning("[Gnani STT] Authentication failed (HTTP 401). Verify GNANI_API_KEY in environment.")
                 return {
                     'success': False,
                     'is_configured': True,
                     'error': 'Gnani AI authentication failed. Please verify GNANI_API_KEY in backend/.env.'
                 }
             elif response.status_code == 429:
+                logger.warning("[Gnani STT] Rate limit reached (HTTP 429).")
                 return {
                     'success': False,
                     'is_configured': True,
                     'error': 'Gnani AI rate limit reached. Please wait before attempting again.'
                 }
             else:
+                logger.warning(
+                    "[Gnani STT] Upstream API returned error HTTP %s: %s",
+                    response.status_code, response.text[:300]
+                )
                 return {
                     'success': False,
                     'is_configured': True,
@@ -194,6 +273,11 @@ class GnaniAiService:
             'sampling_rate': 16000
         }
 
+        logger.info(
+            "[Gnani TTS] Initiating TTS request to %s (voice=%s, lang=%s, text_len=%d)",
+            endpoint, target_voice, language, len(payload['text'])
+        )
+
         try:
             response = requests.post(
                 endpoint,
@@ -202,7 +286,10 @@ class GnaniAiService:
                 timeout=30
             )
 
+            logger.info("[Gnani TTS] Upstream response HTTP %s received", response.status_code)
+
             if response.status_code == 200:
+                logger.info("[Gnani TTS] Speech synthesis succeeded (bytes: %d)", len(response.content))
                 # Timbre TTS returns binary 16-bit linear PCM audio
                 content_type = response.headers.get('Content-Type', '')
                 if 'audio' in content_type or 'octet-stream' in content_type or len(response.content) > 100:
