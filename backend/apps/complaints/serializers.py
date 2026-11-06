@@ -221,6 +221,17 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
             data_copy['final_submitted_application'] = data_copy['formal_application']
         if not data_copy.get('full_issue_location') and data_copy.get('location'):
             data_copy['full_issue_location'] = data_copy['location']
+
+        # Normalize priority (e.g. URGENT -> CRITICAL)
+        if 'priority' in data_copy and data_copy['priority']:
+            p = str(data_copy['priority']).strip().upper()
+            if p == 'URGENT':
+                data_copy['priority'] = Complaint.Priority.CRITICAL
+            elif p in Complaint.Priority.values:
+                data_copy['priority'] = p
+            else:
+                data_copy['priority'] = Complaint.Priority.MEDIUM
+
         return super().to_internal_value(data_copy)
 
     @transaction.atomic

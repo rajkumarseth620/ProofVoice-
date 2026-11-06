@@ -185,7 +185,7 @@
         const targetPage = decoded.split('?')[0].split('#')[0].split('/').pop();
         const superAdminPages = ['super-admin.html'];
         const adminOnlyPages = ['admin-dashboard.html', 'admin-complaints.html', 'admin-complaint-details.html', 'departments.html', 'users.html', 'analytics.html', 'institution-settings.html', 'admin-profile.html', 'admin-notifications.html', 'admin-help.html'];
-        const studentOnlyPages = ['student-dashboard.html', 'new-complaint.html', 'review-complaint.html', 'my-complaints.html', 'student-profile.html', 'student-notifications.html', 'student-help.html'];
+        const studentOnlyPages = ['student-dashboard.html', 'new-complaint.html', 'review-complaint.html', 'my-complaints.html', 'complaint-details.html', 'student-profile.html', 'student-profile-complete.html', 'student-notifications.html', 'student-help.html'];
 
         if (superAdminPages.includes(targetPage)) {
           return isSuperAdmin ? decoded : 'student-dashboard.html';

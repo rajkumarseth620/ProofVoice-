@@ -23,40 +23,31 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function resolveStudentContext(filter) {
-  try {
-    if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
-      let user = window.proofVoiceApi.getStoredUser();
-      if (!user && typeof window.proofVoiceApi.getCurrentUser === 'function') {
-        try { user = await window.proofVoiceApi.getCurrentUser(); } catch (e) {}
-      }
-      if (!user && window.proofVoiceDb) {
-        user = window.proofVoiceDb.getCurrentUser();
-      }
-      user = user || { fullName: 'Student', role: 'student', institutionName: 'Campus Institution' };
-
-      let complaints = [];
-      try {
-        complaints = await window.proofVoiceApi.getComplaints(filter || {});
-      } catch (err) {
-        if (window.proofVoiceDb) complaints = window.proofVoiceDb.getComplaints(filter || {});
-      }
-
-      return {
-        user,
-        institution: {
-          name: user.institutionName || 'Your Institution',
-          categories: []
-        },
-        complaints: Array.isArray(complaints) ? complaints : []
-      };
+  if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+    let user = null;
+    try {
+      user = await window.proofVoiceApi.getCurrentUser();
+    } catch (e) {
+      user = window.proofVoiceApi.getStoredUser();
     }
-  } catch (err) {
-    console.warn('[ProofVoice] Live student context failed, falling back:', err);
+    user = user || window.proofVoiceApi.getStoredUser();
+    user = user || { fullName: 'Student', role: 'student', institutionName: 'Campus Institution' };
+
+    const complaints = await window.proofVoiceApi.getComplaints(filter || {});
+
+    return {
+      user,
+      institution: {
+        name: user.institutionName || 'Campus Institution',
+        categories: []
+      },
+      complaints: Array.isArray(complaints) ? complaints : []
+    };
   }
 
   const user = (window.proofVoiceDb && window.proofVoiceDb.getCurrentUser()) || { fullName: 'Student', role: 'student', institutionName: 'Campus Institution' };
   const instId = user ? (user.institutionId || user.institution_id) : null;
-  const institution = (window.proofVoiceDb && instId ? window.proofVoiceDb.getInstitution(instId) : null) || { name: user.institutionName || 'Your Institution', categories: [] };
+  const institution = (window.proofVoiceDb && instId ? window.proofVoiceDb.getInstitution(instId) : null) || { name: user.institutionName || 'Campus Institution', categories: [] };
   const complaints = (window.proofVoiceDb && typeof window.proofVoiceDb.getComplaints === 'function') ? window.proofVoiceDb.getComplaints(filter || {}) : [];
   return { user, institution, complaints: Array.isArray(complaints) ? complaints : [] };
 }
@@ -66,15 +57,18 @@ async function loadStudentDashboard() {
 
   // Set greeting & institution
   const greetingEl = document.getElementById('studentGreetingName');
-  const instBadgeEl = document.getElementById('studentInstitutionName');
+  const instBadgeEl = document.getElementById('studentInstitutionName') || document.getElementById('sidebarInstName');
+  const topbarInstEl = document.getElementById('topbarInst');
   const userAvatarEl = document.getElementById('sidebarUserAvatar');
   const userNameEl = document.getElementById('sidebarUserName');
 
   const fullName = (user && (user.fullName || user.full_name || user.name || user.email)) || 'Student';
   const firstName = fullName.trim().split(/\s+/)[0] || fullName;
 
+  const verifiedInstName = (institution && institution.name) || (user && user.institutionName) || '';
   if (greetingEl) greetingEl.textContent = firstName;
-  if (instBadgeEl) instBadgeEl.textContent = (institution && institution.name) || (user && user.institutionName) || 'Your Institution';
+  if (instBadgeEl && verifiedInstName) instBadgeEl.textContent = verifiedInstName;
+  if (topbarInstEl && verifiedInstName) topbarInstEl.textContent = verifiedInstName;
   if (userAvatarEl) {
     if (user && user.profileImage) {
       userAvatarEl.textContent = '';
@@ -211,13 +205,22 @@ async function loadMyComplaintsPage() {
   const emptyState = document.getElementById('myComplaintsEmpty');
   const countSpan = document.getElementById('complaintsCountSpan');
 
-  const initial = await resolveStudentContext();
-  const user = initial.user;
-  const institution = initial.institution;
+  let user = null;
+  let institution = null;
+  try {
+    const initial = await resolveStudentContext();
+    user = initial.user;
+    institution = initial.institution;
+  } catch (e) {
+    user = (window.proofVoiceApi && window.proofVoiceApi.getStoredUser()) || null;
+  }
 
   if (window.syncGlobalUserAvatars) window.syncGlobalUserAvatars();
-  const instEls = document.querySelectorAll('#studentInstitutionName, #sidebarInstName, .sidebar-institution-name, #topbarInst');
-  instEls.forEach(el => { if (user && user.institutionName) el.textContent = user.institutionName; });
+  const instEls = document.querySelectorAll('#studentInstitutionName, #sidebarInstName, .sidebar-institution-name, #topbarInst, .institution-pill span');
+  const activeInst = (user && user.institutionName) || (institution && institution.name) || '';
+  if (activeInst) {
+    instEls.forEach(el => { el.textContent = activeInst; });
+  }
 
   // Populate Categories
   if (categoryFilter && institution && institution.categories) {
@@ -227,6 +230,10 @@ async function loadMyComplaintsPage() {
     });
   }
 
+  const errorContainer = document.getElementById('myComplaintsError');
+  const retryBtn = document.getElementById('retryMyComplaintsBtn');
+  if (retryBtn) retryBtn.addEventListener('click', () => { renderList(); });
+
   async function renderList() {
     const filter = {
       search: searchInput ? searchInput.value.trim() : '',
@@ -234,51 +241,76 @@ async function loadMyComplaintsPage() {
       category: categoryFilter ? categoryFilter.value : 'All'
     };
 
-    const ctx = await resolveStudentContext(filter);
-    const complaints = ctx.complaints;
+    if (errorContainer) errorContainer.style.display = 'none';
 
-    if (countSpan) countSpan.textContent = `Showing ${complaints.length} complaints`;
+    try {
+      const ctx = await resolveStudentContext(filter);
+      const complaints = ctx.complaints;
 
-    if (complaints.length === 0) {
-      if (tableBody) tableBody.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'flex';
-    } else {
+      if (countSpan) countSpan.textContent = `Showing ${complaints.length} complaint${complaints.length === 1 ? '' : 's'}`;
+
+      if (complaints.length === 0) {
+        if (tableBody) tableBody.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'flex';
+      } else {
+        if (emptyState) emptyState.style.display = 'none';
+        if (tableBody) {
+          tableBody.innerHTML = complaints.map(c => {
+            const canEditOrDelete = (c.status === 'Submitted' || c.status === 'Draft');
+            return `
+            <tr>
+              <td class="cell-id">
+                <a href="complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" style="text-decoration:none; color:inherit; font-weight:600;">
+                  ${escapeHtml(c.id)}
+                </a>
+              </td>
+              <td>
+                <div style="font-weight: 600; color: var(--color-navy); margin-bottom: 2px;">
+                  <a href="complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" style="text-decoration:none; color:inherit;">
+                    ${escapeHtml(c.title)}
+                  </a>
+                </div>
+                <div class="text-xs text-muted" style="display:flex; gap:8px;">
+                  <span>Location: ${escapeHtml(c.location || 'Campus Premises')}</span>
+                  <span>•</span>
+                  <span>Input: ${c.originalInputMethod === 'voice' ? '🎙️ Voice' : '⌨️ Text'}</span>
+                  ${c.assignedDepartment ? `<span>•</span><span>Dept: ${escapeHtml(c.assignedDepartment)}</span>` : ''}
+                </div>
+              </td>
+              <td><span class="badge" style="background:#F1F5F9; color:#475569;">${escapeHtml(c.category || 'General')}</span></td>
+              <td>${renderPriorityBadge(c.priority)}</td>
+              <td class="text-muted text-xs">${formatDateTime(c.submittedAt)}</td>
+              <td>${renderStatusBadge(c.status)}</td>
+              <td class="text-right">
+                <div style="display:flex; justify-content:flex-end; gap:6px; flex-wrap:nowrap;">
+                  <a href="complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" class="btn btn-secondary btn-sm" title="View details and track resolution">
+                    View & Track
+                  </a>
+                  ${canEditOrDelete ? `
+                  <button type="button" class="btn btn-outline btn-sm edit-my-complaint-btn" data-id="${escapeHtml(c.id)}" title="Edit Application" style="padding:4px 8px; font-size:11px; background:#fff; border-color:#CBD5E1; color:#0F172A;">
+                    ✏️ Edit
+                  </button>
+                  <button type="button" class="btn btn-outline btn-sm delete-my-complaint-btn" data-id="${escapeHtml(c.id)}" title="Delete Complaint" style="padding:4px 8px; font-size:11px; background:#fff; border-color:#FECACA; color:#DC2626;">
+                    🗑️ Delete
+                  </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+          }).join('');
+        }
+      }
+    } catch (err) {
       if (emptyState) emptyState.style.display = 'none';
-      if (tableBody) {
-        tableBody.innerHTML = complaints.map(c => `
-          <tr>
-            <td class="cell-id">${escapeHtml(c.id)}</td>
-            <td>
-              <div style="font-weight: 600; color: var(--color-navy); margin-bottom: 2px;">
-                <a href="complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" style="text-decoration:none; color:inherit;">
-                  ${escapeHtml(c.title)}
-                </a>
-              </div>
-              <div class="text-xs text-muted" style="display:flex; gap:8px;">
-                <span>Location: ${escapeHtml(c.location)}</span>
-                <span>•</span>
-                <span>Input: ${c.originalInputMethod === 'voice' ? '🎙️ Voice' : '⌨️ Text'}</span>
-              </div>
-            </td>
-            <td><span class="badge" style="background:#F1F5F9; color:#475569;">${escapeHtml(c.category)}</span></td>
-            <td>${renderPriorityBadge(c.priority)}</td>
-            <td class="text-muted text-xs">${formatDateTime(c.submittedAt)}</td>
-            <td>${renderStatusBadge(c.status)}</td>
-            <td class="text-right">
-              <div style="display:flex; justify-content:flex-end; gap:6px; flex-wrap:nowrap;">
-                <a href="complaint-details.html?id=${escapeHtml(c.id)}" onclick="sessionStorage.setItem('proofvoice_current_complaint_id', '${escapeHtml(c.id)}'); localStorage.setItem('proofvoice_last_viewed_complaint_id', '${escapeHtml(c.id)}');" class="btn btn-secondary btn-sm" title="View details and track resolution">
-                  View & Track
-                </a>
-                <button type="button" class="btn btn-outline btn-sm edit-my-complaint-btn" data-id="${escapeHtml(c.id)}" title="Edit Application" style="padding:4px 8px; font-size:11px; background:#fff; border-color:#CBD5E1; color:#0F172A;">
-                  ✏️ Edit
-                </button>
-                <button type="button" class="btn btn-outline btn-sm delete-my-complaint-btn" data-id="${escapeHtml(c.id)}" title="Delete Complaint" style="padding:4px 8px; font-size:11px; background:#fff; border-color:#FECACA; color:#DC2626;">
-                  🗑️ Delete
-                </button>
-              </div>
-            </td>
-          </tr>
-        `).join('');
+      if (tableBody) tableBody.innerHTML = '';
+      if (countSpan) countSpan.textContent = 'Failed to load records';
+      if (errorContainer) {
+        errorContainer.style.display = 'flex';
+        const msgEl = errorContainer.querySelector('.empty-state-text');
+        if (msgEl) msgEl.textContent = err.message || 'Unable to connect to the complaint service. Please check your connection or retry.';
+      } else {
+        showToast('error', 'Error Loading Complaints', err.message || 'Network error.');
       }
     }
   }
@@ -358,31 +390,29 @@ async function loadComplaintDetailsPage() {
   }
 
   let complaint = null;
-  try {
-    if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+  let loadError = null;
+  if (window.proofVoiceApi && window.proofVoiceApi.isLiveSession()) {
+    try {
       complaint = await window.proofVoiceApi.getComplaint(complaintId);
+    } catch (err) {
+      loadError = err;
     }
-  } catch (err) {
-    console.warn('[ProofVoice Student] Live fetch by ID failed, falling back:', err);
+  } else {
+    complaint = window.proofVoiceDb ? window.proofVoiceDb.getComplaintById(complaintId) : null;
+    if (!complaint && typeof INITIAL_DEMO_DATA !== 'undefined' && INITIAL_DEMO_DATA.complaints) {
+      complaint = INITIAL_DEMO_DATA.complaints.find(c => String(c.id).toLowerCase() === String(complaintId).toLowerCase());
+    }
   }
 
   if (!complaint) {
-    complaint = window.proofVoiceDb.getComplaintById(complaintId);
-  }
-
-  // Safety net: Check initial demo complaints directly if custom session user
-  if (!complaint && typeof INITIAL_DEMO_DATA !== 'undefined' && INITIAL_DEMO_DATA.complaints) {
-    complaint = INITIAL_DEMO_DATA.complaints.find(c => String(c.id).toLowerCase() === String(complaintId).toLowerCase());
-  }
-
-  if (!complaint) {
-    showToast('error', 'Complaint Not Found', `Complaint record "${complaintId}" was not found.`);
+    const errorMsg = (loadError && loadError.message) || `Complaint record "${complaintId}" was not found or is inaccessible.`;
+    showToast('error', 'Access Restricted', errorMsg);
     const mainEl = document.getElementById('complaintDetailsHeader');
     if (mainEl) {
       mainEl.innerHTML = `
         <div class="card" style="padding:3rem; text-align:center;">
-          <h2 style="color:var(--color-navy); margin-bottom:1rem;">Complaint Record Inaccessible</h2>
-          <p class="text-muted" style="margin-bottom:1.5rem;">Complaint <strong>${escapeHtml(complaintId)}</strong> could not be located in your active student records.</p>
+          <h2 style="color:var(--color-navy); margin-bottom:1rem;">Complaint Inaccessible</h2>
+          <p class="text-muted" style="margin-bottom:1.5rem;">${escapeHtml(errorMsg)}</p>
           <a href="my-complaints.html" class="btn btn-primary">Return to My Complaints</a>
         </div>
       `;
@@ -562,27 +592,39 @@ async function loadComplaintDetailsPage() {
     window.location.reload();
   });
 
+  const canEdit = (complaint.status === 'Submitted' || complaint.status === 'Draft');
   if (detailsEditBtn) {
-    detailsEditBtn.addEventListener('click', () => {
-      window.openEditComplaintModal(complaint);
-    });
+    if (!canEdit) {
+      detailsEditBtn.style.display = 'none';
+    } else {
+      detailsEditBtn.style.display = 'inline-flex';
+      detailsEditBtn.addEventListener('click', () => {
+        window.openEditComplaintModal(complaint);
+      });
+    }
   }
 
+  const canDelete = (complaint.status === 'Submitted' || complaint.status === 'Draft');
   if (detailsDeleteBtn) {
-    detailsDeleteBtn.addEventListener('click', async () => {
-      const confirmed = window.confirm(`Are you sure you want to delete grievance application ${complaint.id}? This action cannot be undone.`);
-      if (!confirmed) return;
+    if (!canDelete) {
+      detailsDeleteBtn.style.display = 'none';
+    } else {
+      detailsDeleteBtn.style.display = 'inline-flex';
+      detailsDeleteBtn.addEventListener('click', async () => {
+        const confirmed = window.confirm(`Are you sure you want to delete grievance application ${complaint.id}? This action cannot be undone.`);
+        if (!confirmed) return;
 
-      try {
-        await window.proofVoiceApi.deleteComplaint(complaint.id);
-        showToast('success', 'Complaint Deleted', `Complaint ${complaint.id} has been deleted successfully.`);
-        setTimeout(() => {
-          window.location.href = 'my-complaints.html';
-        }, 1000);
-      } catch (err) {
-        showToast('error', 'Delete Failed', err.message || 'Unable to delete complaint.');
-      }
-    });
+        try {
+          await window.proofVoiceApi.deleteComplaint(complaint.id);
+          showToast('success', 'Complaint Deleted', `Complaint ${complaint.id} has been deleted successfully.`);
+          setTimeout(() => {
+            window.location.href = 'my-complaints.html';
+          }, 1000);
+        } catch (err) {
+          showToast('error', 'Delete Failed', err.message || 'Unable to delete complaint.');
+        }
+      });
+    }
   }
 }
 

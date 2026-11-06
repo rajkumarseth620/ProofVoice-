@@ -188,29 +188,29 @@ function syncGlobalUserAvatars() {
     }
   });
 
-  const instEls = document.querySelectorAll(
-    '#studentInstitutionName, #adminInstitutionName, #sidebarInstName, #topbarInst, .sidebar-institution-name, .user-tenant-display, .institution-pill span, [class*="sidebar-institution-name"], [id*="InstName"]'
-  );
-  instEls.forEach(el => {
-    if (isSuperAdmin) {
-      if (el.closest('.sidebar-institution-badge') || el.classList.contains('sidebar-institution-name')) {
-        el.textContent = 'Platform Super-Admin';
-        return;
+  const instName = user.institutionName || user.institution_name || (user.institution && user.institution.name) || '';
+  if (instName) {
+    const instEls = document.querySelectorAll(
+      '#studentInstitutionName, #adminInstitutionName, #sidebarInstName, #topbarInst, .sidebar-institution-name, .user-tenant-display, .institution-pill span, [class*="sidebar-institution-name"], [id*="InstName"], [id*="InstitutionName"]'
+    );
+    instEls.forEach(el => {
+      if (isSuperAdmin) {
+        if (el.closest('.sidebar-institution-badge') || el.classList.contains('sidebar-institution-name')) {
+          el.textContent = 'Platform Super-Admin';
+          return;
+        }
+        if (el.id === 'topbarInst' || el.closest('.institution-pill')) {
+          el.textContent = 'Campus Administration Workspace';
+          return;
+        }
       }
-      if (el.id === 'topbarInst' || el.closest('.institution-pill')) {
-        el.textContent = 'Campus Administration Workspace';
-        return;
-      }
-    }
-    const instName = user.institutionName || (user.institution && user.institution.name) || '';
-    if (instName) {
       if (el.textContent.includes('Tenant:')) {
         el.textContent = `Tenant: ${instName}`;
       } else {
         el.textContent = instName;
       }
-    }
-  });
+    });
+  }
 }
 window.syncGlobalUserAvatars = syncGlobalUserAvatars;
 function showToast(type, title, message, duration = 4000) {
@@ -479,6 +479,34 @@ function enforceRouteGuard() {
 
 // Enforce route guard immediately
 enforceRouteGuard();
+
+// Centralized Protected Route Click Interceptor (captures clicks on links/buttons leading to protected features)
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a, button[data-target-url], [data-feature-target]');
+  if (!link) return;
+
+  let targetUrl = link.getAttribute('data-feature-target') || link.getAttribute('data-target-url') || link.getAttribute('href');
+  if (!targetUrl || targetUrl.startsWith('#') || targetUrl.startsWith('javascript:')) return;
+
+  const cleanTarget = targetUrl.split('?')[0].split('#')[0].split('/').pop();
+  const isProtected = STUDENT_ROUTES.has(cleanTarget) || ADMIN_ROUTES.has(cleanTarget) || SUPERADMIN_ROUTES.has(cleanTarget);
+  if (!isProtected) return;
+
+  const token = localStorage.getItem('proofvoice_auth_token');
+  const isAuth = Boolean(token && !String(token).startsWith('demo_token_'));
+
+  if (!isAuth) {
+    e.preventDefault();
+    e.stopPropagation();
+    const rootPrefix = getAppRootPrefix();
+    const featureName = link.getAttribute('data-feature-name') || link.textContent.trim().slice(0, 40) || 'Feature';
+    try { sessionStorage.setItem('proofvoice_auth_toast', `Please sign in to access ${featureName}.`); } catch (err) {}
+    try { sessionStorage.setItem('proofvoice_return_to_home', 'true'); } catch (err) {}
+    const redirectParam = encodeURIComponent(targetUrl);
+    window.location.href = `${rootPrefix}login.html?redirect=${redirectParam}`;
+    return;
+  }
+}, true);
 
 // Also guard on back-forward cache restoration
 window.addEventListener('pageshow', (event) => {

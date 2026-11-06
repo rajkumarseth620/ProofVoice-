@@ -24,6 +24,33 @@
 
   <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/theme.css">
+  <script>
+    (function() {
+      var token = localStorage.getItem('proofvoice_auth_token');
+      if (!token || token.indexOf('demo_token_') === 0) {
+        var page = window.location.pathname.split('/').pop() || 'student-dashboard.html';
+        var dest = encodeURIComponent(page + window.location.search + window.location.hash);
+        window.location.replace('login.html?redirect=' + dest);
+      }
+    })();
+  </script>
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('proofvoice_session_user') || localStorage.getItem('proofvoice_auth_user');
+        if (raw) {
+          var u = JSON.parse(raw);
+          var inst = u.institutionName || u.institution_name || (u.institution && u.institution.name) || '';
+          if (inst) {
+            document.addEventListener('DOMContentLoaded', function() {
+              var els = document.querySelectorAll('#studentInstitutionName, #sidebarInstName, .sidebar-institution-name, #topbarInst, .institution-pill span');
+              els.forEach(function(el) { el.textContent = inst; });
+            });
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
 <body>
@@ -74,7 +101,7 @@
 
         <span class="sidebar-institution-name" id="studentInstitutionName">
 
-          Apex Institute of Technology
+          Campus Institution
 
         </span>
 
@@ -234,7 +261,7 @@
 
             </svg>
 
-            <span id="topbarTenantPill">Tenant: Apex Tech (AIT)</span>
+            <span id="topbarTenantPill">Tenant: Campus Institution</span>
 
           </div>
 

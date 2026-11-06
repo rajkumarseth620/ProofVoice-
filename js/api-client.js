@@ -341,33 +341,33 @@ class ProofVoiceApiClient {
 
       backendRole: user.role || data.role,
 
-      institutionId: profile.institution || (institution && institution.id) || null,
+      institutionId: profile.institution || (institution && institution.id) || user.institutionId || user.institution_id || (user.institution && user.institution.id) || null,
 
-      institutionName: profile.institution_name || (institution && institution.name) || '',
+      institutionName: profile.institution_name || (institution && institution.name) || user.institutionName || user.institution_name || (user.institution && user.institution.name) || '',
 
-      institutionCode: profile.institution_code || (institution && institution.code) || '',
+      institutionCode: profile.institution_code || (institution && institution.code) || user.institutionCode || user.institution_code || (user.institution && user.institution.code) || '',
 
-      studentIdentifier: profile.student_id || profile.staff_id || '',
+      studentIdentifier: profile.student_id || profile.staff_id || user.studentIdentifier || user.student_id || '',
 
-      staffId: profile.staff_id || profile.student_id || '',
+      staffId: profile.staff_id || profile.student_id || user.staffId || user.staff_id || '',
 
-      department: profile.department || profile.department_name || '',
+      department: profile.department || profile.department_name || user.department || '',
 
-      departmentName: profile.department_name || profile.department || '',
+      departmentName: profile.department_name || profile.department || user.departmentName || user.department_name || '',
 
-      course: profile.course || profile.department || '',
+      course: profile.course || profile.department || user.course || '',
 
-      yearSemester: profile.semester || '',
+      yearSemester: profile.semester || user.yearSemester || user.semester || '',
 
-      residentialAddress: profile.address || profile.office_address || '',
+      residentialAddress: profile.address || profile.office_address || user.residentialAddress || '',
 
-      officeAddress: profile.office_address || profile.address || '',
+      officeAddress: profile.office_address || profile.address || user.officeAddress || '',
 
-      phone: profile.phone || '',
+      phone: profile.phone || user.phone || '',
 
-      designation: profile.designation || '',
+      designation: profile.designation || user.designation || '',
 
-      notifyInApp: profile.notify_in_app !== undefined ? Boolean(profile.notify_in_app) : true,
+      notifyInApp: profile.notify_in_app !== undefined ? Boolean(profile.notify_in_app) : (user.notifyInApp !== undefined ? Boolean(user.notifyInApp) : true),
 
       notifyEmail: profile.notify_email !== undefined ? Boolean(profile.notify_email) : true,
 
@@ -2488,57 +2488,55 @@ class ProofVoiceApiClient {
 
 
 
-      try {
+      let res = await fetch(`${endpoint}${qs ? '?' + qs : ''}`, {
 
-        let res = await fetch(`${endpoint}${qs ? '?' + qs : ''}`, {
+        headers: this.getHeaders()
+
+      });
+
+      if (!res.ok && isAdmin && (res.status === 404 || res.status === 403)) {
+
+        // Fallback to /complaints/
+
+        res = await fetch(`${this.config.BASE_URL}/complaints/${qs ? '?' + qs : ''}`, {
 
           headers: this.getHeaders()
 
         });
 
-        if (!res.ok && isAdmin && (res.status === 404 || res.status === 403)) {
+      }
 
-          // Fallback to /complaints/
+      if (!res.ok) {
 
-          res = await fetch(`${this.config.BASE_URL}/complaints/${qs ? '?' + qs : ''}`, {
+        const errData = await res.json().catch(() => ({}));
 
-            headers: this.getHeaders()
-
-          });
-
-        }
-
-        const data = await this.handleResponse(res);
-
-        let list = this.unwrapList(data).map((item) => this.normalizeComplaint(item));
-
-        if (filter.category && filter.category !== 'All') {
-
-          list = list.filter((c) => c.category === filter.category);
-
-        }
-
-        if (filter.department && filter.department !== 'All') {
-
-          list = list.filter((c) => c.assignedDepartment === filter.department);
-
-        }
-
-        if (filter.status === 'Unassigned') {
-
-          list = list.filter((c) => !c.assignedDepartment || c.assignedDepartment === 'Unassigned');
-
-        }
-
-        return list;
-
-      } catch (err) {
-
-        console.warn('[ProofVoice API] Live complaints query failed, using local demo store:', err);
-
-        return window.proofVoiceDb.getComplaints(filter, forceRole || (isAdmin ? 'admin' : null));
+        throw new Error(errData.detail || errData.error || `Failed to retrieve complaints (HTTP ${res.status}).`);
 
       }
+
+      const data = await this.handleResponse(res);
+
+      let list = this.unwrapList(data).map((item) => this.normalizeComplaint(item));
+
+      if (filter.category && filter.category !== 'All') {
+
+        list = list.filter((c) => c.category === filter.category);
+
+      }
+
+      if (filter.department && filter.department !== 'All') {
+
+        list = list.filter((c) => c.assignedDepartment === filter.department);
+
+      }
+
+      if (filter.status === 'Unassigned') {
+
+        list = list.filter((c) => !c.assignedDepartment || c.assignedDepartment === 'Unassigned');
+
+      }
+
+      return list;
 
     }
 
@@ -2552,31 +2550,39 @@ class ProofVoiceApiClient {
 
     if (this.isLiveSession()) {
 
-      try {
+      const res = await fetch(`${this.config.BASE_URL}/complaints/${encodeURIComponent(id)}/`, {
 
-        const res = await fetch(`${this.config.BASE_URL}/complaints/${id}/`, {
+        headers: this.getHeaders()
 
-          headers: this.getHeaders()
+      });
 
-        });
+      if (res.ok) {
 
-        if (res.ok) {
+        const data = await this.handleResponse(res);
 
-          const data = await this.handleResponse(res);
-
-          return this.normalizeComplaint(data);
-
-        }
-
-      } catch (e) {
-
-        console.warn('[ProofVoice API] Live complaint by ID failed, falling back to local store:', e);
+        return this.normalizeComplaint(data);
 
       }
 
+      const errData = await res.json().catch(() => ({}));
+
+      if (res.status === 403) {
+
+        throw new Error(errData.detail || errData.error || 'Access denied. You are not authorized to view this grievance.');
+
+      }
+
+      if (res.status === 404) {
+
+        throw new Error(errData.detail || errData.error || `Complaint record "${id}" was not found.`);
+
+      }
+
+      throw new Error(errData.detail || errData.error || `Failed to retrieve complaint (HTTP ${res.status}).`);
+
     }
 
-    const complaint = window.proofVoiceDb.getComplaintById(id, forceRole);
+    const complaint = window.proofVoiceDb ? window.proofVoiceDb.getComplaintById(id, forceRole) : null;
 
     if (!complaint) throw new Error('Complaint not found or unauthorized.');
 
@@ -2614,105 +2620,143 @@ class ProofVoiceApiClient {
 
     if (this.isLiveSession()) {
 
-      try {
+      let priority = (complaintData.priority || complaintData.urgency || 'MEDIUM').toString().toUpperCase();
 
-        const res = await fetch(`${this.config.BASE_URL}/complaints/`, {
+      if (priority === 'URGENT') priority = 'CRITICAL';
 
-          method: 'POST',
+      else if (!['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(priority)) priority = 'MEDIUM';
 
-          headers: this.getHeaders(),
 
-          body: JSON.stringify({
 
-            title: complaintData.title,
+      const payload = {
 
-            original_description: complaintData.originalDescription || complaintData.originalTranscription || complaintData.description,
+        title: complaintData.title,
 
-            original_transcription: complaintData.originalTranscription || '',
+        original_description: complaintData.originalDescription || complaintData.originalTranscription || complaintData.description || complaintData.title,
 
-            final_submitted_application: complaintData.finalApplicationLetter || complaintData.formalApplication || complaintData.final_submitted_application || '',
+        original_transcription: complaintData.originalTranscription || '',
 
-            category: complaintData.category || complaintData.categoryName || '',
+        final_submitted_application: complaintData.finalApplicationLetter || complaintData.formalApplication || complaintData.final_submitted_application || '',
 
-            category_id: complaintData.categoryId ? parseInt(complaintData.categoryId, 10) : null,
+        category: complaintData.category || complaintData.categoryName || '',
 
-            priority: complaintData.priority ? String(complaintData.priority).toUpperCase() : 'MEDIUM',
+        category_id: complaintData.categoryId ? parseInt(complaintData.categoryId, 10) : null,
 
-            source_type: (complaintData.sourceType || complaintData.originalInputMethod || 'TEXT').toString().toUpperCase() === 'VOICE' ? 'VOICE' : 'TEXT',
+        priority: priority,
 
-            building: complaintData.locationBuilding || complaintData.building || '',
+        source_type: (complaintData.sourceType || complaintData.originalInputMethod || 'TEXT').toString().toUpperCase() === 'VOICE' ? 'VOICE' : 'TEXT',
 
-            floor: complaintData.locationFloor || complaintData.floor || '',
+        building: complaintData.locationBuilding || complaintData.building || '',
 
-            room_number: complaintData.locationRoom || complaintData.room_number || '',
+        floor: complaintData.locationFloor || complaintData.floor || '',
 
-            full_issue_location: complaintData.location || complaintData.full_issue_location || '',
+        room_number: complaintData.locationRoom || complaintData.room_number || '',
 
-            submit_now: true
+        full_issue_location: complaintData.location || complaintData.full_issue_location || '',
 
-          })
+        submit_now: true
 
-        });
+      };
 
-        const data = await this.handleResponse(res);
 
-        const normalized = this.normalizeComplaint(data.complaint || data);
 
-        if (normalized && normalized.id) {
+      const res = await fetch(`${this.config.BASE_URL}/complaints/`, {
 
-          sessionStorage.setItem('proofvoice_current_complaint_id', normalized.id);
+        method: 'POST',
 
-          localStorage.setItem('proofvoice_last_viewed_complaint_id', normalized.id);
+        headers: this.getHeaders(),
 
-        }
+        body: JSON.stringify(payload)
 
-        // Keep local store in sync for offline viewing and cross-tab viewing
+      });
 
-        try {
 
-          if (window.proofVoiceDb) {
 
-            window.proofVoiceDb.addComplaint({
+      if (!res.ok) {
 
-              ...complaintData,
+        const errData = await res.json().catch(() => ({}));
 
-              id: normalized.id,
+        let msg = errData.error || errData.detail;
 
-              complaint_id: normalized.id,
+        if (!msg && typeof errData === 'object') {
 
-              numericId: normalized.numericId,
+          const parts = [];
 
-              status: normalized.status || 'Submitted',
+          for (const [k, v] of Object.entries(errData)) {
 
-              title: normalized.title,
-
-              category: normalized.category,
-
-              location: normalized.location,
-
-              formalApplication: normalized.formalApplication || complaintData.formalApplication,
-
-              originalTranscription: normalized.originalTranscription || complaintData.originalTranscription,
-
-              submittedAt: normalized.submittedAt || new Date().toISOString()
-
-            });
+            parts.push(`${k}: ${Array.isArray(v) ? v.join(', ') : v}`);
 
           }
 
-        } catch (e) {}
+          if (parts.length > 0) msg = parts.join(' | ');
 
-        return normalized;
+        }
 
-      } catch (err) {
-
-        console.warn('[ProofVoice API] Live submitComplaint failed, saving to local store:', err);
+        throw new Error(msg || `Complaint submission failed (HTTP ${res.status}).`);
 
       }
 
+
+
+      const data = await this.handleResponse(res);
+
+      const normalized = this.normalizeComplaint(data.complaint || data);
+
+
+
+      if (normalized && normalized.id) {
+
+        sessionStorage.setItem('proofvoice_current_complaint_id', normalized.id);
+
+        localStorage.setItem('proofvoice_last_viewed_complaint_id', normalized.id);
+
+      }
+
+
+
+      try {
+
+        if (window.proofVoiceDb) {
+
+          window.proofVoiceDb.addComplaint({
+
+            ...complaintData,
+
+            id: normalized.id,
+
+            complaint_id: normalized.id,
+
+            numericId: normalized.numericId,
+
+            status: normalized.status || 'Submitted',
+
+            title: normalized.title,
+
+            category: normalized.category,
+
+            location: normalized.location,
+
+            formalApplication: normalized.formalApplication || complaintData.formalApplication,
+
+            originalTranscription: normalized.originalTranscription || complaintData.originalTranscription,
+
+            submittedAt: normalized.submittedAt || new Date().toISOString()
+
+          });
+
+        }
+
+      } catch (e) {}
+
+
+
+      return normalized;
+
     }
 
-    return window.proofVoiceDb.addComplaint(complaintData);
+
+
+    return window.proofVoiceDb ? window.proofVoiceDb.addComplaint(complaintData) : null;
 
   }
 
@@ -2812,65 +2856,83 @@ class ProofVoiceApiClient {
 
   async updateComplaint(id, updateData) {
 
-    let liveUpdated = null;
+    if (this.isLiveSession()) {
 
-    if (this.config.USE_REAL_BACKEND && this.isLiveSession()) {
+      const payload = {};
+
+      if (updateData.title) payload.title = updateData.title;
+
+      if (updateData.location) {
+
+        payload.location = updateData.location;
+
+        payload.full_issue_location = updateData.location;
+
+      }
+
+      if (updateData.urgency || updateData.priority) {
+
+        let p = (updateData.urgency || updateData.priority || 'MEDIUM').toString().toUpperCase();
+
+        if (p === 'URGENT') p = 'CRITICAL';
+
+        payload.priority = p;
+
+      }
+
+      if (updateData.formalApplication || updateData.description || updateData.application) {
+
+        payload.final_submitted_application = updateData.formalApplication || updateData.application || updateData.description;
+
+        payload.original_description = updateData.description || updateData.formalApplication;
+
+      }
+
+      if (updateData.category_id) {
+
+        payload.category_id = parseInt(updateData.category_id, 10);
+
+      } else if (updateData.category) {
+
+        payload.category = updateData.category;
+
+      }
+
+
+
+      const res = await fetch(`${this.config.BASE_URL}/complaints/${encodeURIComponent(id)}/`, {
+
+        method: 'PATCH',
+
+        headers: this.getHeaders(),
+
+        body: JSON.stringify(payload)
+
+      });
+
+
+
+      if (!res.ok) {
+
+        const errData = await res.json().catch(() => ({}));
+
+        throw new Error(errData.error || errData.detail || `Failed to update complaint application (HTTP ${res.status}).`);
+
+      }
+
+
+
+      const data = await this.handleResponse(res);
+
+      const normalized = this.normalizeComplaint(data.complaint || data);
 
       try {
 
-        const payload = {};
+        if (window.proofVoiceDb) window.proofVoiceDb.updateComplaint(id, updateData);
 
-        if (updateData.title) payload.title = updateData.title;
+      } catch (e) {}
 
-        if (updateData.location) {
-
-          payload.location = updateData.location;
-
-          payload.full_issue_location = updateData.location;
-
-        }
-
-        if (updateData.urgency || updateData.priority) {
-
-          payload.priority = (updateData.urgency || updateData.priority || 'MEDIUM').toUpperCase();
-
-        }
-
-        if (updateData.formalApplication || updateData.description || updateData.application) {
-
-          payload.final_submitted_application = updateData.formalApplication || updateData.application || updateData.description;
-
-          payload.original_description = updateData.description || updateData.formalApplication;
-
-        }
-
-
-
-        const res = await fetch(`${this.config.BASE_URL}/complaints/${encodeURIComponent(id)}/`, {
-
-          method: 'PATCH',
-
-          headers: this.getHeaders(),
-
-          body: JSON.stringify(payload)
-
-        });
-
-
-
-        if (res.ok) {
-
-          const data = await this.handleResponse(res);
-
-          liveUpdated = data.complaint || data;
-
-        }
-
-      } catch (err) {
-
-        console.warn('[ProofVoice API] Live updateComplaint failed, syncing local store:', err);
-
-      }
+      return normalized;
 
     }
 
@@ -2878,7 +2940,7 @@ class ProofVoiceApiClient {
 
     const localUpdated = window.proofVoiceDb ? window.proofVoiceDb.updateComplaint(id, updateData) : null;
 
-    return liveUpdated || localUpdated;
+    return localUpdated;
 
   }
 
@@ -2886,31 +2948,35 @@ class ProofVoiceApiClient {
 
   async deleteComplaint(id) {
 
-    let liveDeleted = false;
+    if (this.isLiveSession()) {
 
-    if (this.config.USE_REAL_BACKEND && this.isLiveSession()) {
+      const res = await fetch(`${this.config.BASE_URL}/complaints/${encodeURIComponent(id)}/`, {
+
+        method: 'DELETE',
+
+        headers: this.getHeaders()
+
+      });
+
+
+
+      if (!res.ok) {
+
+        const errData = await res.json().catch(() => ({}));
+
+        throw new Error(errData.error || errData.detail || `Failed to delete complaint (HTTP ${res.status}).`);
+
+      }
+
+
 
       try {
 
-        const res = await fetch(`${this.config.BASE_URL}/complaints/${encodeURIComponent(id)}/`, {
+        if (window.proofVoiceDb) window.proofVoiceDb.deleteComplaint(id);
 
-          method: 'DELETE',
+      } catch (e) {}
 
-          headers: this.getHeaders()
-
-        });
-
-        if (res.ok) {
-
-          liveDeleted = true;
-
-        }
-
-      } catch (err) {
-
-        console.warn('[ProofVoice API] Live deleteComplaint failed, removing locally:', err);
-
-      }
+      return true;
 
     }
 
@@ -2918,7 +2984,7 @@ class ProofVoiceApiClient {
 
     const localDeleted = window.proofVoiceDb ? window.proofVoiceDb.deleteComplaint(id) : true;
 
-    return liveDeleted || localDeleted;
+    return localDeleted;
 
   }
 

@@ -102,18 +102,28 @@ class ComplaintDetailView(APIView):
     def patch(self, request, pk):
         complaint = self.get_object(pk)
 
-        # Student ownership check
+        # Student ownership and lifecycle check
         if request.user.role == User.Role.STUDENT:
             if complaint.student != request.user:
-                return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
-            if complaint.status in [Complaint.Status.RESOLVED, Complaint.Status.REJECTED]:
-                return Response({'error': 'Closed or resolved complaints cannot be edited.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Forbidden. You do not own this complaint.'}, status=status.HTTP_403_FORBIDDEN)
+            if complaint.status in [Complaint.Status.RESOLVED, Complaint.Status.REJECTED, Complaint.Status.IN_PROGRESS, Complaint.Status.ASSIGNED, Complaint.Status.UNDER_REVIEW]:
+                return Response({'error': f'Complaints in {complaint.get_status_display()} stage cannot be edited.'}, status=status.HTTP_400_BAD_REQUEST)
 
         was_submitted = (complaint.status != Complaint.Status.DRAFT)
 
-        for field in ['title', 'original_description', 'final_submitted_application', 'campus', 'building', 'floor', 'room_number', 'full_issue_location', 'priority']:
+        for field in ['title', 'original_description', 'final_submitted_application', 'campus', 'building', 'floor', 'room_number', 'full_issue_location']:
             if field in request.data:
                 setattr(complaint, field, request.data[field])
+
+        # Normalize and validate priority
+        if 'priority' in request.data and request.data['priority']:
+            p = str(request.data['priority']).strip().upper()
+            if p == 'URGENT':
+                complaint.priority = Complaint.Priority.CRITICAL
+            elif p in Complaint.Priority.values:
+                complaint.priority = p
+            else:
+                return Response({'error': f'Invalid priority choice: {request.data["priority"]}'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Also support description and location aliases
         if 'description' in request.data:
@@ -131,6 +141,15 @@ class ComplaintDetailView(APIView):
                 complaint.category = ComplaintCategory.objects.filter(id=cat_id, institution=complaint.institution).first()
             else:
                 complaint.category = None
+        elif 'category' in request.data:
+            cat_name = str(request.data['category']).strip()
+            if cat_name:
+                category = ComplaintCategory.objects.filter(institution=complaint.institution, name__iexact=cat_name).first()
+                if not category:
+                    category = ComplaintCategory.objects.filter(institution=complaint.institution, name__icontains=cat_name).first()
+                if not category:
+                    category, _ = ComplaintCategory.objects.get_or_create(institution=complaint.institution, name=cat_name)
+                complaint.category = category
 
         complaint.save()
 
@@ -151,8 +170,11 @@ class ComplaintDetailView(APIView):
 
     def delete(self, request, pk):
         complaint = self.get_object(pk)
-        if request.user.role == User.Role.STUDENT and complaint.student != request.user:
-            return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.role == User.Role.STUDENT:
+            if complaint.student != request.user:
+                return Response({'error': 'Forbidden. You cannot delete complaints submitted by another student.'}, status=status.HTTP_403_FORBIDDEN)
+            if complaint.status not in [Complaint.Status.DRAFT, Complaint.Status.SUBMITTED]:
+                return Response({'error': f'Complaints in {complaint.get_status_display()} stage cannot be deleted.'}, status=status.HTTP_400_BAD_REQUEST)
 
         complaint_id = complaint.complaint_id
         complaint.delete()

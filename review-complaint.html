@@ -35,6 +35,33 @@
   </style>
   <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/theme.css">
+  <script>
+    (function() {
+      var token = localStorage.getItem('proofvoice_auth_token');
+      if (!token || token.indexOf('demo_token_') === 0) {
+        var page = window.location.pathname.split('/').pop() || 'student-dashboard.html';
+        var dest = encodeURIComponent(page + window.location.search + window.location.hash);
+        window.location.replace('login.html?redirect=' + dest);
+      }
+    })();
+  </script>
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('proofvoice_session_user') || localStorage.getItem('proofvoice_auth_user');
+        if (raw) {
+          var u = JSON.parse(raw);
+          var inst = u.institutionName || u.institution_name || (u.institution && u.institution.name) || '';
+          if (inst) {
+            document.addEventListener('DOMContentLoaded', function() {
+              var els = document.querySelectorAll('#studentInstitutionName, #sidebarInstName, .sidebar-institution-name, #topbarInst, .institution-pill span');
+              els.forEach(function(el) { el.textContent = inst; });
+            });
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -59,7 +86,7 @@
 
       <div class="sidebar-institution-badge">
         <span class="sidebar-institution-label">Verified Institution</span>
-        <span class="sidebar-institution-name" id="sidebarInstName">Apex Institute of Technology</span>
+        <span class="sidebar-institution-name" id="sidebarInstName">Campus Institution</span>
       </div>
 
       <nav class="sidebar-nav">
@@ -107,7 +134,7 @@
         </div>
         <div class="topbar-right">
           <div class="institution-pill">
-            <span id="topbarInst">Apex Tech (AIT)</span>
+            <span id="topbarInst">Campus Institution</span>
           </div>
           <a href="student-profile.html" class="user-avatar" id="topbarAvatar" style="text-decoration:none;">MS</a>
         </div>
@@ -195,7 +222,7 @@
           <div class="formal-letter-header" style="border-bottom:2px solid var(--color-border); padding-bottom:var(--space-4); margin-bottom:var(--space-6); display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
               <div class="formal-letter-institution" id="reviewInstitutionName" style="font-size:var(--text-lg); font-weight:700; color:var(--color-navy);">
-                Apex Institute of Technology
+                Campus Institution
               </div>
               <div style="font-size:var(--text-xs); color:var(--color-text-secondary); margin-top:2px;">
                 Official Student Grievance Redressal Application
@@ -315,7 +342,7 @@
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
             <span class="text-muted">Institution:</span>
-            <strong id="successInstitution">Apex Institute of Technology</strong>
+            <strong id="successInstitution">Campus Institution</strong>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
             <span class="text-muted">Submission Timestamp:</span>
